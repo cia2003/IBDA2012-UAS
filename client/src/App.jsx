@@ -8,9 +8,9 @@ import StaffDashboard from "./pages/admin/StaffDashboard";
 import "./style.css";
 import RoomsDataDetails from "./pages/admin/RoomsDataDetails";
 import OccupantDataDetails from "./pages/admin/OccupantDataDetails";
+import EditOccupant from "./pages/admin/EditOccupant";
 
 export default function App() {
-  // Ganti dataLoggedIn menjadi staffData sesuai yang ada di Provider
   const { isLoggedIn, staffData } = useAppContext(); 
 
   return (
@@ -34,6 +34,8 @@ export default function App() {
               <Route index element={<StaffDashboard />} />
               <Route path="kamar" element={<RoomsDataDetails />} />
               <Route path="penghuni" element={<OccupantDataDetails />} />
+              <Route path="tambah-penghuni" element={<h1>Tambah Penghuni</h1>} />
+              <Route path="edit-penghuni/:occupantId" element={<EditOccupant />} />
             </Route>
           )}
         </>

@@ -1,30 +1,24 @@
 import { NavLink, Outlet } from "react-router-dom";
 import { useAppContext } from "../../hook/useAppContext";
-import { House, UserRound } from "lucide-react";
+import { BedDouble, UsersRound, LayoutDashboard } from "lucide-react";
 
 const StaffLayout = () => {
     const { staffData, logout } = useAppContext();
 
-    const dashboardicon = (
-        <svg className="w-6 h-6" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
-            <path stroke="currentColor" strokeLinejoin="round" strokeWidth="2" d="M4 5a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V5Zm16 14a1 1 0 0 1-1 1h-4a1 1 0 0 1-1-1v-2a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2ZM4 13a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v6a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-6Zm16-2a1 1 0 0 1-1 1h-4a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v6Z" />
-        </svg>
-    );
-
     const managerSidebarLinks = [
-        { name: "Dashboard", path: "/dashboard/manager",icon: dashboardicon 
+        { name: "Dashboard", path: "/dashboard/manager",icon: <LayoutDashboard /> 
         },
-        { name: "Laporan", path: "/dashboard/manager/laporan",icon: dashboardicon 
+        { name: "Laporan", path: "/dashboard/manager/laporan",icon: <LayoutDashboard /> 
         },
-        { name: "Tambah Kost", path: "/dashboard/manager/tambah-kost", icon: dashboardicon 
+        { name: "Tambah Kost", path: "/dashboard/manager/tambah-kost", icon: <LayoutDashboard /> 
         },
     ];
 
     const staffSidebarLinks =[
-        { name: "Dashboard", path: `/dashboard/staff/${staffData?.id}`, icon: dashboardicon 
+        { name: "Dashboard", path: `/dashboard/staff/${staffData?.id}`, icon: <LayoutDashboard />
         },
-        { name: "Kamar", path: `/dashboard/staff/${staffData?.id}/kamar`, icon: <House />},
-        { name: "Penghuni", path: `/dashboard/staff/${staffData?.id}/penghuni`, icon: <UserRound />},
+        { name: "Kamar", path: `/dashboard/staff/${staffData?.id}/kamar`, icon: <BedDouble />},
+        { name: "Penghuni", path: `/dashboard/staff/${staffData?.id}/penghuni`, icon: <UsersRound />},
     ]
 
     const sidebarLinks = staffData?.role === "MANAGER" ? managerSidebarLinks : staffSidebarLinks
