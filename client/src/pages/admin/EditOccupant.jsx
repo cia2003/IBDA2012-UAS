@@ -26,7 +26,7 @@ export default function EditOccupant() {
 
     return (
         <div className="p-6 bg-white rounded-xl shadow-md">
-            <h1 className="text-xl font-bold mb-4">Edit Profil: {formData.name}</h1>
+            <h1 className="text-xl font-bold mb-4">Form Data Penghuni</h1>
             <form className="space-y-4">
                 <div>
                     <label className="block text-sm font-medium">Nama</label>
@@ -35,6 +35,7 @@ export default function EditOccupant() {
                         value={formData.name} 
                         onChange={(e) => setFormData({...formData, name: e.target.value})}
                     />
+                
                 </div>
                 <div>
                     <label className="block text-sm font-medium">Kontak</label>
@@ -44,8 +45,34 @@ export default function EditOccupant() {
                         onChange={(e) => setFormData({...formData, contact: e.target.value})}
                     />
                 </div>
-                <button type="button" onClick={() => navigate(-1)} className="text-gray-500 mr-4">Batal</button>
-                <button type="submit" className="bg-blue-600 text-white px-4 py-2 rounded">Simpan Perubahan</button>
+                <div>
+                    <label className="block text-sm font-medium">Email</label>
+                    <input type="email" 
+                    className="w-full border p-2 rounded"
+                    value={formData.email}
+                    onChange={(e)=>setFormData({...formData, email: e.target.value})}
+                    />
+                </div>
+                <div>
+                    <label className="block text-sm font-medium">No Kamar</label>
+                    <input type="text" 
+                    className="w-full border p-2 rounded"
+                    value={formData.roomNumber}
+                    onChange={(e)=>setFormData({...formData, roomNumber: e.target.value})}
+                    />
+                </div>
+                <div>
+                    <label className="block text-sm font-medium">Tanggal Masuk</label>
+                    <input type="date" 
+                    className="w-full border p-2 rounded"
+                    value={formData.checkInDate}
+                    onChange={(e)=>setFormData({...formData, checkInDate: e.target.value})}
+                    />
+                </div>
+                <div className="flex flex-col-1 gap-2">
+                    <button type="button" onClick={() => navigate(-1)} className="text-gray-500 px-4 py-2 rounded hover:bg-gray-400 hover:text-white transition-colors">Batal</button>
+                    <button type="submit" className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-800 transition-colors">Simpan</button>
+                </div>
             </form>
         </div>
     );

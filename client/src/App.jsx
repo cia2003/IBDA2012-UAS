@@ -9,6 +9,7 @@ import "./style.css";
 import RoomsDataDetails from "./pages/admin/RoomsDataDetails";
 import OccupantDataDetails from "./pages/admin/OccupantDataDetails";
 import EditOccupant from "./pages/admin/EditOccupant";
+import OccupantForm from "./components/OccupantForm";
 
 export default function App() {
   const { isLoggedIn, staffData } = useAppContext(); 
@@ -35,7 +36,8 @@ export default function App() {
               <Route path="kamar" element={<RoomsDataDetails />} />
               <Route path="penghuni" element={<OccupantDataDetails />} />
               <Route path="tambah-penghuni" element={<h1>Tambah Penghuni</h1>} />
-              <Route path="edit-penghuni/:occupantId" element={<EditOccupant />} />
+              <Route path="edit-penghuni/:occupantId" element={<OccupantForm />} />
+              <Route path="tambah-penghuni/:occupantId" element={<OccupantForm />} />
             </Route>
           )}
         </>

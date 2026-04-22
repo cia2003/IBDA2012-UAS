@@ -1,4 +1,4 @@
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { useAppContext } from "../../hook/useAppContext";
 import KPICard from "../../components/KPICard";
 import { House, Zap, UserRoundPlus, HousePlus, Users } from "lucide-react";
@@ -6,6 +6,7 @@ import { House, Zap, UserRoundPlus, HousePlus, Users } from "lucide-react";
 export default function StaffDashboard() {
     const { staffId } = useParams();
     const { staffData, rooms } = useAppContext();
+    const navigate = useNavigate()
 
     const currentRooms = rooms[0];
     const totalRooms = currentRooms?.rooms?.length || 0;
@@ -17,6 +18,12 @@ export default function StaffDashboard() {
     const roomsLeft = currentRooms?.rooms?.reduce((total, room) => {
         return room.status !== 'Occupied' ? total + 1 : total;
     }, 0) || 0;
+
+    const handleAddOccupant =()=>{
+        const occupantId = "P-" + Math.floor(10000 + Math.random() * 90000);
+        navigate(`/dashboard/staff/${staffId}/tambah-penghuni/${occupantId}`)
+        
+    }
 
     return (
         <div className="space-y-8">
@@ -49,7 +56,9 @@ export default function StaffDashboard() {
                 </div>
                 
                 <div className="flex flex-col gap-3 "> 
-                    <button className="flex items-center gap-2 bg-white hover:bg-gray-50 text-blue-600 font-semibold py-2 px-4 rounded-lg border border-blue-200 transition-all shadow-sm group text-sm">
+                    <button
+                        onClick={handleAddOccupant}
+                        className="flex items-center gap-2 bg-white hover:bg-gray-50 text-blue-600 font-semibold py-2 px-4 rounded-lg border border-blue-200 transition-all shadow-sm group text-sm">
                         <UserRoundPlus size={18} className="group-hover:scale-110 transition-transform" />
                         New Registration
                     </button>

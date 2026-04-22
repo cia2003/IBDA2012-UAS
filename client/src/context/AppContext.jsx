@@ -38,6 +38,7 @@ export const AppContextProvider = ({ children }) => {
 
     const [state, dispatch] = useReducer(AuthReducer, initialState);
     const [filteredRooms, setFilteredRooms] = useState([]);
+    const [occupantData, setOccupantData] = useState({})
 
     const login = (email, password) => {
         dispatch({ type: "LOGIN_START" });
@@ -63,6 +64,21 @@ export const AppContextProvider = ({ children }) => {
         }
     };
 
+    const getOccupantById = (occupantId) => {
+        const currentKost = filteredRooms[0];
+        const allOccupants = currentKost?.rooms
+        ?.filter(room => Array.isArray(room.resident))
+        .flatMap(room => 
+            room.resident.map(p => ({ 
+                ...p, 
+                roomNumber: room.roomNumber 
+            }))
+        );
+
+    const data = allOccupants?.find(p => p.id == occupantId);
+        setOccupantData(data || {});
+    };
+
     const logout = () => {
         dispatch({ type: "LOGOUT" });
         setFilteredRooms([]);
@@ -78,10 +94,12 @@ export const AppContextProvider = ({ children }) => {
         
         rooms: filteredRooms,
         allLocations: kostData,
+        occupantData: occupantData,
 
         // Functions
         login,
-        logout
+        logout,
+        getOccupantById
     };
 
     return (
