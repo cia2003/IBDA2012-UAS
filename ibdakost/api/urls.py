@@ -8,8 +8,8 @@ urlpatterns = [
   path('tenants/', views.TenantListCreateView.as_view(), name='tenant-list'),
   path('tenants/<uuid:id>/', views.TenantDetailView.as_view(), name='tenant-detail'),
 
-  # path('staffs/', views.StaffListCreateView.as_view(), name='staff-list'),
-  # path('staffs/<uuid:id>/', views.StaffDetailView.as_view(), name='staff-detail'),
+  path('staffs/', views.StaffListCreateView.as_view(), name='staff-list'),
+  path('staffs/<uuid:id>/', views.StaffDetailView.as_view(), name='staff-detail'),
 
   path('groups/', views.GroupListCreateView.as_view(), name='group-list'),
   path('groups/<int:pk>/', views.GroupDetailView.as_view(), name='group-detail'),

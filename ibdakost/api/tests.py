@@ -1,10 +1,13 @@
 from django.contrib.auth.models import Group
 
 from django.test import TestCase
+from rest_framework.test import APITestCase
 from django.core.files.uploadedfile import SimpleUploadedFile
+from django.urls import reverse
 
-from api.models import User, Tenant
-from api.serializers import UserSerializer, TenantSerializer
+from api.models import User, Tenant, Staff
+from api.serializers import UserSerializer, TenantSerializer, StaffSerializer
+from kosts.models import Kost
 
 # Create your tests here.
 class ModelTests(TestCase):
@@ -75,20 +78,21 @@ class ModelTests(TestCase):
         self.assertTrue(self.user.groups.filter(name='admin').exists())
         self.assertTrue(self.user.groups.filter(name='staff').exists())
 
+    def test_staff_creation(self):
+        # Test creating a staff member
+        staff = Staff.objects.create(
+            user=self.user,
+            full_name='Jane Smith',
+            assignedKost=Kost.objects.create(
+                name='Kost A',
+                address='Jl. Example No. 123',
+                description='Kost nyaman dan strategis',
+                image=SimpleUploadedFile(name='test_image.jpg', content=b'\x47\x49\x46\x38\x39\x61', content_type='image/jpeg')
+            )
+        )
 
-
-    # def test_staff_creation(self):
-    #     # Test creating a staff member
-    #     staff = Staff.objects.create(
-    #         user=self.user,
-    #         full_name='Jane Smith',
-    #         gender='female',
-    #         phone_number='08456',
-    #         position='Manager'
-    #     )
-
-    #     self.assertEqual(staff.user, self.user)
-    #     self.assertEqual(staff.full_name, 'Jane Smith')
+        self.assertEqual(staff.user, self.user)
+        self.assertEqual(staff.full_name, 'Jane Smith')
 
 class SerializerTests(TestCase):
     def setUp(self):
@@ -124,42 +128,60 @@ class SerializerTests(TestCase):
         serializer = TenantSerializer(tenant)
         self.assertEqual(serializer.data['full_name'], 'John Doe')
 
-    # def test_staff_serializer(self):
-    #     # Test staff serializer
-    #     staff = Staff.objects.create(
-    #         user=self.user,
-    #         full_name='Jane Smith',
-    #         gender='female',
-    #         phone_number='08456',
-    #         position='Manager'
-    #     )
-    #     serializer = StaffSerializer(staff)
-    #     self.assertEqual(serializer.data['full_name'], 'Jane Smith')
+    def test_staff_serializer(self):
+        # Test staff serializer
+        image_kost = SimpleUploadedFile(name='test_image.jpg', content=b'\x47\x49\x46\x38\x39\x61', content_type='image/jpeg')
+        assigned_kost = Kost.objects.create(
+            name='Kost A',
+            address='Jl. Example No. 123',
+            description='Kost nyaman dan strategis',
+            image=image_kost
+        )
 
-class ViewTests(TestCase):
+        staff = Staff.objects.create(
+            user=self.user,
+            full_name='Jane Smith',
+            assignedKost=assigned_kost,
+        )
+
+        serializer = StaffSerializer(staff)
+        self.assertEqual(serializer.data['full_name'], 'Jane Smith')
+
+class ViewTests(APITestCase):
     def setUp(self):
-        self.user = User.objects.create_user(username='testuser', email='testuser@example.com', password='testpass')
+        image = SimpleUploadedFile(name='test_image.jpg', content=b'\x47\x49\x46\x38\x39\x61', content_type='image/jpeg')
+        self.kost = Kost.objects.create(
+            name='Kost A',
+            address='Jl. Example No. 123',
+            description='Kost nyaman dan strategis',
+            image=image
+        )
 
-    def test_user_list_create_view(self):
-        # Test user list and create view
-        pass
+        self.admin = User.objects.create_user(
+            username='admin',
+            email = 'admin@test.com',
+            password='adminpass'
+        )
 
-    def test_user_detail_view(self):
-        # Test user detail view
-        pass
+        self.user = User.objects.create_user(
+            username='user',
+            email = 'user@test.com',
+            password='userpass'
+        )
 
-    def test_tenant_list_create_view(self):
-        # Test tenant list and create view
-        pass
-
-    def test_tenant_detail_view(self):
-        # Test tenant detail view
-        pass
-
-    def test_staff_list_create_view(self):
-        # Test staff list and create view
-        pass
-
-    def test_staff_detail_view(self):
-        # Test staff detail view
-        pass
+        admin_group = Group.objects.create(name='admin')
+        self.admin.groups.add(admin_group)
+    
+    def test_admin_can_delete_user(self):
+        # Test that admin can delete a user
+        url = reverse('user-detail', kwargs={'pk': self.user.pk})
+        self.client.force_authenticate(user=self.admin)
+        response = self.client.delete(url)
+        self.assertEqual(response.status_code, 204)
+    
+    def test_non_admin_cannot_delete_user(self):
+        # Test that non-admin cannot delete a user
+        url = reverse('user-detail', kwargs={'pk': self.admin.pk})
+        self.client.force_authenticate(user=self.user)
+        response = self.client.delete(url)
+        self.assertEqual(response.status_code, 403)

@@ -1,6 +1,12 @@
+from django.contrib.auth.models import Group
+
 from django.test import TestCase
 from django.core.files.uploadedfile import SimpleUploadedFile
+from django.urls import reverse
 
+from rest_framework.test import APITestCase
+
+from api.models import User
 from kosts.models import Kost
 from kosts.serializers import KostSerializer
 
@@ -49,3 +55,42 @@ class KostSerializerTests(TestCase):
         self.assertEqual(updated_kost.name, 'Kost B')
         self.assertEqual(updated_kost.address, 'Jl. Example No. 123')
         self.assertEqual(updated_kost.description, 'Kost nyaman dan strategis')
+
+class KostViewTests(APITestCase):
+    def setUp(self):
+        image = SimpleUploadedFile(name='test_image.jpg', content=b'\x47\x49\x46\x38\x39\x61', content_type='image/jpeg')
+        self.kost = Kost.objects.create(
+            name='Kost A',
+            address='Jl. Example No. 123',
+            description='Kost nyaman dan strategis',
+            image=image
+        )
+
+        self.admin = User.objects.create_user(
+            username='admin',
+            email = 'admin@test.com',
+            password='adminpass'
+        )
+
+        self.user = User.objects.create_user(
+            username='user',
+            email = 'user@test.com',
+            password='userpass'
+        )
+
+        admin_group = Group.objects.create(name='admin')
+        self.admin.groups.add(admin_group)
+
+    def test_admin_can_delete_kost(self):
+        url = reverse('kost-detail', kwargs={'pk': self.kost.pk})
+        self.client.force_authenticate(user=self.admin)
+        response = self.client.delete(url)
+        self.assertEqual(response.status_code, 204)
+    
+    def test_user_cannot_delete_kost(self):
+        # Test that regular user cannot delete a kost
+        url = reverse('kost-detail', kwargs={'pk': self.kost.pk})
+        self.client.force_authenticate(user=self.user)
+        response = self.client.delete(url)
+        self.assertEqual(response.status_code, 403)
+

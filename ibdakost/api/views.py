@@ -6,8 +6,8 @@ from django.contrib.auth.models import Group
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework.permissions import IsAuthenticated
 from api.permissions import IsAdminOrSuperUser, IsOwnerOrAdminOrSuperUser
-from .models import User, Tenant
-from .serializers import TenantSerializer, UserSerializer, GroupSerializer
+from .models import User, Tenant, Staff
+from .serializers import TenantSerializer, UserSerializer, StaffSerializer, GroupSerializer
 from django.http import Http404
 
 class UserListCreateView(APIView):
@@ -91,8 +91,6 @@ class TenantDetailView(APIView):
     authentication_classes = [JWTAuthentication]
 
     def get_permissions(self):
-        if self.request.method == 'DELETE':
-            return [IsAuthenticated(), IsAdminOrSuperUser()]
         return [IsAuthenticated(), IsAdminOrSuperUser()]
 
     def get_object(self, pk):
@@ -121,61 +119,59 @@ class TenantDetailView(APIView):
         tenant.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
-# class StaffListCreateView(APIView):
-#     # Implementation similar to UserListCreateView with appropriate permissions and serializer
-#     authentication_classes = [JWTAuthentication]
+class StaffListCreateView(APIView):
+    # Implementation similar to UserListCreateView with appropriate permissions and serializer
+    authentication_classes = [JWTAuthentication]
 
-#     def get_permissions(self):
-#         if self.request.method == 'GET':
-#             return [IsAuthenticated(), IsAdminOrSuperUser()]
-#         return []
+    def get_permissions(self):
+        return [IsAuthenticated(), IsAdminOrSuperUser()]
 
-#     def get(self, request):
-#         staffs = Staff.objects.all().order_by('username')[:10]
-#         serializer = StaffSerializer(staffs, many=True)
-#         return Response({'staff': serializer.data})
+    def get(self, request):
+        staffs = Staff.objects.all().order_by('username')[:10]
+        serializer = StaffSerializer(staffs, many=True)
+        return Response({'staff': serializer.data})
 
-#     def post(self, request):
-#         serializer = StaffSerializer(data=request.data)
-#         if serializer.is_valid():
-#             serializer.save()
-#             return Response(serializer.data, status=status.HTTP_201_CREATED)
-#         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    def post(self, request):
+        serializer = StaffSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-# class StaffDetailView(APIView):
-#     # Implementation similar to UserDetailView with appropriate permissions and serializer
-#     authentication_classes = [JWTAuthentication]
+class StaffDetailView(APIView):
+    # Implementation similar to UserDetailView with appropriate permissions and serializer
+    authentication_classes = [JWTAuthentication]
 
-#     def get_permissions(self):
-#         if self.request.method == 'DELETE':
-#             return [IsAuthenticated(), IsAdminOrSuperUser()]
-#         return [IsAuthenticated(), IsOwnerOrAdminOrSuperUser()]
+    def get_permissions(self):
+        if self.request.method == 'DELETE':
+            return [IsAuthenticated(), IsAdminOrSuperUser()]
+        return [IsAuthenticated(), IsOwnerOrAdminOrSuperUser()]
 
-#     def get_object(self, pk):
-#         try:
-#             staff = Staff.objects.get(pk=pk)
-#             self.check_object_permissions(self.request, staff)
-#             return staff
-#         except Staff.DoesNotExist:
-#             raise Http404
+    def get_object(self, pk):
+        try:
+            staff = Staff.objects.get(pk=pk)
+            self.check_object_permissions(self.request, staff)
+            return staff
+        except Staff.DoesNotExist:
+            raise Http404
 
-#     def get(self, request, pk):
-#         staff = self.get_object(pk)
-#         serializer = StaffSerializer(staff)
-#         return Response(serializer.data)
+    def get(self, request, pk):
+        staff = self.get_object(pk)
+        serializer = StaffSerializer(staff)
+        return Response(serializer.data)
 
-#     def put(self, request, pk):
-#         staff = self.get_object(pk)
-#         serializer = StaffSerializer(staff, data=request.data)
-#         if serializer.is_valid():
-#             serializer.save()
-#             return Response(serializer.data)
-#         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    def put(self, request, pk):
+        staff = self.get_object(pk)
+        serializer = StaffSerializer(staff, data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-#     def delete(self, request, pk):
-#         staff = self.get_object(pk)
-#         staff.delete()
-#         return Response(status=status.HTTP_204_NO_CONTENT)
+    def delete(self, request, pk):
+        staff = self.get_object(pk)
+        staff.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
 class GroupListCreateView(APIView):
     authentication_classes = [JWTAuthentication]

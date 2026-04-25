@@ -2,7 +2,7 @@ from rest_framework import serializers
 from rest_framework.reverse import reverse
 from django.contrib.auth.hashers import make_password
 from django.contrib.auth.models import Group
-from api.models import Tenant, User
+from api.models import Tenant, User, Staff
  
 class UserSerializer(serializers.HyperlinkedModelSerializer):
     _links = serializers.SerializerMethodField()
@@ -122,48 +122,48 @@ class TenantSerializer(serializers.ModelSerializer):
             }
         ]
     
-# class StaffSerializer(serializers.ModelSerializer):
-#     url = serializers.SerializerMethodField()
-#     user = serializers.CharField(source='user.username', read_only=True)
+class StaffSerializer(serializers.ModelSerializer):
+    url = serializers.SerializerMethodField()
+    user = serializers.CharField(source='user.username', read_only=True)
 
-#     user_id = serializers.PrimaryKeyRelatedField(
-#         queryset=User.objects.all(),
-#         source='user',
-#         write_only=True
-#     )
+    user_id = serializers.PrimaryKeyRelatedField(
+        queryset=User.objects.all(),
+        source='user',
+        write_only=True
+    )
 
-#     class Meta:
-#         model = Staff
-#         fields = ['id', 'name', 'user', 'user_id', 'full_name', 'assignedKost', 'url']
+    class Meta:
+        model = Staff
+        fields = ['id', 'user', 'user_id', 'full_name', 'assignedKost', 'url']
 
-#     def get_url(self, obj):
-#         request = self.context.get('request')
-#         return [
-#             {
-#                 "rel": "self",
-#                 "href": reverse('staff-list', request=request), 
-#                 "action": "POST", 
-#                 "types": ["application/json"]
-#             }, 
-#             {
-#                 "rel": "self",
-#                 "href": reverse('staff-detail', kwargs={'id': obj.id}, request=request), 
-#                 "action": "GET", 
-#                 "types": ["application/json"]
-#             }, 
-#             {
-#                 "rel": "self",
-#                 "href": reverse('staff-detail', kwargs={'id': obj.id}, request=request), 
-#                 "action": "PUT", 
-#                 "types": ["application/json"]
-#             },
-#             {
-#                 "rel": "self",
-#                 "href": reverse('staff-detail', kwargs={'id': obj.id}, request=request), 
-#                 "action": "DELETE", 
-#                 "types": ["application/json"]
-#             }
-#         ]
+    def get_url(self, obj):
+        request = self.context.get('request')
+        return [
+            {
+                "rel": "self",
+                "href": reverse('staff-list', request=request), 
+                "action": "POST", 
+                "types": ["application/json"]
+            }, 
+            {
+                "rel": "self",
+                "href": reverse('staff-detail', kwargs={'id': obj.id}, request=request), 
+                "action": "GET", 
+                "types": ["application/json"]
+            }, 
+            {
+                "rel": "self",
+                "href": reverse('staff-detail', kwargs={'id': obj.id}, request=request), 
+                "action": "PUT", 
+                "types": ["application/json"]
+            },
+            {
+                "rel": "self",
+                "href": reverse('staff-detail', kwargs={'id': obj.id}, request=request), 
+                "action": "DELETE", 
+                "types": ["application/json"]
+            }
+        ]
 
 class GroupSerializer(serializers.HyperlinkedModelSerializer):
     _links = serializers.SerializerMethodField()
