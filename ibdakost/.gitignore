@@ -1,0 +1,5 @@
+# ignore media folder
+media/
+
+# ignore .env file which contains sensitive information
+.env

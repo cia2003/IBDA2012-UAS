@@ -9,6 +9,23 @@ from api.models import User, Tenant, Staff
 from api.serializers import UserSerializer, TenantSerializer, StaffSerializer
 from kosts.models import Kost
 
+import io
+from PIL import Image
+
+
+# create test image
+def create_test_image():
+    file = io.BytesIO()
+    image = Image.new('RGB', (100, 100), color='red')
+    image.save(file, format='JPEG')
+    file.seek(0)
+
+    return SimpleUploadedFile(
+        name='test.jpg',
+        content=file.read(),
+        content_type='image/jpeg'
+    )
+
 # Create your tests here.
 class ModelTests(TestCase):
     def setUp(self):
@@ -23,7 +40,7 @@ class ModelTests(TestCase):
 
     def test_tenant_creation(self):
         # Test creating a tenant
-        image = SimpleUploadedFile(name='test_image.jpg', content=b'\x47\x49\x46\x38\x39\x61', content_type='image/jpeg')
+        image = create_test_image()
         tenant = Tenant.objects.create(
             user=self.user,
             full_name='John Doe',
@@ -83,11 +100,11 @@ class ModelTests(TestCase):
         staff = Staff.objects.create(
             user=self.user,
             full_name='Jane Smith',
-            assignedKost=Kost.objects.create(
+            kost=Kost.objects.create(
                 name='Kost A',
                 address='Jl. Example No. 123',
                 description='Kost nyaman dan strategis',
-                image=SimpleUploadedFile(name='test_image.jpg', content=b'\x47\x49\x46\x38\x39\x61', content_type='image/jpeg')
+                image=create_test_image()
             )
         )
 
@@ -112,25 +129,28 @@ class SerializerTests(TestCase):
         serializer.save()
         self.assertFalse(serializer.instance.is_active)
 
-    def test_tenant_serializer(self):
-        # Test tenant serializer
-        image = SimpleUploadedFile(name='test_image.jpg', content=b'\x47\x49\x46\x38\x39\x61', content_type='image/jpeg')
-        tenant = Tenant.objects.create(
-            user=self.user,
-            full_name='John Doe',
-            gender='male',
-            phone_number='08123',
-            occupation='Student',
-            institution='XYZ',
-            identity_type='KTP',
-            identity_card=image
-        )
-        serializer = TenantSerializer(tenant)
-        self.assertEqual(serializer.data['full_name'], 'John Doe')
+    def test_tenant_serializer_create(self):
+        # Test tenant serializer create method
+        image = create_test_image()
+        tenant_data = {
+            'user_id': self.user.id,
+            'full_name': 'John Doe',
+            'gender': 'male',
+            'phone_number': '08123',
+            'occupation': 'Student',
+            'institution': 'XYZ',
+            'identity_type': 'KTP',
+            'identity_card': image
+        }
 
-    def test_staff_serializer(self):
-        # Test staff serializer
-        image_kost = SimpleUploadedFile(name='test_image.jpg', content=b'\x47\x49\x46\x38\x39\x61', content_type='image/jpeg')
+        serializer = TenantSerializer(data=tenant_data)
+        self.assertTrue(serializer.is_valid(), serializer.errors)
+        tenant = serializer.save()
+        self.assertEqual(tenant.user.groups.filter(name='tenant').exists(), True)
+
+    def test_staff_serializer_create(self):
+        # Test staff serializer create method
+        image_kost = create_test_image()
         assigned_kost = Kost.objects.create(
             name='Kost A',
             address='Jl. Example No. 123',
@@ -138,18 +158,19 @@ class SerializerTests(TestCase):
             image=image_kost
         )
 
-        staff = Staff.objects.create(
-            user=self.user,
-            full_name='Jane Smith',
-            assignedKost=assigned_kost,
-        )
-
-        serializer = StaffSerializer(staff)
-        self.assertEqual(serializer.data['full_name'], 'Jane Smith')
+        staff_data = {
+            'user_id': self.user.id,
+            'full_name': 'Jane Smith',
+            'kost_id': assigned_kost.id,
+        }
+        serializer = StaffSerializer(data=staff_data)
+        self.assertTrue(serializer.is_valid())
+        staff = serializer.save()
+        self.assertEqual(staff.user.groups.filter(name='staff').exists(), True)
 
 class ViewTests(APITestCase):
     def setUp(self):
-        image = SimpleUploadedFile(name='test_image.jpg', content=b'\x47\x49\x46\x38\x39\x61', content_type='image/jpeg')
+        image = create_test_image()
         self.kost = Kost.objects.create(
             name='Kost A',
             address='Jl. Example No. 123',

@@ -3,6 +3,7 @@ from rest_framework.reverse import reverse
 from django.contrib.auth.hashers import make_password
 from django.contrib.auth.models import Group
 from api.models import Tenant, User, Staff
+from kosts.models import Kost
  
 class UserSerializer(serializers.HyperlinkedModelSerializer):
     _links = serializers.SerializerMethodField()
@@ -92,6 +93,15 @@ class TenantSerializer(serializers.ModelSerializer):
         fields = [
             'id', 'user', 'user_id', 'full_name', 'gender', 'phone_number', 'occupation', 'institution', 'identity_type', 'identity_card', 'url'
         ]
+    
+    def create(self, validated_data):
+        user = validated_data.pop('user')
+
+        tenant_group, _ = Group.objects.get_or_create(name='tenant')
+        user.groups.add(tenant_group)
+
+        tenant = Tenant.objects.create(user=user, **validated_data)
+        return tenant
 
     def get_url(self, obj):
         request = self.context.get('request')
@@ -125,6 +135,7 @@ class TenantSerializer(serializers.ModelSerializer):
 class StaffSerializer(serializers.ModelSerializer):
     url = serializers.SerializerMethodField()
     user = serializers.CharField(source='user.username', read_only=True)
+    kost = serializers.CharField(source='kost.name', read_only=True)
 
     user_id = serializers.PrimaryKeyRelatedField(
         queryset=User.objects.all(),
@@ -132,9 +143,24 @@ class StaffSerializer(serializers.ModelSerializer):
         write_only=True
     )
 
+    kost_id = serializers.PrimaryKeyRelatedField(
+        queryset=Kost.objects.all(),
+        source='kost',
+        write_only=True
+    )
+
     class Meta:
         model = Staff
-        fields = ['id', 'user', 'user_id', 'full_name', 'assignedKost', 'url']
+        fields = ['id', 'user', 'user_id', 'full_name', 'kost', 'kost_id', 'url']
+
+    def create(self, validated_data):
+        user = validated_data.pop('user')
+
+        staff_group, _ = Group.objects.get_or_create(name='staff')
+        user.groups.add(staff_group)
+
+        staff = Staff.objects.create(user=user, **validated_data)
+        return staff
 
     def get_url(self, obj):
         request = self.context.get('request')

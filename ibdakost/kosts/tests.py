@@ -10,10 +10,26 @@ from api.models import User
 from kosts.models import Kost
 from kosts.serializers import KostSerializer
 
+import io
+from PIL import Image
+
+
+def create_test_image():
+    file = io.BytesIO()
+    image = Image.new('RGB', (100, 100), color='red')
+    image.save(file, format='JPEG')
+    file.seek(0)
+
+    return SimpleUploadedFile(
+        name='test.jpg',
+        content=file.read(),
+        content_type='image/jpeg'
+    )
+
 # Create your tests here.
 class KostModelTests(TestCase):
     def setUp(self):
-        image = SimpleUploadedFile(name='test_image.jpg', content=b'\x47\x49\x46\x38\x39\x61', content_type='image/jpeg')
+        image = create_test_image()
         self.kost = Kost.objects.create(
             name='Kost A',
             address='Jl. Example No. 123',
@@ -29,7 +45,7 @@ class KostModelTests(TestCase):
 
 class KostSerializerTests(TestCase):
     def setUp(self):
-        image = SimpleUploadedFile(name='test_image.jpg', content=b'\x47\x49\x46\x38\x39\x61', content_type='image/jpeg')
+        image = create_test_image()
         self.kost = Kost.objects.create(
             name='Kost A',
             address='Jl. Example No. 123',
@@ -58,7 +74,7 @@ class KostSerializerTests(TestCase):
 
 class KostViewTests(APITestCase):
     def setUp(self):
-        image = SimpleUploadedFile(name='test_image.jpg', content=b'\x47\x49\x46\x38\x39\x61', content_type='image/jpeg')
+        image = create_test_image()
         self.kost = Kost.objects.create(
             name='Kost A',
             address='Jl. Example No. 123',
@@ -93,4 +109,3 @@ class KostViewTests(APITestCase):
         self.client.force_authenticate(user=self.user)
         response = self.client.delete(url)
         self.assertEqual(response.status_code, 403)
-

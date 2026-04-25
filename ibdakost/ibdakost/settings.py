@@ -12,15 +12,11 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 
 from pathlib import Path
 from datetime import timedelta
+import dj_database_url
 from dotenv import load_dotenv
 import os
-import environ
-import dj_database_url
 
 load_dotenv()  # Load environment variables from .env file  
-
-env = environ.Env()
-environ.Env.read_env()  # Membaca file .env
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -111,9 +107,15 @@ DATABASES = {
     #     'ENGINE': 'django.db.backends.sqlite3',
     #     'NAME': BASE_DIR / 'db.sqlite3',
     # }
-    'default': {
-        dj_database_url.config(default=env('DATABASE_URL'))
-    }
+    # 'default': {
+    #     'ENGINE': os.getenv('DATABASE_ENGINE'),
+    #     'NAME': os.getenv('DATABASE_NAME'),
+    #     'USER': os.getenv('DATABASE_USER'),
+    #     'PASSWORD': os.getenv('DATABASE_PASSWORD'),
+    #     'HOST': os.getenv('DATABASE_HOST'),
+    #     'PORT': os.getenv('DATABASE_PORT'),
+    # }
+    'default': dj_database_url.parse(os.getenv('DATABASE_URL'))
 }
 
 
