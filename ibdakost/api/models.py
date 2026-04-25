@@ -21,7 +21,7 @@ class Tenant(models.Model):
     occupation = models.CharField(max_length=255)
     institution = models.CharField(max_length=255)
     identity_type = models.CharField(max_length=100)
-    identity_card = models.CharField(max_length=100)
+    identity_card = models.ImageField(upload_to='identity_cards/')
 
     def __str__(self):
         return self.full_name
@@ -29,14 +29,14 @@ class Tenant(models.Model):
     class Meta:
         db_table = 'tenants'
 
-class Staff(models.Model):
-    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
-    full_name = models.CharField(max_length=255)
-    assignedKost = models.ForeignKey('Kost', on_delete=models.CASCADE)
+# class Staff(models.Model):
+#     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+#     user = models.ForeignKey(User, on_delete=models.CASCADE)
+#     full_name = models.CharField(max_length=255)
+#     assignedKost = models.ForeignKey('Kost', on_delete=models.CASCADE)
 
-    def __str__(self):
-        return self.full_name
+#     def __str__(self):
+#         return self.full_name
     
-    class Meta:
-        db_table = 'staffs'
+#     class Meta:
+#         db_table = 'staffs'

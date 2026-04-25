@@ -149,6 +149,10 @@ STATIC_URL = 'static/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
+AUTH_USER_MODEL = 'api.User'  # Gunakan model User kustom dari aplikasi api
+
 CORS_ALLOW_ALL_ORIGINS = True  # Untuk sementara, nanti diubah sesuai kebutuhan
 CORS_ALLOW_CREDENTIALS = True
 
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
