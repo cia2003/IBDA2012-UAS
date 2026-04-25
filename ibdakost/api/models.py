@@ -5,6 +5,20 @@ from django.contrib.auth.models import AbstractUser
 # Create your models here.
 class User(AbstractUser):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    email = models.EmailField(unique=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    status = models.CharField(
+        max_length=20,
+        choices=[
+            ('active', 'Active'),
+            ('inactive', 'Inactive'),
+            ('suspended', 'Suspended'),
+            ('deleted', 'Deleted'),
+        ],
+        default='active'
+    )
+    is_active = models.BooleanField(default=True)
 
     def __str__(self):
         return self.username
@@ -22,6 +36,9 @@ class Tenant(models.Model):
     institution = models.CharField(max_length=255)
     identity_type = models.CharField(max_length=100)
     identity_card = models.ImageField(upload_to='identity_cards/')
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
         return self.full_name

@@ -9,19 +9,42 @@ class UserSerializer(serializers.HyperlinkedModelSerializer):
  
     class Meta:
         model = User
-        fields = ['id', 'username', 'email', 'password', '_links']
+        fields = ['id', 'username', 'email', 'password', 'created_at', 'updated_at', 'status', 'is_active', '_links']
         extra_kwargs = {
-            'password': {'write_only': True}
+            'password': {'write_only': True}, 
+            'is_active': {'read_only': True}
         }
  
     def create(self, validated_data):
         """
         Override create method to hash password and create user.
         """
+        validated_data['email'] = validated_data['email'].lower()
+
+        status = validated_data.get('status', 'active')
+        validated_data['is_active'] = status not in ['suspended', 'deleted']
+
         password = validated_data.pop('password')
         validated_data['password'] = make_password(password)
-        return User.objects.create(**validated_data)
- 
+
+        user = User.objects.create(**validated_data)
+
+        return user
+    
+    def update(self, instance, validated_data):
+        if 'email' in validated_data:
+            validated_data['email'] = validated_data['email'].lower()
+
+        if 'status' in validated_data:
+            status = validated_data['status']
+            instance.is_active = status not in ['suspended', 'deleted']
+
+        for attr, value in validated_data.items():
+            setattr(instance, attr, value)
+
+        instance.save()
+        return instance
+    
     def get__links(self, obj):
         request = self.context.get('request')
         return [
