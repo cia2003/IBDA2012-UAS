@@ -3,3 +3,7 @@ media/
 
 # ignore .env file which contains sensitive information
 .env
+
+# ignore db.sqlite3 which is the default database for Django projects
+db.sqlite3
+
