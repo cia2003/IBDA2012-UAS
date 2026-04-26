@@ -23,13 +23,13 @@ class IsTenant(BasePermission):
     def has_permission(self, request, view):
         return request.user and request.user.is_authenticated and request.user.groups.filter(name='tenant').exists()
     
-class IsKostStaff(BasePermission):
+class IsStaff(BasePermission):
     """
-    Allows access to kost staff.
+    Allows access to staff.
     """
 
     def has_permission(self, request, view):
-        return request.user and request.user.is_authenticated and request.user.groups.filter(name='kost_staff').exists()
+        return request.user and request.user.is_authenticated and request.user.groups.filter(name='staff').exists()
 
 class IsAdminOrSuperUser(BasePermission):
     """
@@ -43,16 +43,16 @@ class IsAdminOrSuperUser(BasePermission):
           )
       )
 
-class IsAdminOrKostManagerOrSuperUser(BasePermission):
+class IsAdminOrStaffOrSuperUser(BasePermission):
     """
-    Allows access to admin, kost managers, and superusers.
+    Allows access to admin, kost staff, and superusers.
     """
     def has_permission(self, request, view):
       return (
           request.user and request.user.is_authenticated and (
               request.user.is_superuser or
               request.user.groups.filter(name='admin').exists() or
-              request.user.groups.filter(name='kost_manager').exists()
+              request.user.groups.filter(name='staff').exists()
           )
       )
 
@@ -68,10 +68,3 @@ class IsOwnerOrAdminOrSuperUser(BasePermission):
                 obj == request.user
             )
         )
-
-class IsKostManager(BasePermission):
-    """
-    Allows access to the manager of the kost, admin, and superusers.
-    """
-    def has_permission(self, request, view):
-        return request.user and request.user.is_authenticated and request.user.groups.filter(name='kost_manager').exists()

@@ -72,10 +72,9 @@ class TenantListCreateView(APIView):
     def get_permissions(self):
         if self.request.method == 'GET':
             return [IsAuthenticated(), IsAdminOrSuperUser()]
-        return []
 
     def get(self, request):
-        tenants = Tenant.objects.all().order_by('username')[:10]
+        tenants = Tenant.objects.all().order_by('created_at')[:10]
         serializer = TenantSerializer(tenants, many=True)
         return Response({'tenants': serializer.data})
 
@@ -91,7 +90,8 @@ class TenantDetailView(APIView):
     authentication_classes = [JWTAuthentication]
 
     def get_permissions(self):
-        return [IsAuthenticated(), IsAdminOrSuperUser()]
+        if self.request.method == 'GET':
+            return [IsAuthenticated(), IsAdminOrSuperUser()]
 
     def get_object(self, pk):
         try:
@@ -124,10 +124,11 @@ class StaffListCreateView(APIView):
     authentication_classes = [JWTAuthentication]
 
     def get_permissions(self):
-        return [IsAuthenticated(), IsAdminOrSuperUser()]
+        if self.request.method == 'GET':
+            return [IsAuthenticated(), IsAdminOrSuperUser()]
 
     def get(self, request):
-        staffs = Staff.objects.all().order_by('username')[:10]
+        staffs = Staff.objects.all().order_by('created_at')[:10]
         serializer = StaffSerializer(staffs, many=True)
         return Response({'staff': serializer.data})
 
@@ -176,6 +177,7 @@ class StaffDetailView(APIView):
 class GroupListCreateView(APIView):
     authentication_classes = [JWTAuthentication]
     permission_classes = [IsAuthenticated, IsAdminOrSuperUser]
+    # permission_classes = []
 
     def get(self, request):
         groups = Group.objects.all().order_by('name')[:10]
@@ -192,6 +194,7 @@ class GroupListCreateView(APIView):
 class GroupDetailView(APIView):
     authentication_classes = [JWTAuthentication]
     permission_classes = [IsAuthenticated, IsAdminOrSuperUser]
+    # permission_classes = []
 
     def get_object(self, pk):
         try:
@@ -222,6 +225,7 @@ class GroupDetailView(APIView):
 class AssignRoleView(APIView):
     authentication_classes = [JWTAuthentication]
     permission_classes = [IsAuthenticated, IsAdminOrSuperUser]
+    # permission_classes = []
 
     def post(self, request):
         user = get_object_or_404(User, pk=request.data['user_id'])

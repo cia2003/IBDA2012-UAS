@@ -62,6 +62,7 @@ INSTALLED_APPS = [
     # Aplikasi yang sedang dibuat
     'api',
     'kosts',
+    'rooms',
 
     # Aplikasi pihak ketiga
     'rest_framework',

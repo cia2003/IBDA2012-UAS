@@ -79,7 +79,7 @@ class UserSerializer(serializers.HyperlinkedModelSerializer):
         return [group.name for group in obj.groups.all()]
 
 class TenantSerializer(serializers.ModelSerializer):
-    url = serializers.SerializerMethodField()
+    _links = serializers.SerializerMethodField()
     user = serializers.CharField(source='user.username', read_only=True)
 
     user_id = serializers.PrimaryKeyRelatedField(
@@ -91,7 +91,7 @@ class TenantSerializer(serializers.ModelSerializer):
     class Meta:
         model = Tenant
         fields = [
-            'id', 'user', 'user_id', 'full_name', 'gender', 'phone_number', 'occupation', 'institution', 'identity_type', 'identity_card', 'url'
+            'id', 'user', 'user_id', 'full_name', 'gender', 'phone_number', 'occupation', 'institution', 'identity_type', 'identity_card', '_links'
         ]
     
     def create(self, validated_data):
@@ -103,7 +103,7 @@ class TenantSerializer(serializers.ModelSerializer):
         tenant = Tenant.objects.create(user=user, **validated_data)
         return tenant
 
-    def get_url(self, obj):
+    def get__links(self, obj):
         request = self.context.get('request')
         return [
             {
@@ -133,7 +133,7 @@ class TenantSerializer(serializers.ModelSerializer):
         ]
     
 class StaffSerializer(serializers.ModelSerializer):
-    url = serializers.SerializerMethodField()
+    _links = serializers.SerializerMethodField()
     user = serializers.CharField(source='user.username', read_only=True)
     kost = serializers.CharField(source='kost.name', read_only=True)
 
@@ -151,7 +151,7 @@ class StaffSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Staff
-        fields = ['id', 'user', 'user_id', 'full_name', 'kost', 'kost_id', 'url']
+        fields = ['id', 'user', 'user_id', 'full_name', 'kost', 'kost_id', '_links']
 
     def create(self, validated_data):
         user = validated_data.pop('user')
@@ -162,7 +162,7 @@ class StaffSerializer(serializers.ModelSerializer):
         staff = Staff.objects.create(user=user, **validated_data)
         return staff
 
-    def get_url(self, obj):
+    def get__links(self, obj):
         request = self.context.get('request')
         return [
             {
