@@ -7,6 +7,8 @@ import {
   newTenant,
 } from "../assets/assets";
 
+import { api } from "../axios/axios";
+
 export const AppContext = createContext();
 
 const initialState = {
@@ -50,11 +52,14 @@ export const AppContextProvider = ({ children }) => {
           (kost) => kost.id === state.staffData?.assignedKost,
         );
 
-  const login = (email, password) => {
+  const login = async (email, password) => {
     dispatch({ type: "LOGIN_START" });
-    const user = staffList.find(
-      (s) => s.email === email && s.password === password,
-    );
+
+    const res = await api.post("/login/", { email, password });
+    const { access, refresh, user } = res.data;
+    // const user = staffList.find(
+    //   (s) => s.email === email && s.password === password,
+    // );
     if (user) {
       dispatch({ type: "LOGIN_SUCCESS", payload: user });
       navigate(
@@ -75,8 +80,10 @@ export const AppContextProvider = ({ children }) => {
     navigate("/login");
   };
 
-  const getKostById = (kostId) =>
-    initialKostData.find((kost) => String(kost.id) === String(kostId)) ?? null;
+  const getKostById = async (kostId) => {
+    const res = await api.get(`/kosts/${kostId}/`);
+    return res.data;
+  };
 
   const getStaffByKostId = (kostId) => {
     const kost = initialKostData.find((k) => String(k.id) === String(kostId));

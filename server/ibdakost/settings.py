@@ -78,6 +78,7 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     "corsheaders.middleware.CorsMiddleware",  # Tambahkan middleware CORS
+    "django.middleware.common.CommonMiddleware",  # Pastikan CommonMiddleware ada setelah CorsMiddleware
 ]
 
 ROOT_URLCONF = 'ibdakost.urls'
