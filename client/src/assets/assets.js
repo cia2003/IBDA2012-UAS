@@ -28,7 +28,7 @@ export const ROOM_TYPES = {
         name: 'Tipe 4',
         size: '5 m × 5 m',
         facilities: ['AC', 'TV', 'Mini Pantry', 'Dispenser', 'Kulkas', 'Kamar Mandi Dalam', 'Parkir Mobil'],
-        price: 3750000
+        price: 4000000
     }
 };
 
@@ -39,7 +39,7 @@ export const staff = [
         role: ROLES.MANAGER, 
         assignedKost: null, 
         email: 'manager@email.com',
-        password: 'manager123' 
+        password: 'calvinJoshua' 
     },
     { 
         id: 2, 
@@ -73,14 +73,16 @@ export const kostData = [
         name: 'IBDA Kost A', 
         address: 'Jl. Merdeka No. 1', 
         rooms: [
-            { id: 'A01', roomNumber: '101', ...ROOM_TYPES.TIPE_1, status: 'Available', resident: null },
+            { id: 'A01', roomNumber: '101', ...ROOM_TYPES.TIPE_1, status: 'Occupied', resident: [
+                {id: 'P506', name: 'Joshua', contact: '089617548012', checkInDate: '2026-04-04'}
+            ] },
             { id: 'A02', roomNumber: '102', ...ROOM_TYPES.TIPE_2, status: 'Available', resident: null },
         ],
         staffId: 2 
     },
     { 
         id: 'K02', 
-        name: 'IBDA Kost B', 
+        name: 'IBDA Kost B',
         address: 'Jl. Sudirman No. 12', 
         rooms: [
             { id: 'B01', roomNumber: '201', ...ROOM_TYPES.TIPE_1, status: 'Available', resident: null },
@@ -106,5 +108,41 @@ export const kostData = [
             { id: 'C02', roomNumber: '302', ...ROOM_TYPES.TIPE_4, status: 'Available', resident: null },
         ],
         staffId: 4
+    },
+];
+
+export const newTenant = [
+    { 
+        id: "reg-001",
+        name: "Abu jahar", 
+        gender: "Laki-laki", 
+        asal: "Madiun", 
+        entryDate: "2026-05-05",
+        requestedKostId: "K03",
+        requestedRoomId: "C02",
+        phoneNumber: "08123456789",
+        notes: "Mahasiswa semester 2"
+    },
+    { 
+        id: "reg-002",
+        name: "Sulaiman", 
+        gender: "Laki-laki", 
+        asal: "Madiun", 
+        entryDate: "2026-05-05", 
+        requestedKostId: "K01",
+        requestedRoomId: "A02",
+        phoneNumber: "08129999888",
+        notes: "Karyawan swasta"
+    },
+    { 
+        id: "reg-003",
+        name: "Bilqis", 
+        gender: "Perempuan", 
+        asal: "Depok", 
+        entryDate: "2026-05-06", 
+        requestedKostId: "K02",
+        requestedRoomId: "B02",
+        phoneNumber: "08131111222",
+        notes: "-"
     },
 ];

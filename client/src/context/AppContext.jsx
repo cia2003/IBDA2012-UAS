@@ -1,110 +1,133 @@
-import { createContext, useReducer, useState } from "react";
+import { createContext, useReducer } from "react";
 import { useNavigate } from "react-router-dom";
-import { kostData, staff as staffList, ROLES } from "../assets/assets";
+import {
+  kostData as initialKostData,
+  staff as staffList,
+  ROLES,
+  newTenant,
+} from "../assets/assets";
 
 export const AppContext = createContext();
 
-export const AppContextProvider = ({ children }) => {
-    const navigate = useNavigate();
+const initialState = {
+  isLoggedIn: false,
+  staffData: null,
+  staffRole: null,
+  isLoading: false,
+  error: null,
+};
 
-    const initialState = {
-        isLoggedIn: false,
-        staffData: null,
-        staffRole: null,
+const AuthReducer = (state, action) => {
+  switch (action.type) {
+    case "LOGIN_START":
+      return { ...state, isLoading: true, error: null };
+    case "LOGIN_SUCCESS":
+      return {
+        ...state,
         isLoading: false,
-        error: null
-    };
+        isLoggedIn: true,
+        staffData: action.payload,
+        staffRole: action.payload.role,
+      };
+    case "LOGIN_FAILURE":
+      return { ...state, isLoading: false, error: action.payload };
+    case "LOGOUT":
+      return initialState;
+    default:
+      return state;
+  }
+};
 
-    const AuthReducer = (state, action) => {
-        switch (action.type) {
-            case "LOGIN_START":
-                return { ...state, isLoading: true, error: null };
-            case "LOGIN_SUCCESS":
-                return {
-                    ...state,
-                    isLoading: false,
-                    isLoggedIn: true,
-                    staffData: action.payload,
-                    staffRole: action.payload.role
-                };
-            case "LOGIN_FAILURE":
-                return { ...state, isLoading: false, error: action.payload };
-            case "LOGOUT":
-                return initialState;
-            default:
-                return state;
-        }
-    };
+export const AppContextProvider = ({ children }) => {
+  const navigate = useNavigate();
+  const [state, dispatch] = useReducer(AuthReducer, initialState);
 
-    const [state, dispatch] = useReducer(AuthReducer, initialState);
-    const [filteredRooms, setFilteredRooms] = useState([]);
-    const [occupantData, setOccupantData] = useState({})
-
-    const login = (email, password) => {
-        dispatch({ type: "LOGIN_START" });
-        const user = staffList.find(s => s.email === email && s.password === password);
-        if (user) {
-            dispatch({ type: "LOGIN_SUCCESS", payload: user });
-            fetchRoomData(user);
-            navigate(user.role === ROLES.MANAGER ? "/dashboard/manager" : `/dashboard/staff/${user.id}`)
-            console.log("Data User: ", user)
-        } else {
-            dispatch({ type: "LOGIN_FAILURE", payload: "Email atau Password salah!" });
-        }
-    };
-
-    const fetchRoomData = (user) => {
-        if (user.role === ROLES.MANAGER) {
-            setFilteredRooms(kostData);
-            console.log("Data Kost (Manager): ", kostData);
-        } else if (user.role === ROLES.STAFF) {
-            const assignedData = kostData.filter(kost => kost.id === user.assignedKost);
-            setFilteredRooms(assignedData);
-            console.log("Data Kost (Staff): ", assignedData);
-        }
-    };
-
-    const getOccupantById = (occupantId) => {
-        const currentKost = filteredRooms[0];
-        const allOccupants = currentKost?.rooms
-        ?.filter(room => Array.isArray(room.resident))
-        .flatMap(room => 
-            room.resident.map(p => ({ 
-                ...p, 
-                roomNumber: room.roomNumber 
-            }))
+  // Derived: kamar yang bisa diakses sesuai role
+  const filteredRooms =
+    state.staffRole === ROLES.MANAGER
+      ? initialKostData
+      : initialKostData.filter(
+          (kost) => kost.id === state.staffData?.assignedKost,
         );
 
-    const data = allOccupants?.find(p => p.id == occupantId);
-        setOccupantData(data || {});
-    };
-
-    const logout = () => {
-        dispatch({ type: "LOGOUT" });
-        setFilteredRooms([]);
-        navigate("/login");
-    };
-
-    const values = {
-        isLoggedIn: state.isLoggedIn,
-        staffData: state.staffData,
-        staffRole: state.staffRole,
-        isLoading: state.isLoading,
-        error: state.error,
-        
-        rooms: filteredRooms,
-        allLocations: kostData,
-        occupantData: occupantData,
-
-        // Functions
-        login,
-        logout,
-        getOccupantById
-    };
-
-    return (
-        <AppContext.Provider value={values}>
-            {children}
-        </AppContext.Provider>
+  const login = (email, password) => {
+    dispatch({ type: "LOGIN_START" });
+    const user = staffList.find(
+      (s) => s.email === email && s.password === password,
     );
+    if (user) {
+      dispatch({ type: "LOGIN_SUCCESS", payload: user });
+      navigate(
+        user.role === ROLES.MANAGER
+          ? "/dashboard/manager"
+          : `/dashboard/staff/${user.id}`,
+      );
+    } else {
+      dispatch({
+        type: "LOGIN_FAILURE",
+        payload: "Email atau Password salah!",
+      });
+    }
+  };
+
+  const logout = () => {
+    dispatch({ type: "LOGOUT" });
+    navigate("/login");
+  };
+
+  const getKostById = (kostId) =>
+    initialKostData.find((kost) => String(kost.id) === String(kostId)) ?? null;
+
+  const getStaffByKostId = (kostId) => {
+    const kost = initialKostData.find((k) => String(k.id) === String(kostId));
+    if (!kost) return null;
+    return staffList.find((s) => s.id === kost.staffId) ?? null;
+  };
+
+  const getOccupantById = (occupantId) => {
+    for (const kost of initialKostData) {
+      for (const room of kost.rooms ?? []) {
+        if (!Array.isArray(room.resident)) continue;
+        const occupant = room.resident.find((p) => p.id == occupantId);
+        if (occupant) {
+          return {
+            ...occupant,
+            roomNumber: room.roomNumber,
+            kostName: kost.name,
+          };
+        }
+      }
+    }
+    return null;
+  };
+
+  const fetchNewTenants = (kostId) => {
+    const data = newTenant.filter(
+      (t) => t.requestedKostId === kostId
+    );
+    return data
+  };
+
+  const values = {
+    // Auth state
+    isLoggedIn: state.isLoggedIn,
+    staffData: state.staffData,
+    staffRole: state.staffRole,
+    isLoading: state.isLoading,
+    error: state.error,
+
+    // Data
+    allLocations: initialKostData,
+    rooms: filteredRooms,
+
+    // Functions
+    login,
+    logout,
+    getKostById,
+    getOccupantById,
+    getStaffByKostId,
+    fetchNewTenants
+  };
+
+  return <AppContext.Provider value={values}>{children}</AppContext.Provider>;
 };
