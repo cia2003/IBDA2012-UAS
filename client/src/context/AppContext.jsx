@@ -57,9 +57,6 @@ export const AppContextProvider = ({ children }) => {
 
     const res = await api.post("/login/", { email, password });
     const { access, refresh, user } = res.data;
-    // const user = staffList.find(
-    //   (s) => s.email === email && s.password === password,
-    // );
     if (user) {
       dispatch({ type: "LOGIN_SUCCESS", payload: user });
       navigate(
