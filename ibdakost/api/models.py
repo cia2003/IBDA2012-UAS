@@ -20,7 +20,6 @@ class User(AbstractUser):
         ],
         default='active'
     )
-    is_staff = models.BooleanField(default=False)
     is_active = models.BooleanField(default=True)
 
     def __str__(self):
