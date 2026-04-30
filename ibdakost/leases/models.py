@@ -18,8 +18,8 @@ class Lease(models.Model):
         default='pending'
     )
     is_validated = models.BooleanField(default=False)
-    start_date = models.DateTimeField()
-    end_date = models.DateTimeField()
+    start_date = models.DateField()
+    end_date = models.DateField()
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)

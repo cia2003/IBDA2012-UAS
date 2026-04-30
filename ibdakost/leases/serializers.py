@@ -3,9 +3,13 @@ from rest_framework.reverse import reverse
 from django.contrib.auth.hashers import make_password
 from django.contrib.auth.models import Group
 from .models import Lease
+from api.models import Tenant
+from rooms.models import Room
 
 class LeaseSerializer(serializers.ModelSerializer):
     _links = serializers.SerializerMethodField()
+    tenant = serializers.PrimaryKeyRelatedField(queryset=Tenant.objects.all())
+    room = serializers.PrimaryKeyRelatedField(queryset=Room.objects.all())
     class Meta:
         model = Lease
         fields = [

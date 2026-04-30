@@ -51,7 +51,7 @@ class LeaseDetailView(APIView):
 
     def put(self, request, pk):
         lease = self.get_object(pk)
-        serializer = LeaseSerializer(lease, data=request.data)
+        serializer = LeaseSerializer(lease, data=request.data, partial=True)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data)

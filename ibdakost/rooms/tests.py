@@ -16,8 +16,6 @@ import io
 from PIL import Image
 from django.core.files.uploadedfile import SimpleUploadedFile
 
-from uuid import UUID
-
 
 def create_test_image():
     file = io.BytesIO()
