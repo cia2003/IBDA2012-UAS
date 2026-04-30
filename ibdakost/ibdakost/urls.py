@@ -9,6 +9,7 @@ urlpatterns = [
     path('', include('api.urls')),  # Sertakan URL dari aplikasi api
     path('', include('kosts.urls')),  # Sertakan URL dari aplikasi kosts
     path('', include('rooms.urls')),  # Sertakan URL dari aplikasi rooms
+    path('', include('leases.urls')), # sertakan URL dari aplikasi leases
     path('login/', EmailLoginView.as_view(), name='login'),
     path('token/refresh/', TokenRefreshView.as_view(), name='refresh'),
     path('api-auth/', include('rest_framework.urls')),  # Untuk login/logout di browsable API
