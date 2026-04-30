@@ -7,9 +7,15 @@ from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework.permissions import IsAuthenticated
 from api.permissions import IsAdminOrSuperUser, IsOwnerOrAdminOrSuperUser
 from .models import User, Tenant, Staff
-from .serializers import TenantSerializer, UserSerializer, StaffSerializer, GroupSerializer
+from .serializers import EmailTokenObtainPairSerializer, TenantSerializer, UserSerializer, StaffSerializer, GroupSerializer
 from django.http import Http404
+from rest_framework_simplejwt.views import TokenObtainPairView
 
+
+
+class EmailLoginView(TokenObtainPairView):
+    serializer_class = EmailTokenObtainPairSerializer
+    
 class UserListCreateView(APIView):
     authentication_classes = [JWTAuthentication]
 
