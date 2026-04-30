@@ -111,18 +111,12 @@ class UserSerializer(serializers.HyperlinkedModelSerializer):
 
 class TenantSerializer(serializers.ModelSerializer):
     _links = serializers.SerializerMethodField()
-    user = serializers.CharField(source='user.username', read_only=True)
-
-    user_id = serializers.PrimaryKeyRelatedField(
-        queryset=User.objects.all(),
-        source='user',
-        write_only=True
-    )
+    user = serializers.PrimaryKeyRelatedField(queryset=User.objects.all())
 
     class Meta:
         model = Tenant
         fields = [
-            'id', 'user', 'user_id', 'full_name', 'gender', 'phone_number', 'occupation', 'institution', 'identity_type', 'identity_card', '_links'
+            'user', 'full_name', 'gender', 'phone_number', 'occupation', 'institution', 'identity_type', 'identity_card', '_links'
         ]
     
     def create(self, validated_data):
@@ -165,24 +159,11 @@ class TenantSerializer(serializers.ModelSerializer):
     
 class StaffSerializer(serializers.ModelSerializer):
     _links = serializers.SerializerMethodField()
-    user = serializers.CharField(source='user.username', read_only=True)
-    kost = serializers.CharField(source='kost.name', read_only=True)
-
-    user_id = serializers.PrimaryKeyRelatedField(
-        queryset=User.objects.all(),
-        source='user',
-        write_only=True
-    )
-
-    kost_id = serializers.PrimaryKeyRelatedField(
-        queryset=Kost.objects.all(),
-        source='kost',
-        write_only=True
-    )
+    user = serializers.PrimaryKeyRelatedField(queryset=User.objects.all())
 
     class Meta:
         model = Staff
-        fields = ['id', 'user', 'user_id', 'full_name', 'kost', 'kost_id', '_links']
+        fields = ['user', 'full_name', 'kost', '_links']
 
     def create(self, validated_data):
         user = validated_data.pop('user')

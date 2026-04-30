@@ -1,9 +1,12 @@
-# @superuser_access_token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzc3NTIwODMxLCJpYXQiOjE3Nzc1MTcyMzEsImp0aSI6ImYyNzA0OWNhMzE5NzRlNTNhZTY1YTk5OTk1YjJlZTM2IiwidXNlcl9pZCI6IjQ3N2Q3MzczLWQwYWUtNDkxMy1iZjExLTg0YjY0OTY0YWYzYSJ9.XpYmrupgBZsvRrLfycdSv8TtSMzve2r26IQ7gWUlHLg
+@superuser_access_token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzc3NTI3Njc0LCJpYXQiOjE3Nzc1MjQwNzQsImp0aSI6IjYzYzBlNTE4Y2IzODRhMjg5MWI5YWQ2ODY2Y2E2ZTA5IiwidXNlcl9pZCI6Ijc1OTQwYmEzLTkwZjEtNGNlYi04NDNiLWFhYWJhNzExZmI4NiJ9.2ybUmBOtSem9d5OtivYZF5SyEAzUtfFqHAlCj5iZ-wo
+@tenant_access_token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzc3NTI3ODIyLCJpYXQiOjE3Nzc1MjQyMjIsImp0aSI6ImJlMTMwY2MzMTJiMjQzZDBhOGFlNTkxM2E4MDZjMzhjIiwidXNlcl9pZCI6IjAxYzQxZTVlLTUzMzItNDQwNS04MjhhLTIwNTllMjY1MzRiNSJ9.ePZp_oHGznzF6_vf1RPGSPPkGIkbHiN_JqUKToEvLJQ
 
-POST http://localhost:8000/login/ HTTP/1.1
+GET http://localhost:8000/assign-roles/ HTTP/1.1
+Authorization: Bearer {{superuser_access_token}}
+# Accept: application/json
 Content-Type: application/json
 
 {
-    "email": "jane@gmail.com",
-    "password": "jane123"
+    "user_id": "john@gmail.com",
+    "group_id": "john123"
 }

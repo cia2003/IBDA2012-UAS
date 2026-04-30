@@ -29,8 +29,7 @@ class User(AbstractUser):
         db_table = 'users'
 
 class Tenant(models.Model):
-    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    user = models.OneToOneField(User, on_delete=models.CASCADE, primary_key=True)
     full_name = models.CharField(max_length=255)
     gender = models.CharField(max_length=10)
     phone_number = models.CharField(max_length=20)
@@ -49,8 +48,7 @@ class Tenant(models.Model):
         db_table = 'tenants'
 
 class Staff(models.Model):
-    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    user = models.OneToOneField(User, on_delete=models.CASCADE, primary_key=True)
     full_name = models.CharField(max_length=255)
     kost = models.ForeignKey(Kost, on_delete=models.CASCADE)
 

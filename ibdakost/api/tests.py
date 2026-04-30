@@ -133,7 +133,7 @@ class SerializerTests(TestCase):
         # Test tenant serializer create method
         image = create_test_image()
         tenant_data = {
-            'user_id': self.user.id,
+            'user': self.user.id,
             'full_name': 'John Doe',
             'gender': 'male',
             'phone_number': '08123',
@@ -159,9 +159,9 @@ class SerializerTests(TestCase):
         )
 
         staff_data = {
-            'user_id': self.user.id,
+            'user': self.user.id,
             'full_name': 'Jane Smith',
-            'kost_id': assigned_kost.id,
+            'kost': assigned_kost.id,
         }
         serializer = StaffSerializer(data=staff_data)
         self.assertTrue(serializer.is_valid())
