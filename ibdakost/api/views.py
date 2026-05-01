@@ -11,8 +11,6 @@ from .serializers import EmailTokenObtainPairSerializer, TenantSerializer, UserS
 from django.http import Http404
 from rest_framework_simplejwt.views import TokenObtainPairView
 
-
-
 class EmailLoginView(TokenObtainPairView):
     serializer_class = EmailTokenObtainPairSerializer
     
@@ -78,6 +76,7 @@ class TenantListCreateView(APIView):
     def get_permissions(self):
         if self.request.method == 'GET':
             return [IsAuthenticated(), IsAdminOrSuperUser()]
+        return []
 
     def get(self, request):
         tenants = Tenant.objects.all().order_by('created_at')[:10]
@@ -96,8 +95,9 @@ class TenantDetailView(APIView):
     authentication_classes = [JWTAuthentication]
 
     def get_permissions(self):
-        if self.request.method == 'GET':
+        if self.request.method == 'DELETE':
             return [IsAuthenticated(), IsAdminOrSuperUser()]
+        return [IsAuthenticated(), IsOwnerOrAdminOrSuperUser]
 
     def get_object(self, pk):
         try:
@@ -128,10 +128,7 @@ class TenantDetailView(APIView):
 class StaffListCreateView(APIView):
     # Implementation similar to UserListCreateView with appropriate permissions and serializer
     authentication_classes = [JWTAuthentication]
-
-    def get_permissions(self):
-        if self.request.method == 'GET':
-            return [IsAuthenticated(), IsAdminOrSuperUser()]
+    permission_classes = [IsAuthenticated, IsAdminOrSuperUser]
 
     def get(self, request):
         staffs = Staff.objects.all().order_by('created_at')[:10]
@@ -148,11 +145,7 @@ class StaffListCreateView(APIView):
 class StaffDetailView(APIView):
     # Implementation similar to UserDetailView with appropriate permissions and serializer
     authentication_classes = [JWTAuthentication]
-
-    def get_permissions(self):
-        if self.request.method == 'DELETE':
-            return [IsAuthenticated(), IsAdminOrSuperUser()]
-        return [IsAuthenticated(), IsOwnerOrAdminOrSuperUser()]
+    permission_classes = [IsAuthenticated, IsAdminOrSuperUser]
 
     def get_object(self, pk):
         try:
@@ -183,7 +176,6 @@ class StaffDetailView(APIView):
 class GroupListCreateView(APIView):
     authentication_classes = [JWTAuthentication]
     permission_classes = [IsAuthenticated, IsAdminOrSuperUser]
-    # permission_classes = []
 
     def get(self, request):
         groups = Group.objects.all().order_by('name')[:10]
@@ -200,7 +192,6 @@ class GroupListCreateView(APIView):
 class GroupDetailView(APIView):
     authentication_classes = [JWTAuthentication]
     permission_classes = [IsAuthenticated, IsAdminOrSuperUser]
-    # permission_classes = []
 
     def get_object(self, pk):
         try:
@@ -231,7 +222,6 @@ class GroupDetailView(APIView):
 class AssignRoleView(APIView):
     authentication_classes = [JWTAuthentication]
     permission_classes = [IsAuthenticated, IsAdminOrSuperUser]
-    # permission_classes = []
 
     def post(self, request):
         user = get_object_or_404(User, pk=request.data['user_id'])

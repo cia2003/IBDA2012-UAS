@@ -254,6 +254,22 @@ class ViewTest(APITestCase):
 
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
     
+    def test_user_try_to_delete_lease(self):
+        lease = Lease.objects.create(
+            tenant=self.tenant,
+            room=self.room,
+            start_date='2025-10-01',
+            end_date='2025-10-31'
+        )
+
+        self.authenticate(self.user)
+
+        url = f'/leases/{lease.id}/'
+
+        response = self.client.delete(url)
+
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+    
     def test_unauthenticated_access(self):
         response = self.client.get(self.lease_url)
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)

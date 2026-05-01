@@ -64,6 +64,7 @@ INSTALLED_APPS = [
     'kosts',
     'rooms',
     'leases',
+    'wishlists',
 
     # Aplikasi pihak ketiga
     'rest_framework',
