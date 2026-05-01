@@ -1,37 +1,85 @@
+// App.jsx
 import { Navigate, Route, Routes } from "react-router-dom";
-import { useAppContext } from "./hook/useAppContext";
+import { useAppContext } from "./hook/useContext";
 
 import Login from "./pages/Login";
-import Layout from "./pages/admin/Layout"; 
-import Dashboard from "./pages/admin/Dashboard";
-import RoomsDataDetails from "./pages/admin/RoomsDataDetails";
-import OccupantDataDetails from "./pages/admin/OccupantDataDetails";
+import Layout from "./pages/admin/Layout";
+import StaffDashboard from "./pages/admin/staff/StaffDashboard";
+import RoomsDataDetails from "./pages/admin/staff/RoomsDataDetails";
+import OccupantDataDetails from "./pages/admin/staff/OccupantDataDetails";
 import OccupantForm from "./components/OccupantForm";
-import RoomForm from "./components/RoomForm"
+import RoomForm from "./components/RoomForm";
+import ManagerDashboard from "./pages/admin/manager/ManagerDashboard";
+import NewTenantList from "./pages/admin/staff/NewTenantList";
 
 import "./style.css";
-import NewTenantList from "./pages/admin/NewTenantList";
+import { Toaster } from "react-hot-toast";
+import Kost from "./pages/admin/manager/Kost";
+import Staff from "./pages/admin/manager/Staff";
+import StaffForm from "./pages/admin/manager/StaffForm";
+
+const ProtectedRoute = ({ children, allowedRole }) => {
+  const { isLoggedIn, role } = useAppContext();
+
+  if (!isLoggedIn) return <Navigate to="/login" replace />;
+  if (allowedRole && role !== allowedRole)
+    return <Navigate to="/login" replace />;
+
+  return children;
+};
 
 export default function App() {
-  const { isLoggedIn, staffData } = useAppContext(); 
+  const { isLoggedIn, staffData, role } = useAppContext();
+
+  const defaultRedirect = !isLoggedIn
+    ? "/login"
+    : role === "manager"
+      ? "/dashboard/manager"
+      : `/dashboard/${staffData?.id}`;
 
   return (
     <>
+      <Toaster />
       <Routes>
-        <Route path="/login" element={<Login />} />
-        {isLoggedIn && (
-          <>
-            <Route path="/dashboard/:staffId" element={<Layout />}>
-                <Route index element={<Dashboard />} />
-                <Route path="kamar" element={<RoomsDataDetails />} />
-                <Route path="penghuni" element={<OccupantDataDetails />} />
-                <Route path="edit-penghuni/:occupantId" element={<OccupantForm />} />
-                <Route path="tambah-kamar" element={<RoomForm />} />
-                <Route path="penghuni-baru" element={<NewTenantList />} />
-              </Route>
-          </>
-        )}
-        <Route path="*" element={<Navigate to={isLoggedIn ? (`/dashboard/${staffData?.id}`) : "/login"} />} />
+        <Route
+          path="/login"
+          element={
+            isLoggedIn ? <Navigate to={defaultRedirect} replace /> : <Login />
+          }
+        />
+        <Route
+          path="/dashboard/:staffId"
+          element={
+            <ProtectedRoute allowedRole="staff">
+              <Layout />
+            </ProtectedRoute>
+          }
+        >
+          <Route index element={<StaffDashboard />} />
+          <Route path="kamar" element={<RoomsDataDetails />} />
+          <Route path="penghuni" element={<OccupantDataDetails />} />
+          <Route path="edit-penghuni/:occupantId" element={<OccupantForm />} />
+          <Route path="tambah-kamar" element={<RoomForm />} />
+          <Route path="penghuni-baru" element={<NewTenantList />} />
+        </Route>
+
+        <Route
+          path="/dashboard/manager"
+          element={
+            <ProtectedRoute allowedRole="manager">
+              <Layout />
+            </ProtectedRoute>
+          }
+        >
+          <Route index element={<ManagerDashboard />} />
+          <Route path="kost" element={<Kost />} />
+          <Route path="staff" element={<Staff />} />
+          <Route path="staff-form" element={<StaffForm />} />
+          <Route path="staff-form/:staffId" element={<StaffForm />} />
+        </Route>
+
+        {/* Fallback */}
+        <Route path="*" element={<Navigate to={defaultRedirect} replace />} />
       </Routes>
     </>
   );

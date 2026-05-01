@@ -1,7 +1,7 @@
 // Definisi Role
 export const ROLES = {
-    MANAGER: 'MANAGER',
-    STAFF: 'STAFF'
+    MANAGER: 'manager',
+    STAFF: 'staff'
 };
 
 // Master Data Tipe Kamar (Sesuai Deskripsi Bisnis)
@@ -38,6 +38,7 @@ export const staff = [
         name: 'Joshua', 
         role: ROLES.MANAGER, 
         assignedKost: null, 
+        telephone: '089617548012',
         email: 'manager@email.com',
         password: 'calvinJoshua' 
     },
@@ -46,6 +47,7 @@ export const staff = [
         name: 'Emily', 
         role: ROLES.STAFF, 
         assignedKost: 'K01',
+        telephone: '081234567890',
         email: 'staff1@email.com',
         password: 'stafkos1' 
     },
@@ -53,6 +55,7 @@ export const staff = [
         id: 3, 
         name: 'Michael', 
         role: ROLES.STAFF, 
+        telephone: '081234567890',
         assignedKost: 'K02', 
         email: 'michael@email.com',
         password: 'stafkos2' 
@@ -61,6 +64,7 @@ export const staff = [
         id: 4, 
         name: 'Sarah', 
         role: ROLES.STAFF, 
+        telephone: '081234567890',
         assignedKost: 'K03', 
         email: 'sarah@email.com',
         password: 'stafkost3' 
