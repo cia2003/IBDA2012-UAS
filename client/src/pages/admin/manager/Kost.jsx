@@ -1,11 +1,17 @@
-import { Building2, HousePlus } from "lucide-react";
+import { Building2, CircleArrowRight, HousePlus } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useManagerContext } from "../../../hook/useContext";
 import Table from "../../../components/Table";
+import { useNavigate } from "react-router-dom";
 
 function Kost() {
   const [kost, setKost] = useState([]);
   const { getKostData } = useManagerContext();
+  const navigate = useNavigate();
+
+  const handleKostDetail = (id)=>{
+    navigate(`/dashboard/manager/kost-detail/${id}`)
+  }
 
   useEffect(() => {
     const fetchKostData = async () => {
@@ -28,7 +34,24 @@ function Kost() {
       header: "Jumlah Kamar",
       accessor: "roomCount",
     },
-    // Aku belum tahu action Kost apaan
+    {
+      header: "Aksi",
+      accessor: "id",
+      cell: (id, item) => (
+        <div className="flex justify-center">
+          <button
+            onClick={() => {handleKostDetail(id)}}
+            className="group flex items-center gap-2 bg-blue-50 hover:bg-blue-600 text-blue-600 hover:text-white px-3 py-1.5 rounded-xl transition-all duration-300 font-medium text-sm border border-blue-100"
+          >
+            <span>Detail</span>
+            <CircleArrowRight
+              size={16}
+              className="opacity-0 w-0 -translate-x-2 group-hover:opacity-100 group-hover:w-4 group-hover:translate-x-0 transition-all duration-300"
+            />
+          </button>
+        </div>
+      ),
+    },
   ];
   return (
     <div className="space-y-4 sm:space-y-6">

@@ -1,4 +1,4 @@
-import { FileUser, SaveAll } from "lucide-react";
+import { FileUser, SaveAll, ArrowLeft } from "lucide-react";
 import { useEffect, useState, useCallback } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useManagerContext } from "../../../hook/useContext";
@@ -63,6 +63,14 @@ function StaffForm() {
 
   return (
     <div className="space-y-4 sm:space-y-6">
+      <div className="flex justify-between items-center">
+        <button
+          onClick={() => navigate(-1)}
+          className="flex items-center gap-2 text-gray-500 hover:text-gray-800 transition-colors font-medium text-sm"
+        >
+          <ArrowLeft size={18} /> Kembali
+        </button>
+      </div>
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 bg-white p-6 rounded-3xl border border-gray-100 shadow-sm">
         <div className="flex items-center gap-4">

@@ -39,9 +39,9 @@ export default function StaffDashboard() {
     navigate(`/dashboard/${staffId}/tambah-kamar`);
   };
 
-  useEffect(()=>{
-    console.log(currentRooms)
-  },[])
+  // useEffect(()=>{
+  //   console.log(currentRooms)
+  // },[])
 
   return (
     <div className="space-y-8">

@@ -1,8 +1,37 @@
+import { useEffect, useState, useCallback } from "react";
 import KPICard from "../../../components/KPICard";
 
 import { House, Bed, HouseHeart, HousePlus, Zap, UserPlus2 } from "lucide-react";
+import { useManagerContext } from "../../../hook/useContext";
+import { useNavigate } from "react-router-dom";
 
 function ManagerDashboard() {
+  const { getKostData } = useManagerContext();
+  const [kostData, setKostData] = useState([]);
+  const navigate = useNavigate();
+
+  const fetchKostData = useCallback(async () => {
+    const data = await getKostData();
+    if (data) {
+      setKostData(data);
+    }
+  }, [getKostData]);
+
+  useEffect(() => {
+    fetchKostData();
+  }, [fetchKostData]);
+
+  const totalKost = kostData.length;
+  
+  const totalRooms = kostData.reduce((acc, current) => {
+    return acc + (current.rooms?.length || 0);
+  }, 0);
+
+  const occupiedRooms = kostData.reduce((acc, current) => {
+    const occupiedInThisKost = current.rooms?.filter(room => room.status === 'Occupied').length || 0;
+    return acc + occupiedInThisKost;
+  }, 0);
+
   return (
     <div className="space-y-8">
       {/* Header */}
@@ -17,21 +46,21 @@ function ManagerDashboard() {
         <div className="lg:col-span-2 md:col-span-2">
           <KPICard
             title="Total Kost"
-            value={0}
+            value={totalKost}
             icon={<House className="text-blue-500" />}
           />
         </div>
         <div className="lg:col-span-1">
           <KPICard
             title="Total Kamar"
-            value={0}
+            value={totalRooms}
             icon={<Bed className="text-purple-500" />}
           />
         </div>
         <div className="lg:col-span-1">
           <KPICard
             title="Kamar Terisi"
-            value={0}
+            value={occupiedRooms}
             icon={<HouseHeart className="text-green-500" />}
           />
         </div>
@@ -58,6 +87,7 @@ function ManagerDashboard() {
           </button>
           <button
             className="flex items-center gap-2 bg-gray-400 hover:bg-gray-700 hover:text-white font-semibold py-2 px-4 rounded-lg transition-all shadow-md group text-sm"
+            onClick={()=>navigate('/dashboard/manager/staff-form')}
           >
             <UserPlus2
               size={18}

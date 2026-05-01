@@ -1,14 +1,17 @@
 import { createContext, useCallback, useMemo } from "react";
-import { staff as staffList, kostData as initialKostData } from "../assets/assets"; // Sesuaikan import
+import {
+  staff as staffList,
+  kostData as initialKostData,
+} from "../assets/assets";
 import toast from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
 
 export const ManagerContext = createContext();
 
 export const ManagerContextProvider = ({ children }) => {
-    const navigate = useNavigate()
-  
-    const getStaffData = useCallback(async () => {
+  const navigate = useNavigate();
+
+  const getStaffData = useCallback(async () => {
     try {
       const data = await staffList;
       // console.log(data); // Debugging
@@ -37,37 +40,50 @@ export const ManagerContextProvider = ({ children }) => {
     }
   }, []);
 
+  const getKostById = useCallback(async (id) => {
+    try {
+      const data = initialKostData.find((k) => String(k.id) === String(id));
+      if (data) {
+        return data;
+      }
+    } catch (error) {
+      toast.error("Data Kost gagal di fetch");
+      console.error(error.message);
+    }
+  });
+
   const addStaff = useCallback(async (staffForm) => {
     try {
       toast.success("Staff Berhasil Ditambahkan");
-      navigate('/dashboard/manager')
+      navigate("/dashboard/manager");
     } catch (error) {
       toast.error("Staff gagal ditambahkan");
       console.error(error.message);
     }
   }, []);
 
-  const editKost = useCallback(async (kostId)=>{
+  const editKost = useCallback(async (kostId) => {
     try {
       toast.success("Kost Berhasil Diedit");
     } catch (error) {
       toast.error("Kost gagal diedit");
       console.error(error.message);
     }
-  },[])
+  }, []);
 
-  const editStaff = useCallback(async (staffId)=>{
+  const editStaff = useCallback(async (staffId) => {
     try {
       toast.success("Staff Berhasil Diedit");
     } catch (error) {
       toast.error("Staff gagal Diedit");
       console.error(error.message);
     }
-  },[])
+  }, []);
 
   const deleteKost = useCallback(async (kostId) => {
     try {
       toast.success("Data Kost berhasil dihapus");
+      return true
     } catch (error) {
       console.error(error.message);
       toast.error("Kost gagal dihapus");
@@ -83,29 +99,41 @@ export const ManagerContextProvider = ({ children }) => {
     }
   }, []);
 
-  const getStaffById = useCallback(async(id)=>{
+  const getStaffById = useCallback(async (id) => {
     try {
-        return staff.find((s) => s.id === Number(id));
-    } catch (error) {
-        
-    }
-  })
+      return staff.find((s) => s.id === Number(id));
+    } catch (error) {}
+  },[]);
 
-  const values = useMemo(() => ({
-    getStaffData,
-    getKostData,
-    addKost,
-    deleteKost,
-    editKost,
-    deleteStaff,
-    editStaff,
-    getStaffById,
-    addStaff
-  }), [getStaffData, addStaff, deleteStaff, getKostData, addKost, deleteKost, editKost, getStaffById, editStaff]);
+
+  const values = useMemo(
+    () => ({
+      getStaffData,
+      getKostData,
+      addKost,
+      deleteKost,
+      editKost,
+      deleteStaff,
+      editStaff,
+      getStaffById,
+      getKostById,
+      addStaff,
+    }),
+    [
+      getStaffData,
+      getKostById,
+      addStaff,
+      deleteStaff,
+      getKostData,
+      addKost,
+      deleteKost,
+      editKost,
+      getStaffById,
+      editStaff,
+    ],
+  );
 
   return (
-    <ManagerContext.Provider value={values}>
-      {children}
-    </ManagerContext.Provider>
+    <ManagerContext.Provider value={values}>{children}</ManagerContext.Provider>
   );
 };

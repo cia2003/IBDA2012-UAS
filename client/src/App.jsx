@@ -17,6 +17,7 @@ import { Toaster } from "react-hot-toast";
 import Kost from "./pages/admin/manager/Kost";
 import Staff from "./pages/admin/manager/Staff";
 import StaffForm from "./pages/admin/manager/StaffForm";
+import KostDetail from "./pages/admin/manager/KostDetail";
 
 const ProtectedRoute = ({ children, allowedRole }) => {
   const { isLoggedIn, role } = useAppContext();
@@ -76,6 +77,7 @@ export default function App() {
           <Route path="staff" element={<Staff />} />
           <Route path="staff-form" element={<StaffForm />} />
           <Route path="staff-form/:staffId" element={<StaffForm />} />
+          <Route path="kost-detail/:kostId" element={<KostDetail />} /> 
         </Route>
 
         {/* Fallback */}
