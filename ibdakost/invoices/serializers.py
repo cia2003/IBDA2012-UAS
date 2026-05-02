@@ -1,11 +1,11 @@
 from rest_framework import serializers
 from rest_framework.reverse import reverse
 from .models import Invoice
-from invoices.models import invoice
+from invoices.models import Invoice
 
 class InvoiceSerializer(serializers.ModelSerializer):
     _links = serializers.SerializerMethodField()
-    invoice = serializers.PrimaryKeyRelatedField(queryset=invoice.objects.all())
+    invoice = serializers.PrimaryKeyRelatedField(queryset=Invoice.objects.all())
 
     class Meta:
         model = Invoice

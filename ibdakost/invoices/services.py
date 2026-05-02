@@ -1,5 +1,6 @@
 from dateutil.relativedelta import relativedelta
 from datetime import date, timedelta
+from .models import Invoice
 
 class InvoiceService:
     @staticmethod
@@ -19,61 +20,70 @@ class InvoiceService:
     
     @staticmethod
     def generate_initial_invoice(lease):
-        today = date.today()
+        """
+        Dipanggil saat lease baru dibuat
+        """
+        if lease.invoices.exists():
+            return None  # sudah pernah dibuat
 
-        period_start = lease.start_date
-        period_end = period_start + relativedelta(months=1) - timedelta(days=1)
+        start = lease.start_date
 
-        if lease.invoices.filter(period_start=period_start).exists():
-            return None
-        
         data = InvoiceService.build_invoice_data(lease)
 
-        return {
-            'lease': lease,
-            'period_start': period_start,
-            'period_end': period_end,
-            'issue_date': today,
-            'due_date': today + timedelta(days=3)
-            **data
-        }
+        return Invoice.objects.create(
+            lease=lease,
+            period_start=start,
+            period_end=start + relativedelta(months=1) - timedelta(days=1),
+            issue_date=start,
+            due_date=start + timedelta(days=10),
+            unit_price=data['price'],
+            quantity=data['quantity'],
+            total_amount=data['total_amount']
+        )
     
     @staticmethod
-    def generate_monthly_invoice_for_lease(lease):
+    def generate_next_invoice(lease):
         today = date.today()
 
-        last_period_end = lease.invoices.order_by('-period_end').values_list('period_end', flat=True).first()
+        if lease.status != 'approved':
+            return None
 
-        if last_period_end:
-            period_start = last_period_end + timedelta(days=1)
+        # tanda '-' pada '-period_start' berarti urutan dari paling baru
+        last_invoice = lease.invoices.order_by('-period_start').first()
+
+        if last_invoice:
+            next_start = last_invoice.period_start + relativedelta(months=1)
         else:
-            period_start = lease.start_date
-        
-        if period_start > today:
-            return None
-        
-        while period_start + relativedelta(months=1) <= today:
-            period_start += relativedelta(months=1)
-        
-        period_end = period_start + relativedelta(months=1) - timedelta(days=1)
+            next_start = lease.start_date
 
-        if lease.invoices.filter(period_start=period_start).exists():
+        # Jangan generate kalau belum waktunya
+        if next_start > today:
             return None
-        
+
+        # Anti-duplicate safety
+        if lease.invoices.filter(period_start=next_start).exists():
+            return None
+
+        period_end = next_start + relativedelta(months=1) - timedelta(days=1)
+
         data = InvoiceService.build_invoice_data(lease)
+        
+        return Invoice.objects.create(
+            lease=lease,
+            period_start=next_start,
+            period_end=period_end,
+            issue_date=next_start,
+            due_date=next_start + timedelta(days=10),
+            unit_price=data['unit_price'],
+            quantity=data['quantity'],
+            total_amount= data['total_amount']
+        )
 
-        return {
-            'lease': lease,
-            'period_start': period_start,
-            'period_end': period_end,
-            'issue_date': today,
-            'due_date': period_start - timedelta(days=7),
-            **data
-        }
-    
+    staticmethod
     def mark_overdue():
         today = date.today()
 
-        return {
-            'status': 'overdue'
-        }
+        return Invoice.objects.filter(
+            status='pending',
+            due_date__lt=today # ambil data due_date < today
+        ).update(status='overdue')

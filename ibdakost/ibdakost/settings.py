@@ -15,6 +15,7 @@ from datetime import timedelta
 import dj_database_url
 from dotenv import load_dotenv
 import os
+from celery.schedules import crontab 
 
 load_dotenv()  # Load environment variables from .env file  
 
@@ -65,6 +66,7 @@ INSTALLED_APPS = [
     'rooms',
     'leases',
     'wishlists',
+    'invoices',
 
     # Aplikasi pihak ketiga
     'rest_framework',
@@ -170,3 +172,17 @@ CORS_ALLOW_CREDENTIALS = True
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+
+CELERY_BROKER_URL = 'redis://127.0.0.1:6379/0' 
+CELERY_ACCEPT_CONTENT = ['json'] 
+CELERY_TASK_SERIALIZER = 'json' 
+
+CELERY_BEAT_SCHEDULE = { 
+    'generate-invoices-daily': { 
+        'task': 'invoices.tasks.generate_monthly_invoices', 
+        'schedule': crontab(hour=0, minute=0), }, 
+        'mark-overdue-daily': { 
+            'task': 'invoices.tasks.update_overdue_invoices', 
+            'schedule': crontab(hour=1, minute=0), 
+            }, 
+            }
