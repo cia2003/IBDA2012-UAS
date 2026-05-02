@@ -9,8 +9,9 @@ import {
   Users,
   BedDouble,
   CircleCheckBig,
+  CalendarClock
 } from "lucide-react";
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
 
 export default function StaffDashboard() {
   const { staffId } = useParams();
@@ -35,10 +36,45 @@ export default function StaffDashboard() {
       return room.status !== "Occupied" ? total + 1 : total;
     }, 0) || 0;
 
-  const handleAddRooms = () => {
-    navigate(`/dashboard/${staffId}/tambah-kamar`);
-  };
+  const handleAddRooms = () => {};
 
+  const overdueResidents = useMemo(() => {
+    if (!currentRooms?.rooms) return [];
+
+    const today = new Date().getDate();
+    const overdueList = [];
+
+    currentRooms.rooms.forEach((room) => {
+      if (room.status === "Occupied" && room.resident) {
+        room.resident.forEach((res) => {
+          // Jika tanggal jatuh tempo < tanggal hari ini, anggap terlambat
+          if (res.paymentDueDate < today) {
+            overdueList.push({
+              ...res,
+              roomNumber: room.roomNumber,
+            });
+          }
+        });
+      }
+    });
+    return overdueList;
+  }, [currentRooms]);
+
+  const columns = [
+    { header: "Nama Penghuni", accessor: "name" },
+    { header: "No. Kamar", accessor: "roomNumber" },
+    {
+      header: "Jatuh Tempo",
+      accessor: "paymentDueDate",
+      cell: (value) => (
+        <span className="font-bold text-red-600">Setiap Tanggal {value}</span>
+      ),
+    },
+    {
+      header: "Kontak",
+      accessor: "contact",
+    },
+  ];
   // useEffect(()=>{
   //   console.log(currentRooms)
   // },[])
@@ -80,26 +116,44 @@ export default function StaffDashboard() {
         </div>
       </div>
 
-      {/* Quick Actions Section */}
-      <div className="bg-blue-50 p-6 rounded-xl border border-blue-100 shadow-sm w-fit">
-        <div className="flex items-center gap-3 mb-6">
-          <div className="p-2 bg-blue-500 rounded-lg text-white">
-            <Zap size={20} fill="currentColor" />
-          </div>
-          <h3 className="font-bold text-lg text-gray-800">Quick Actions</h3>
-        </div>
+      <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
+        <div className="xl:col-span-2 bg-white p-6 rounded-3xl border border-gray-100 shadow-sm">
+            <div className="flex items-center gap-3 mb-6">
+              <CalendarClock className="text-red-500" />
+              <h2 className="text-xl font-bold text-gray-800">
+                Pengingat Jatuh Tempo
+              </h2>
+            </div>
 
-        <div className="flex flex-col gap-3 ">
-          <button
-            onClick={handleAddRooms}
-            className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg transition-all shadow-md group text-sm"
-          >
-            <HousePlus
-              size={18}
-              className="group-hover:scale-110 transition-transform"
-            />
-            Tambah Kamar Baru
-          </button>
+            {overdueResidents.length > 0 ? (
+              <Table columns={columns} data={overdueResidents} />
+            ) : (
+              <div className="text-center py-10 text-gray-400 italic">
+                Tidak ada penghuni yang terlambat membayar bulan ini.
+              </div>
+            )}
+          </div>
+        {/* Quick Actions Section */}
+        <div className="bg-blue-50 p-6 rounded-xl border border-blue-100 shadow-sm w-fit">
+          <div className="flex items-center gap-3 mb-6">
+            <div className="p-2 bg-blue-500 rounded-lg text-white">
+              <Zap size={20} fill="currentColor" />
+            </div>
+            <h3 className="font-bold text-lg text-gray-800">Quick Actions</h3>
+          </div>
+
+          <div className="flex flex-col gap-3 ">
+            <button
+              onClick={() => navigate(`/dashboard/${staffId}/tambah-kamar`)}
+              className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg transition-all shadow-md group text-sm"
+            >
+              <HousePlus
+                size={18}
+                className="group-hover:scale-110 transition-transform"
+              />
+              Tambah Kamar Baru
+            </button>
+          </div>
         </div>
       </div>
     </div>
