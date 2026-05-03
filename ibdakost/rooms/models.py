@@ -38,7 +38,7 @@ class Room(models.Model):
     room_type = models.ForeignKey(RoomType, on_delete=models.CASCADE)
     name = models.CharField(max_length=255)
     is_available = models.BooleanField(default=True)
-
+    image = models.ImageField(upload_to='room_images/')
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 

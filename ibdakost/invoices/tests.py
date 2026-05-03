@@ -36,7 +36,7 @@ class InvoiceServiceTest(TestCase):
             image=image
         )
         self.room_type = RoomType.objects.create(name='Tipe 1', size='2.5 m x 2.5 m', price=750000)
-        self.room = Room.objects.create(kost=self.kost, room_type=self.room_type, name='Room 101')
+        self.room = Room.objects.create(kost=self.kost, room_type=self.room_type, name='Room 101', image=image)
         self.user = User.objects.create_user(username='testuser', email='testuser@example.com', password='testpass')
         self.tenant = Tenant.objects.create(
             user=self.user,

@@ -60,7 +60,7 @@ class RoomSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Room
-        fields = ['id', 'kost', 'room_type', 'name', 'is_available', 'created_at', 'updated_at', '_links']
+        fields = ['id', 'kost', 'room_type', 'name', 'is_available', 'image', 'created_at', 'updated_at', '_links']
 
     def get__links(self, obj):
         request = self.context.get('request')

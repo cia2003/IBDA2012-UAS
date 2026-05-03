@@ -40,7 +40,7 @@ class RoomModelTests(TestCase):
             image=image
         )
         self.room_type = RoomType.objects.create(name='Tipe 1', size='2.5 m x 2.5 m', price=750000)
-        self.room = Room.objects.create(kost=self.kost, room_type=self.room_type, name='Room 101')
+        self.room = Room.objects.create(kost=self.kost, room_type=self.room_type, name='Room 101', image=image)
 
     def test_room_type_creation(self):
         self.assertEqual(self.room_type.name, 'Tipe 1')
@@ -69,7 +69,7 @@ class RoomSerializerTests(TestCase):
             image=image
         )
         self.room_type = RoomType.objects.create(name='Tipe 1', size='2.5 m x 2.5 m', price=750000)
-        self.room = Room.objects.create(kost=self.kost, room_type=self.room_type, name='Room 101')
+        self.room = Room.objects.create(kost=self.kost, room_type=self.room_type, name='Room 101', image=image)
 
     def test_room_serializer(self):
         serializer = RoomSerializer(instance=self.room)
@@ -108,7 +108,8 @@ class RoomViewTests(APITestCase):
         self.room = Room.objects.create(
             kost=self.kost,
             room_type=self.room_type,
-            name='Room 101'
+            name='Room 101', 
+            image=image
         )
 
         self.facility_1 = Facility.objects.create(name='Kipas Angin')

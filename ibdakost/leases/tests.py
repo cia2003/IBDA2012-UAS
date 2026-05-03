@@ -40,7 +40,7 @@ class ModelTest(TestCase):
             image=image
         )
         self.room_type = RoomType.objects.create(name='Tipe 1', size='2.5 m x 2.5 m', price=750000)
-        self.room = Room.objects.create(kost=self.kost, room_type=self.room_type, name='Room 101')
+        self.room = Room.objects.create(kost=self.kost, room_type=self.room_type, name='Room 101', image=image)
         self.user = User.objects.create_user(username='testuser', email='testuser@example.com', password='testpass')
     
     def test_lease_creation(self):
@@ -75,7 +75,7 @@ class SerializerTest(TestCase):
             image=image
         )
         self.room_type = RoomType.objects.create(name='Tipe 1', size='2.5 m x 2.5 m', price=750000)
-        self.room = Room.objects.create(kost=self.kost, room_type=self.room_type, name='Room 101')
+        self.room = Room.objects.create(kost=self.kost, room_type=self.room_type, name='Room 101', image=image)
         self.user = User.objects.create_user(username='testuser', email='testuser@example.com', password='testpass')
     
     def test_lease_serializer(self):
@@ -158,7 +158,8 @@ class ViewTest(APITestCase):
         self.room = Room.objects.create(
             kost=self.kost,
             room_type=self.room_type,
-            name='Room 101'
+            name='Room 101', 
+            image=image
         )
 
         # user biasa
