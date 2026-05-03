@@ -15,7 +15,7 @@ from datetime import timedelta
 import dj_database_url
 from dotenv import load_dotenv
 import os
-
+import sys
 load_dotenv()  # Load environment variables from .env file  
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -169,5 +169,12 @@ AUTH_USER_MODEL = 'api.User'  # Gunakan model User kustom dari aplikasi api
 CORS_ALLOW_ALL_ORIGINS = True  # Untuk sementara, nanti diubah sesuai kebutuhan
 CORS_ALLOW_CREDENTIALS = True
 
-MEDIA_URL = '/media/'
-MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+DEFAULT_FILE_STORAGE = "storages.supabase_storage.SupabaseStorage"
+
+SUPABASE_PROJECT_URL = os.getenv('SUPABASE_PROJECT_URL')
+SUPABASE_SERVICE_ROLE_KEY = os.getenv('SUPABASE_SERVICE_ROLE_KEY')
+SUPABASE_BUCKET = os.getenv("SUPABASE_BUCKET", "media")
+
+if 'test' in sys.argv:
+    MEDIA_URL = '/media/'
+    MEDIA_ROOT = os.path.join(BASE_DIR, 'media')

@@ -1,6 +1,7 @@
 import uuid
 
 from django.db import models
+from .validators import validate_file_size, validate_image_type
 
 # Create your models here.
 class Kost(models.Model):
@@ -8,7 +9,7 @@ class Kost(models.Model):
     name = models.CharField(max_length=255)
     address = models.TextField()
     description = models.TextField()
-    image = models.ImageField(upload_to='kost_images/')
+    image = models.ImageField(upload_to='kost_images/', validators=[validate_file_size, validate_image_type])
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 

@@ -1,6 +1,8 @@
 import uuid
 from django.db import models
 from kosts.models import Kost
+from storages.supabase_storage import SupabaseStorage
+from kosts.validators import validate_file_size, validate_image_type
 
 # Create your models here.
 class Facility(models.Model):
@@ -38,7 +40,7 @@ class Room(models.Model):
     room_type = models.ForeignKey(RoomType, on_delete=models.CASCADE)
     name = models.CharField(max_length=255)
     is_available = models.BooleanField(default=True)
-    image = models.ImageField(upload_to='room_images/')
+    image = models.ImageField(upload_to='room_images/', validators=[validate_image_type, validate_file_size])
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
