@@ -15,7 +15,6 @@ from datetime import timedelta
 import dj_database_url
 from dotenv import load_dotenv
 import os
-from celery.schedules import crontab 
 
 load_dotenv()  # Load environment variables from .env file  
 

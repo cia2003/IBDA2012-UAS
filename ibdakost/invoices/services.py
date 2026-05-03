@@ -37,9 +37,12 @@ class InvoiceService:
             next_start = datetime.strptime(next_start, "%Y-%m-%d").date()
 
         # Jangan generate kalau belum waktunya
-        if next_start > today:
-            return None
+        # Batasi hanya sampai bulan sekarang (asumsi: tiap pembaruan periode selalu awal bulan)
+        current_period = today.replace(day=1)
 
+        if next_start > current_period:
+            return None
+        
         # Anti-duplicate safety
         if lease.invoices.filter(period_start=next_start).exists():
             return None
@@ -59,7 +62,7 @@ class InvoiceService:
             total_amount= data['total_amount']
         )
 
-    staticmethod
+    @staticmethod
     def mark_overdue():
         today = date.today()
 

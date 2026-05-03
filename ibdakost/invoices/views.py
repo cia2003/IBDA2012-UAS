@@ -28,15 +28,7 @@ class InvoiceListCreateView(APIView):
     def post(self, request):
         lease = Lease.objects.get(id=request.data['lease'])
 
-        data = InvoiceService.create_invoice_data(
-            lease=lease,
-            period_start=request.data['period_start'],
-            period_end=request.data['period_end'],
-            issue_date=request.data['issue_date'],
-            due_date=request.data['due_date'],
-        )
-
-        invoice = Invoice.objects.create(**data)
+        invoice = InvoiceService.generate_next_invoice(lease)
 
         serializer = InvoiceSerializer(invoice)
 
