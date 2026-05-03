@@ -2,7 +2,7 @@ import { UserCheck, Check, X, Phone, Search, ChevronDown } from "lucide-react";
 import { useAppContext } from "../../../hook/useContext";
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-import Table from "../../../components/Table";
+import Table from "../../../components/ui/Table";
 import toast from "react-hot-toast";
 
 function NewTenantList() {
@@ -17,15 +17,12 @@ function NewTenantList() {
 
   useEffect(() => {
     if (kostId) {
-      // console.log("Fetching tenants for Kost ID:", kostId);
       const data = fetchNewTenants(kostId);
       setTenants(data || []);
     } else {
-      // console.log("kostId is still undefined, waiting...");
     }
   }, [kostId, fetchNewTenants]);
 
-  // LOGIKA FILTER: Menggabungkan Search dan Gender Filter
   const filteredTenants = tenants.filter((t) => {
     const matchesSearch = t.name
       .toLowerCase()
@@ -39,8 +36,8 @@ function NewTenantList() {
   // Logika Accept Tenant
   const handleAccept = (tenant) => {
     const acceptAction = new Promise((resolve, reject) => {
+      // Logika API nanti di sini
       setTimeout(() => {
-        // Logika API nanti di sini
         resolve(tenant.name);
       }, 1500);
     });

@@ -1,7 +1,7 @@
 import { ContactRound, UserCog, UserMinus, UserPlus } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useManagerContext } from "../../../hook/useContext";
-import Table from "../../../components/Table";
+import Table from "../../../components/ui/Table";
 import { useNavigate } from "react-router-dom";
 
 function Staff() {

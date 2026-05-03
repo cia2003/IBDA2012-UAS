@@ -1,5 +1,5 @@
 import { useState } from "react";
-import Table from "../../../components/Table";
+import Table from "../../../components/ui/Table";
 import { useAppContext } from "../../../hook/useContext";
 import {
   Edit3,

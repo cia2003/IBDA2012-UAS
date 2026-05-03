@@ -83,11 +83,11 @@ export const AppContextProvider = ({ children }) => {
     [],
   );
 
-  const getStaffByKostId = useCallback((kostId) => {
-    const kost = initialKostData.find((k) => String(k.id) === String(kostId));
-    if (!kost) return null;
-    return staffList.find((s) => s.id === kost.staffId) ?? null;
-  }, []);
+  // const getStaffByKostId = useCallback((kostId) => {
+  //   const kost = initialKostData.find((k) => String(k.id) === String(kostId));
+  //   if (!kost) return null;
+  //   return staffList.find((s) => s.id === kost.staffId) ?? null;
+  // }, []);
 
   const getOccupantById = useCallback((occupantId) => {
     for (const kost of initialKostData) {
@@ -129,7 +129,7 @@ export const AppContextProvider = ({ children }) => {
       logout,
       getKostById,
       getOccupantById,
-      getStaffByKostId,
+      // getStaffByKostId,
       fetchNewTenants,
     }),
     [
@@ -140,7 +140,7 @@ export const AppContextProvider = ({ children }) => {
       logout,
       getKostById,
       getOccupantById,
-      getStaffByKostId,
+      // getStaffByKostId,
       fetchNewTenants,
     ],
   );

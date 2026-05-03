@@ -1,5 +1,5 @@
 import { useEffect, useState, useCallback } from "react";
-import KPICard from "../../../components/KPICard";
+import KPICard from "../../../components/ui/KPICard";
 
 import { House, Bed, HouseHeart, HousePlus, Zap, UserPlus2 } from "lucide-react";
 import { useManagerContext } from "../../../hook/useContext";

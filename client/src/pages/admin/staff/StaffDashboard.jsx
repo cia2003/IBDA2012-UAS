@@ -1,6 +1,6 @@
 import { useNavigate, useParams } from "react-router-dom";
 import { useAppContext } from "../../../hook/useContext";
-import KPICard from "../../../components/KPICard";
+import KPICard from "../../../components/ui/KPICard";
 import {
   House,
   Zap,
@@ -75,12 +75,12 @@ export default function StaffDashboard() {
       accessor: "contact",
     },
   ];
-  // useEffect(()=>{
-  //   console.log(currentRooms)
-  // },[])
+  useEffect(()=>{
+    console.log(currentRooms)
+  },[])
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6">
       {/* Header Section */}
       <div className="lg:flex-row lg:items-center justify-between gap-4 bg-white p-5 sm:p-6 rounded-3xl border border-gray-100 shadow-sm">
         <h1 className="text-2xl font-bold text-gray-800">

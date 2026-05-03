@@ -6,9 +6,9 @@ import Login from "./pages/Login";
 import Layout from "./pages/admin/Layout";
 import StaffDashboard from "./pages/admin/staff/StaffDashboard";
 import RoomsDataDetails from "./pages/admin/staff/RoomsDataDetails";
-import OccupantDataDetails from "./pages/admin/staff/OccupantDataDetails";
-import OccupantForm from "./components/OccupantForm";
-import RoomForm from "./components/RoomForm";
+import TenantList from "./pages/admin/staff/TenantList";
+import OccupantForm from "./components/ui/OccupantForm";
+import RoomForm from "./components/ui/RoomForm";
 import ManagerDashboard from "./pages/admin/manager/ManagerDashboard";
 import NewTenantList from "./pages/admin/staff/NewTenantList";
 
@@ -58,7 +58,7 @@ export default function App() {
         >
           <Route index element={<StaffDashboard />} />
           <Route path="kamar" element={<RoomsDataDetails />} />
-          <Route path="penghuni" element={<OccupantDataDetails />} />
+          <Route path="penghuni" element={<TenantList />} />
           <Route path="edit-penghuni/:occupantId" element={<OccupantForm />} />
           <Route path="tambah-kamar" element={<RoomForm />} />
           <Route path="penghuni-baru" element={<NewTenantList />} />
