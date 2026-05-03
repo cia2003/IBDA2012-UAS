@@ -1,5 +1,5 @@
 from dateutil.relativedelta import relativedelta
-from datetime import date, timedelta
+from datetime import date, datetime, timedelta
 from .models import Invoice
 
 class InvoiceService:
@@ -19,33 +19,10 @@ class InvoiceService:
         }
     
     @staticmethod
-    def generate_initial_invoice(lease):
-        """
-        Dipanggil saat lease baru dibuat
-        """
-        if lease.invoices.exists():
-            return None  # sudah pernah dibuat
-
-        start = lease.start_date
-
-        data = InvoiceService.build_invoice_data(lease)
-
-        return Invoice.objects.create(
-            lease=lease,
-            period_start=start,
-            period_end=start + relativedelta(months=1) - timedelta(days=1),
-            issue_date=start,
-            due_date=start + timedelta(days=10),
-            unit_price=data['price'],
-            quantity=data['quantity'],
-            total_amount=data['total_amount']
-        )
-    
-    @staticmethod
     def generate_next_invoice(lease):
         today = date.today()
 
-        if lease.status != 'approved':
+        if lease.status != 'accepted':
             return None
 
         # tanda '-' pada '-period_start' berarti urutan dari paling baru
@@ -55,6 +32,9 @@ class InvoiceService:
             next_start = last_invoice.period_start + relativedelta(months=1)
         else:
             next_start = lease.start_date
+
+        if isinstance(next_start, str):
+            next_start = datetime.strptime(next_start, "%Y-%m-%d").date()
 
         # Jangan generate kalau belum waktunya
         if next_start > today:

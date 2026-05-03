@@ -10,6 +10,8 @@ from kosts.models import Kost
 from rooms.models import Room, RoomType
 from api.models import User, Tenant
 from leases.models import Lease
+from leases.serializers import LeaseSerializer
+from datetime import datetime, timedelta, date
 
 # Create your tests here.
 def create_test_image():
@@ -50,11 +52,92 @@ class InvoiceServiceTest(TestCase):
         self.lease = Lease.objects.create(
             tenant = self.tenant, 
             room = self.room, 
-            start_date = "2025-10-01",
-            end_date = "2025-10-31"
+            start_date = "2026-01-24",
+            end_date = "2026-06-24"
         )
     
     def test_no_invoice_if_not_approved(self):
         InvoiceService.generate_next_invoice(self.lease)
 
         self.assertEqual(Invoice.objects.count(), 0)
+    
+    def test_generate_initial_invoice_when_approved(self):
+        data = {
+            'status': 'accepted'
+        }
+
+        serializer = LeaseSerializer(self.lease, data=data, partial=True)
+        self.assertTrue(serializer.is_valid(), serializer.errors)
+
+        updated_lease = serializer.save()
+
+        InvoiceService.generate_next_invoice(updated_lease)
+
+        self.assertEqual(updated_lease.tenant.user.id, self.tenant.user.id)
+        self.assertEqual(Invoice.objects.count(), 1)
+    
+    def test_not_duplicate_invoice(self):
+        data = {
+            'status': 'accepted'
+        }
+        serializer = LeaseSerializer(self.lease, data, partial=True)
+        self.assertTrue(serializer.is_valid(), serializer.errors)
+
+        updated_lease = serializer.save()
+
+        InvoiceService.generate_next_invoice(updated_lease)
+        InvoiceService.generate_next_invoice(updated_lease)
+
+        start_date = datetime.strptime(updated_lease.start_date, "%Y-%m-%d").date()
+
+        self.assertEqual(
+            Invoice.objects.filter(
+                lease=updated_lease, 
+                period_start = start_date
+            ).count(), 
+            1
+        )
+    
+    def test_generate_next_month_invoice(self):
+        data = {
+            'status': 'accepted'
+        }
+        serializer = LeaseSerializer(self.lease, data, partial=True)
+        self.assertTrue(serializer.is_valid(), serializer.errors)
+
+        updated_lease = serializer.save()
+
+        InvoiceService.generate_next_invoice(updated_lease)
+        InvoiceService.generate_next_invoice(updated_lease)
+
+        start_date = datetime.strptime(updated_lease.start_date, "%Y-%m-%d").date()
+
+        self.assertEqual(
+            Invoice.objects.filter(
+                lease=updated_lease, 
+                period_start = start_date
+            ).count(), 
+            1
+        )
+        self.assertEqual(
+            Invoice.objects.filter(lease=updated_lease).count(), 2
+        )
+    
+    def test_mark_overdue(self):
+        serializer = LeaseSerializer(self.lease, {'status': 'accepted'}, partial=True)
+        self.assertTrue(serializer.is_valid(), serializer.errors)
+
+        updated_lease = serializer.save()
+
+        InvoiceService.generate_next_invoice(updated_lease)
+
+        invoice = Invoice.objects.get(lease=updated_lease)
+
+        # paksa overdue
+        invoice.due_date = date.today() - timedelta(days=1)
+        invoice.save()
+
+        InvoiceService.mark_overdue()
+
+        invoice.refresh_from_db()
+        self.assertEqual(invoice.status, 'overdue')
