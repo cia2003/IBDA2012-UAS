@@ -1,4 +1,5 @@
-import { createContext, useReducer, useMemo, useCallback } from "react";
+      // Tetap logout di client meski server error
+import { createContext, useReducer, useMemo, useCallback, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   kostData as initialKostData,
@@ -6,6 +7,7 @@ import {
   newTenant,
 } from "../assets/assets";
 import toast from "react-hot-toast";
+import api from "../api/api";
 
 export const AppContext = createContext();
 
@@ -51,68 +53,68 @@ export const AppContextProvider = ({ children }) => {
         );
   }, [role, state.staffData]);
 
-  const login = useCallback((email, password) => {
-    dispatch({ type: "LOGIN_START" });
+  // Login admin
+  const login = useCallback(async (email, password) => {
+    try {
+      dispatch({ type: "LOGIN_START" });
 
-    const user = staffList.find(
-      (s) => s.email === email && s.password === password,
-    );
+      // --- MODE DUMMY ---
+      const user = staffList.find(
+        (s) => s.email === email && s.password === password,
+      );
 
-    if (user) {
-      dispatch({ type: "LOGIN_SUCCESS", payload: user });
-      toast.success(`Selamat Datang, ${user.name}!`);
-    } else {
-      dispatch({
-        type: "LOGIN_FAILURE",
-        payload: "Email atau Password salah!",
-      });
-      toast.error("Email atau Password salah!");
+      // --- MODE BACKEND ---
+      // const response = await api.post('/login', { email, password });
+      // const user = response.data.user; // Sesuaikan jika backend mengembalikan { data: { user: ... } }
+
+      if (user) {
+        dispatch({ type: "LOGIN_SUCCESS", payload: user });
+        toast.success(`Selamat Datang, ${user.name}!`);
+      } else {
+        throw new Error("Email atau Password salah!");
+      }
+    } catch (error) {
+      const errorMsg = error.response?.data?.message || error.message || "Terjadi kesalahan";
+      dispatch({ type: "LOGIN_FAILURE", payload: errorMsg });
+      toast.error(errorMsg);
+      console.error(errorMsg);
     }
   }, []);
 
-  const logout = useCallback(() => {
-    dispatch({ type: "LOGOUT" });
-    navigate("/");
-    toast.success("Logout Berhasil");
+  // Logout admin
+  const logout = useCallback(async () => {
+    try {
+      // --- MODE BACKEND ---
+      // await api.post('/logout');
+
+      // --- LOGIKA CLIENT SIDE ---
+      dispatch({ type: "LOGOUT" });
+      toast.success("Logout Berhasil");
+      navigate("/");
+    } catch (error) {
+      console.error(error.message);
+      dispatch({ type: "LOGOUT" });
+      navigate("/");
+    }
   }, [navigate]);
 
-  const getKostById = useCallback(
-    (kostId) =>
-      initialKostData.find((kost) => String(kost.id) === String(kostId)) ??
-      null,
-    [],
-  );
-
-  // const getStaffByKostId = useCallback((kostId) => {
-  //   const kost = initialKostData.find((k) => String(k.id) === String(kostId));
-  //   if (!kost) return null;
-  //   return staffList.find((s) => s.id === kost.staffId) ?? null;
-  // }, []);
-
-  const getOccupantById = useCallback((occupantId) => {
-    for (const kost of initialKostData) {
-      for (const room of kost.rooms ?? []) {
-        if (!Array.isArray(room.resident)) continue;
-        const occupant = room.resident.find(
-          (p) => String(p.id) === String(occupantId),
-        );
-        if (occupant) {
-          return {
-            ...occupant,
-            roomNumber: room.roomNumber,
-            kostName: kost.name,
-          };
-        }
-      }
+  // Ambil data login admin (Persist Login)
+  const isAuth = useCallback(async () => {
+    try {
+      // --- MODE BACKEND ---
+      // const response = await api.get('/is-auth');
+      // if (response.data.success) {
+      //   dispatch({ type: "LOGIN_SUCCESS", payload: response.data.user });
+      // }
+    } catch (error) {
+      console.error("Session expired or not logged in");
     }
-    return null;
   }, []);
 
-  const fetchNewTenants = useCallback(
-    (kostId) =>
-      newTenant.filter((t) => String(t.requestedKostId) === String(kostId)),
-    [],
-  );
+  useEffect(() => {
+    // Panggil isAuth jika menggunakan backend untuk menjaga session saat refresh
+    // isAuth();
+  }, [isAuth]);
 
   const values = useMemo(
     () => ({
@@ -121,28 +123,11 @@ export const AppContextProvider = ({ children }) => {
       isLoading: state.isLoading,
       error: state.error,
       role,
-
-      allLocations: initialKostData,
-      rooms: filteredRooms,
-
       login,
       logout,
-      getKostById,
-      getOccupantById,
-      // getStaffByKostId,
-      fetchNewTenants,
+      // isAuth // Buka jika mau diintegrasikan dengan backend
     }),
-    [
-      state,
-      role,
-      filteredRooms,
-      login,
-      logout,
-      getKostById,
-      getOccupantById,
-      // getStaffByKostId,
-      fetchNewTenants,
-    ],
+    [state, role, login, logout]
   );
 
   return <AppContext.Provider value={values}>{children}</AppContext.Provider>;

@@ -5,7 +5,7 @@ import { House, Bed, HouseHeart, HousePlus, Zap, UserPlus2 } from "lucide-react"
 import { useManagerContext } from "../../../hook/useContext";
 import { useNavigate } from "react-router-dom";
 
-function ManagerDashboard() {
+function OwnerDashboard() {
   const { getKostData } = useManagerContext();
   const [kostData, setKostData] = useState([]);
   const navigate = useNavigate();
@@ -42,28 +42,22 @@ function ManagerDashboard() {
       </div>
 
       {/* KPI Card */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <div className="lg:col-span-2 md:col-span-2">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           <KPICard
             title="Total Kost"
             value={totalKost}
             icon={<House className="text-blue-500" />}
           />
-        </div>
-        <div className="lg:col-span-1">
           <KPICard
             title="Total Kamar"
             value={totalRooms}
             icon={<Bed className="text-purple-500" />}
           />
-        </div>
-        <div className="lg:col-span-1">
           <KPICard
             title="Kamar Terisi"
             value={occupiedRooms}
             icon={<HouseHeart className="text-green-500" />}
           />
-        </div>
       </div>
 
     {/* CTA Links */}
@@ -77,6 +71,7 @@ function ManagerDashboard() {
 
         <div className="flex flex-col gap-3 ">
           <button
+          onClick={()=>navigate("/dashboard/manager/kost-form")}
             className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg transition-all shadow-md group text-sm"
           >
             <HousePlus
@@ -101,4 +96,4 @@ function ManagerDashboard() {
   );
 }
 
-export default ManagerDashboard;
+export default OwnerDashboard;

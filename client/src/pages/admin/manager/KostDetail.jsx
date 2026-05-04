@@ -6,7 +6,7 @@ import { MapPin, User, Trash2, ArrowLeft, Bed, House } from "lucide-react";
 function KostDetail() {
   const { kostId } = useParams();
   const navigate = useNavigate();
-  const { getKostById, deleteKost } = useManagerContext();
+  const { getKostById, deleteKost, editKost } = useManagerContext();
   const [kostDetail, setKostDetail] = useState(null);
 
   const fetchKostDetail = useCallback(async () => {
@@ -78,7 +78,7 @@ function KostDetail() {
                   <Trash2 size={16} /> Hapus Kost
                 </button>
                 <button
-                  onClick={handleDelete}
+                  onClick={()=>navigate(`/dashboard/manager/edit-kost/${kostId}`)}
                   className="flex items-center bg-yellow-50 text-yellow-600 gap-2 hover:bg-yellow-600 hover:text-white px-4 py-2 rounded-2xl transition-all duration-300 font-bold text-sm border border-yellow-100"
                 >
                   <Trash2 size={16} /> Edit Kost

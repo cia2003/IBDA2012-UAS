@@ -1,4 +1,4 @@
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import Table from "../../../components/ui/Table";
 import { useAppContext, useStaffContext } from "../../../hook/useContext";
 import {
@@ -15,16 +15,13 @@ import { useNavigate, useParams } from "react-router-dom";
 
 function TenantList() {
   const { staffId } = useParams();
-  const { rooms } = useAppContext();
-  const { deleteTenant } = useStaffContext();
+  const { deleteTenant, getKostDataByStaffId, managedKost } = useStaffContext();
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedRoom, setSelectedRoom] = useState("All");
   const navigate = useNavigate();
 
-  const currentKost = rooms[0];
-
-  const allOccupants = currentKost?.rooms
-    ? currentKost.rooms
+  const allOccupants = managedKost?.rooms
+    ? managedKost.rooms
         .filter(
           (room) => room.status === "Occupied" && Array.isArray(room.resident),
         )
@@ -156,6 +153,14 @@ function TenantList() {
       ),
     },
   ];
+
+  const fetchData = async()=>{
+    await getKostDataByStaffId(staffId)
+  }
+
+  useEffect(()=>{
+    fetchData()
+  }, [fetchData, staffId])
 
   return (
     <div className="space-y-4 sm:space-y-6">

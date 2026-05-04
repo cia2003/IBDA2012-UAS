@@ -1,6 +1,6 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Table from "../../../components/ui/Table";
-import { useAppContext } from "../../../hook/useContext";
+import { useAppContext, useStaffContext } from "../../../hook/useContext";
 import {
   Edit3,
   Trash2,
@@ -12,14 +12,13 @@ import { useNavigate, useParams } from "react-router-dom";
 import toast from "react-hot-toast";
 
 function RoomsDataDetails() {
-  const { rooms } = useAppContext();
+  const { getKostDataByStaffId, managedKost } = useStaffContext();
   const { staffId } = useParams();
   const [filterStatus, setFilterStatus] = useState("All");
   const [sortBy, setSortBy] = useState("roomNumber");
   const navigate = useNavigate();
 
-  const currentKost = rooms[0];
-  const roomsList = currentKost?.rooms || [];
+  const roomsList = managedKost?.rooms || [];
 
   const filteredData = roomsList
     .filter((room) => {
@@ -117,6 +116,20 @@ function RoomsDataDetails() {
     },
   ];
 
+  const fetchData = async () => {
+    await getKostDataByStaffId(staffId);
+  };
+
+  useEffect(() => {
+    fetchData();
+  }, [staffId, fetchData]);
+
+  // useEffect(()=>{
+  //   if(managedKost){
+  //     console.log(managedKost)
+  //   }
+  // }, [managedKost])
+
   return (
     <div className="space-y-4 sm:space-y-6">
       {/* Header Section */}
@@ -130,7 +143,7 @@ function RoomsDataDetails() {
               Daftar Kamar
             </h1>
             <p className="text-xs sm:text-sm text-gray-400 mt-1 font-medium">
-              {currentKost?.name || "Memuat lokasi..."}
+              {managedKost?.name || "Memuat lokasi..."}
             </p>
           </div>
         </div>

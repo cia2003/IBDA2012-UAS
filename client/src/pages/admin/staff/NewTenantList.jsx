@@ -1,5 +1,5 @@
 import { UserCheck, Check, X, Phone, Search, ChevronDown } from "lucide-react";
-import { useAppContext } from "../../../hook/useContext";
+import { useStaffContext } from "../../../hook/useContext";
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import Table from "../../../components/ui/Table";
@@ -7,23 +7,14 @@ import toast from "react-hot-toast";
 
 function NewTenantList() {
   const { staffId } = useParams();
-  const { fetchNewTenants, rooms } = useAppContext();
+  const { getNewTenantList, newTenantList, getKostDataByStaffId, managedKost } =
+    useStaffContext();
   const [searchNewTenant, setSearchNewTenant] = useState("");
   const [selectedFilter, setSelectedFilter] = useState("All"); // Default ke "All"
-  const [tenants, setTenants] = useState([]);
 
-  const currentKost = rooms[0];
-  const kostId = currentKost?.id;
+  const kostId = managedKost?.id;
 
-  useEffect(() => {
-    if (kostId) {
-      const data = fetchNewTenants(kostId);
-      setTenants(data || []);
-    } else {
-    }
-  }, [kostId, fetchNewTenants]);
-
-  const filteredTenants = tenants.filter((t) => {
+  const filteredTenants = newTenantList.filter((t) => {
     const matchesSearch = t.name
       .toLowerCase()
       .includes(searchNewTenant.toLowerCase());
@@ -76,11 +67,17 @@ function NewTenantList() {
         </div>
       ),
       {
-        duration: Infinity,
+        duration: 5000,
         position: "top-center",
       },
     );
   };
+
+  useEffect(() => {
+    if (kostId) {
+      getNewTenantList(kostId);
+    }
+  }, [kostId, getNewTenantList]);
 
   const columns = [
     {
@@ -114,7 +111,7 @@ function NewTenantList() {
       accessor: "phoneNumber",
       cell: (val) => (
         <div className="flex items-center gap-2 text-blue-600">
-         <span className="text-gray-600 font-medium">{val}</span>,
+          <span className="text-gray-600 font-medium">{val}</span>,
         </div>
       ),
     },
@@ -153,7 +150,7 @@ function NewTenantList() {
               Pendaftaran Masuk
             </h1>
             <p className="text-xs sm:text-sm text-gray-400 mt-1 font-medium italic">
-              {currentKost?.name || "Memuat Lokasi..."}
+              {managedKost?.name || "Memuat Lokasi..."}
             </p>
           </div>
         </div>
@@ -215,7 +212,8 @@ function NewTenantList() {
           </p>
           <p className="text-xs text-gray-500 font-bold">
             <span className="text-blue-600">{filteredTenants.length} </span>
-            <span className="text-gray-300 mx-1">/</span> {tenants.length} orang
+            <span className="text-gray-300 mx-1">/</span> {newTenantList.length}{" "}
+            orang
           </p>
         </div>
       </div>

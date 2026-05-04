@@ -1,5 +1,5 @@
 import { useNavigate, useParams } from "react-router-dom";
-import { useAppContext } from "../../../hook/useContext";
+import { useStaffContext } from "../../../hook/useContext";
 import KPICard from "../../../components/ui/KPICard";
 import {
   House,
@@ -9,16 +9,16 @@ import {
   Users,
   BedDouble,
   CircleCheckBig,
-  CalendarClock
+  CalendarClock,
 } from "lucide-react";
 import { useEffect, useMemo } from "react";
 
 export default function StaffDashboard() {
   const { staffId } = useParams();
-  const { staffData, rooms } = useAppContext();
+  const { managedKost, getKostDataByStaffId } = useStaffContext();
   const navigate = useNavigate();
 
-  const currentRooms = rooms[0];
+  const currentRooms = managedKost;
   const totalRooms = currentRooms?.rooms?.length || 0;
 
   const totalOccupants =
@@ -75,9 +75,15 @@ export default function StaffDashboard() {
       accessor: "contact",
     },
   ];
-  useEffect(()=>{
-    console.log(currentRooms)
-  },[])
+
+  useEffect(() => {
+    const fetchData = async () => {
+      if (staffId) {
+        await getKostDataByStaffId(staffId);
+      }
+    };
+    fetchData()
+  }, [getKostDataByStaffId, staffId]);
 
   return (
     <div className="space-y-6">
@@ -118,21 +124,21 @@ export default function StaffDashboard() {
 
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
         <div className="xl:col-span-2 bg-white p-6 rounded-3xl border border-gray-100 shadow-sm">
-            <div className="flex items-center gap-3 mb-6">
-              <CalendarClock className="text-red-500" />
-              <h2 className="text-xl font-bold text-gray-800">
-                Pengingat Jatuh Tempo
-              </h2>
-            </div>
-
-            {overdueResidents.length > 0 ? (
-              <Table columns={columns} data={overdueResidents} />
-            ) : (
-              <div className="text-center py-10 text-gray-400 italic">
-                Tidak ada penghuni yang terlambat membayar bulan ini.
-              </div>
-            )}
+          <div className="flex items-center gap-3 mb-6">
+            <CalendarClock className="text-red-500" />
+            <h2 className="text-xl font-bold text-gray-800">
+              Tenant yang terlambat membayar
+            </h2>
           </div>
+
+          {overdueResidents.length > 0 ? (
+            <Table columns={columns} data={overdueResidents} />
+          ) : (
+            <div className="text-center py-10 text-gray-400 italic">
+              Tidak ada penghuni yang terlambat membayar bulan ini.
+            </div>
+          )}
+        </div>
         {/* Quick Actions Section */}
         <div className="bg-blue-50 p-6 rounded-xl border border-blue-100 shadow-sm w-fit">
           <div className="flex items-center gap-3 mb-6">

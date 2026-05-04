@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useAppContext } from "../../hook/useContext";
+import { useAppContext, useStaffContext } from "../../hook/useContext";
 import { useParams, useNavigate } from "react-router-dom";
 import {
   User,
@@ -15,7 +15,7 @@ function OccupantForm() {
   const { occupantId } = useParams();
   const navigate = useNavigate();
   const today = new Date().toISOString().split("T")[0];
-  const { rooms, getOccupantById, occupantData } = useAppContext();
+  const { getTenantById } = useStaffContext();
 
   const [formData, setFormData] = useState({
     id: "",
@@ -26,12 +26,17 @@ function OccupantForm() {
     checkInDate: today,
   });
 
+  const fetchTenant = async () => {
+    const data = await getTenantById(occupantId);
+    if(data){
+      setFormData(data)
+    }
+  };
   useEffect(() => {
     if (occupantId) {
-      const data = getOccupantById(occupantId);
-      if (data) setFormData(data);
+      fetchTenant();
     }
-  }, [occupantId, occupantData]);
+  }, [occupantId, fetchTenant]);
 
   const handleSubmit = (e) => {
     e.preventDefault();
