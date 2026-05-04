@@ -58,7 +58,7 @@ class UserDetailView(APIView):
 
     def put(self, request, pk):
         user = self.get_object(pk)
-        serializer = UserSerializer(user, data=request.data)
+        serializer = UserSerializer(user, data=request.data, partial=True)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data)
@@ -115,7 +115,7 @@ class TenantDetailView(APIView):
 
     def put(self, request, pk):
         tenant = self.get_object(pk)
-        serializer = TenantSerializer(tenant, data=request.data)
+        serializer = TenantSerializer(tenant, data=request.data, partial=True)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data)
@@ -173,7 +173,7 @@ class EmployeeDetailView(APIView):
 
     def put(self, request, pk):
         employee = self.get_object(pk)
-        serializer = EmployeeSerializer(employee, data=request.data)
+        serializer = EmployeeSerializer(employee, data=request.data, partial=True)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data)
@@ -219,7 +219,7 @@ class GroupDetailView(APIView):
 
     def put(self, request, pk):
         group = self.get_object(pk)
-        serializer = GroupSerializer(group, data=request.data)
+        serializer = GroupSerializer(group, data=request.data, partial=True)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data)

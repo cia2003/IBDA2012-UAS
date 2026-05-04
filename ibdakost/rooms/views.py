@@ -53,7 +53,7 @@ class RoomDetailView(APIView):
 
     def put(self, request, pk):
         room = self.get_object(pk)
-        serializer = RoomSerializer(room, data=request.data)
+        serializer = RoomSerializer(room, data=request.data, partial=True)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data)
@@ -128,7 +128,7 @@ class RoomTypeDetailView(APIView):
 
     def put(self, request, pk):
         room_type = self.get_object(pk)
-        serializer = RoomTypeSerializer(room_type, data=request.data)
+        serializer = RoomTypeSerializer(room_type, data=request.data, partial=True)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data)
@@ -161,7 +161,7 @@ class FacilityDetailView(APIView):
 
     def put(self, request, pk):
         facility = self.get_object(pk)
-        serializer = FacilitySerializer(facility, data=request.data)
+        serializer = FacilitySerializer(facility, data=request.data, partial=True)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data)

@@ -3,7 +3,7 @@ from django.urls import reverse
 
 from rooms.models import Room, RoomType
 from kosts.models import Kost
-from api.models import User, Tenant, Staff
+from api.models import User
 from wishlists.models import Wishlist
 
 
@@ -41,7 +41,7 @@ class ModelTest(TestCase):
         )
         self.room_type = RoomType.objects.create(name='Tipe 1', size='2.5 m x 2.5 m', price=750000)
         self.room = Room.objects.create(kost=self.kost, room_type=self.room_type, name='Room 101', image=image)
-        self.user = User.objects.create_user(username='testuser', email='testuser@example.com', password='testpass')
+        self.user = User.objects.create_user(first_name='test', last_name='user', email='testuser@example.com', password='testpass')
     
     def test_wishlist_creation(self):
         wishlist = Wishlist.objects.create(
@@ -49,7 +49,7 @@ class ModelTest(TestCase):
             room = self.room, 
         )
 
-        self.assertEqual(wishlist.user.username, "testuser")
+        self.assertEqual(wishlist.user.first_name, "test")
 
 class SerializerTest(TestCase):
     def setUp(self):
@@ -62,7 +62,7 @@ class SerializerTest(TestCase):
         )
         self.room_type = RoomType.objects.create(name='Tipe 1', size='2.5 m x 2.5 m', price=750000)
         self.room = Room.objects.create(kost=self.kost, room_type=self.room_type, name='Room 101', image=image)
-        self.user = User.objects.create_user(username='testuser', email='testuser@example.com', password='testpass')
+        self.user = User.objects.create_user(first_name='test', last_name='user', email='testuser@example.com', password='testpass')
     
     def test_wishlist_serializer(self):
         wishlist_data = {
@@ -73,7 +73,7 @@ class SerializerTest(TestCase):
         serializer = WishlistSerializer(data=wishlist_data)
         self.assertTrue(serializer.is_valid(), serializer.errors)
         wishlist = serializer.save()
-        self.assertEqual(wishlist.user.username, "testuser")
+        self.assertEqual(wishlist.user.first_name, "test")
 
 class ViewTest(APITestCase):
     def setUp(self):
@@ -100,15 +100,12 @@ class ViewTest(APITestCase):
         )
 
         # user biasa
-        self.user = User.objects.create_user(
-            username='user',
-            email='user@gmail.com',
-            password='pass123'
-        )
+        self.user = User.objects.create_user(first_name='test', last_name='user', email='testuser@example.com', password='pass123')
 
         # staff/admin
         self.staff = User.objects.create_user(
-            username='staff',
+            first_name='staff',
+            last_name='test',
             email='staff@gmail.com',
             password='pass123',
         )
@@ -147,9 +144,6 @@ class ViewTest(APITestCase):
             user=self.user,
             room=self.room,
         )
-
-        # login sebagai staff
-        self.authenticate(self.staff)
 
         url = f'/wishlists/{wishlist.id}/'
 

@@ -3,7 +3,7 @@ from django.urls import reverse
 
 from rooms.models import Room, RoomType
 from kosts.models import Kost
-from api.models import User, Tenant, Staff
+from api.models import User, Tenant
 from leases.models import Lease
 
 
@@ -41,13 +41,12 @@ class ModelTest(TestCase):
         )
         self.room_type = RoomType.objects.create(name='Tipe 1', size='2.5 m x 2.5 m', price=750000)
         self.room = Room.objects.create(kost=self.kost, room_type=self.room_type, name='Room 101', image=image)
-        self.user = User.objects.create_user(username='testuser', email='testuser@example.com', password='testpass')
+        self.user = User.objects.create_user(first_name='test', last_name='user', email='testuser@example.com', password='testpass')
     
     def test_lease_creation(self):
         image = create_test_image()
         tenant = Tenant.objects.create(
             user=self.user,
-            full_name='John Doe',
             gender='male',
             phone_number='08123',
             occupation='Student',
@@ -63,7 +62,7 @@ class ModelTest(TestCase):
             end_date = "2025-10-31"
         )
 
-        self.assertEqual(lease.tenant.full_name, "John Doe")
+        self.assertEqual(lease.tenant.user.first_name, "test")
 
 class SerializerTest(TestCase):
     def setUp(self):
@@ -76,13 +75,12 @@ class SerializerTest(TestCase):
         )
         self.room_type = RoomType.objects.create(name='Tipe 1', size='2.5 m x 2.5 m', price=750000)
         self.room = Room.objects.create(kost=self.kost, room_type=self.room_type, name='Room 101', image=image)
-        self.user = User.objects.create_user(username='testuser', email='testuser@example.com', password='testpass')
+        self.user = User.objects.create_user(first_name='test', last_name="user", email='testuser@example.com', password='testpass')
     
     def test_lease_serializer(self):
         image = create_test_image()
         tenant = Tenant.objects.create(
             user=self.user,
-            full_name='John Doe',
             gender='male',
             phone_number='08123',
             occupation='Student',
@@ -101,13 +99,12 @@ class SerializerTest(TestCase):
         serializer = LeaseSerializer(data=lease_data)
         self.assertTrue(serializer.is_valid(), serializer.errors)
         lease = serializer.save()
-        self.assertEqual(lease.tenant.full_name, "John Doe")
+        self.assertEqual(lease.tenant.user.first_name, "test")
 
     def test_update_status_serializer(self):
         image = create_test_image()
         tenant = Tenant.objects.create(
             user=self.user,
-            full_name='John Doe',
             gender='male',
             phone_number='08123',
             occupation='Student',
@@ -164,14 +161,16 @@ class ViewTest(APITestCase):
 
         # user biasa
         self.user = User.objects.create_user(
-            username='user',
+            first_name='user',
+            last_name='test',
             email='user@gmail.com',
             password='pass123'
         )
 
         # staff/admin
         self.staff = User.objects.create_user(
-            username='staff',
+            first_name='staff',
+            last_name='test',
             email='staff@gmail.com',
             password='pass123',
         )
@@ -182,7 +181,6 @@ class ViewTest(APITestCase):
         # tenant
         self.tenant = Tenant.objects.create(
             user=self.user,
-            full_name='John Doe',
             gender='male',
             phone_number='08123',
             occupation='Student',

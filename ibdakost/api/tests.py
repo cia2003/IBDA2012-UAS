@@ -29,11 +29,15 @@ def create_test_image():
 # Create your tests here.
 class ModelTests(TestCase):
     def setUp(self):
-        self.user = User.objects.create_user(username='testuser', email='testuser@example.com', password='testpass')
+        self.user = User.objects.create_user(
+            first_name='test',
+            last_name='user', 
+            email='testuser@example.com', 
+            password='testpass')
 
     def test_user_creation(self):
         # Test creating a user
-        self.assertEqual(self.user.username, 'testuser')
+        self.assertEqual(self.user.first_name, 'test')
         self.assertEqual(self.user.email, 'testuser@example.com')
         self.assertTrue(self.user.check_password('testpass'))
         self.assertIsNotNone(self.user.id)
@@ -43,7 +47,6 @@ class ModelTests(TestCase):
         image = create_test_image()
         tenant = Tenant.objects.create(
             user=self.user,
-            full_name='John Doe',
             gender='male',
             phone_number='08123',
             occupation='Student',
@@ -53,12 +56,17 @@ class ModelTests(TestCase):
         )
 
         self.assertEqual(tenant.user, self.user)
-        self.assertEqual(tenant.full_name, 'John Doe')
+        self.assertEqual(tenant.user.first_name, 'test')
     
     def test_email_uniqueness(self):
         # Test that email must be unique
         with self.assertRaises(Exception):
-            User.objects.create_user(username='anotheruser', email='testuser@example.com', password='testpass')
+            User.objects.create_user(
+                first_name='another',
+                last_name='user', 
+                email='testuser@example.com', 
+                password='testpass'
+                )
     
     def test_user_role_admin(self):
         # Test that user role is set correctly
@@ -97,6 +105,7 @@ class ModelTests(TestCase):
                 description='Kost nyaman dan strategis',
                 image=create_test_image()
             ),
+            position="staff"
 
         )
 
@@ -136,7 +145,7 @@ class SerializerTests(TestCase):
         tenant = serializer.save()
         self.assertEqual(tenant.user.groups.filter(name='tenant').exists(), True)
 
-    def test_staff_serializer_create(self):
+    def test_employee_serializer_create(self):
         # Test staff serializer create method
         image_kost = create_test_image()
         assigned_kost = Kost.objects.create(
@@ -149,9 +158,11 @@ class SerializerTests(TestCase):
         staff_data = {
             'user': self.user.id,
             'kost': assigned_kost.id,
+            'phone_number':'08123',
+            'position': "staff"
         }
         serializer = EmployeeSerializer(data=staff_data)
-        self.assertTrue(serializer.is_valid())
+        self.assertTrue(serializer.is_valid(), serializer.errors)
         staff = serializer.save()
         self.assertEqual(staff.user.groups.filter(name='staff').exists(), True)
 
@@ -166,7 +177,8 @@ class ViewTests(APITestCase):
         )
 
         self.admin = User.objects.create_user(
-            username='admin',
+            first_name='admin',
+            last_name='test',
             email = 'admin@test.com',
             password='adminpass'
         )

@@ -160,14 +160,16 @@ class EmployeeSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         user = validated_data.pop('user')
+        position = validated_data.get('position')
 
-        if validated_data['position'] == 'staff':
-            employee_group, _ = Group.objects.get_or_create(name='employee')
-            user.groups.add(employee_group)
-        
-        if validated_data['position'] == 'manager':
-            employee_group, _ = Group.objects.get_or_create(name='admin')
-            user.groups.add(employee_group)
+        if position:
+            if validated_data['position'] == 'staff':
+                employee_group, _ = Group.objects.get_or_create(name='staff')
+                user.groups.add(employee_group)
+            
+            if validated_data['position'] == 'manager':
+                employee_group, _ = Group.objects.get_or_create(name='admin')
+                user.groups.add(employee_group)
 
         employee = Employee.objects.create(user=user, **validated_data)
         return employee

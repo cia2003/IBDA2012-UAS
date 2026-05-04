@@ -69,7 +69,7 @@ class Role(models.TextChoices):
 
 class Employee(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, primary_key=True)
-    kost = models.ForeignKey(Kost, on_delete=models.CASCADE)
+    kost = models.ForeignKey(Kost, on_delete=models.SET_NULL, null=True, blank=True)
     position = models.CharField(
         max_length=20, 
         choices=Role.choices, 

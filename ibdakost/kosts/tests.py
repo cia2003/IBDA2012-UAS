@@ -83,13 +83,15 @@ class KostViewTests(APITestCase):
         )
 
         self.admin = User.objects.create_user(
-            username='admin',
+            first_name='admin',
+            last_name='test',
             email = 'admin@test.com',
             password='adminpass'
         )
 
         self.user = User.objects.create_user(
-            username='user',
+            first_name='user',
+            last_name='test',
             email = 'user@test.com',
             password='userpass'
         )
