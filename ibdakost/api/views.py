@@ -6,8 +6,8 @@ from django.contrib.auth.models import Group
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework.permissions import IsAuthenticated
 from api.permissions import IsAdminOrSuperUser, IsOwnerOrAdminOrSuperUser
-from .models import User, Tenant, Staff
-from .serializers import EmailTokenObtainPairSerializer, TenantSerializer, UserSerializer, StaffSerializer, GroupSerializer
+from .models import User, Tenant, Employee
+from .serializers import EmailTokenObtainPairSerializer, TenantSerializer, UserSerializer, EmployeeSerializer, GroupSerializer
 from django.http import Http404
 from rest_framework_simplejwt.views import TokenObtainPairView
 
@@ -21,9 +21,10 @@ class UserListCreateView(APIView):
         if self.request.method == 'GET':
             return [IsAuthenticated(), IsAdminOrSuperUser()]
         return []
+    
 
     def get(self, request):
-        users = User.objects.all().order_by('username')[:10]
+        users = User.objects.all().order_by('first_name')[:10]
         serializer = UserSerializer(users, many=True)
         return Response({'users': serializer.data})
 
@@ -68,7 +69,7 @@ class UserDetailView(APIView):
         user.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
-# Tenant and Staff views are omitted for brevity. They should follow a similar pattern to User views, with appropriate permissions and serializers.
+# Tenant and employee views are omitted for brevity. They should follow a similar pattern to User views, with appropriate permissions and serializers.
 class TenantListCreateView(APIView):
     # Implementation similar to UserListCreateView with appropriate permissions and serializer
     authentication_classes = [JWTAuthentication]
@@ -125,52 +126,62 @@ class TenantDetailView(APIView):
         tenant.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
-class StaffListCreateView(APIView):
+class EmployeeListCreateView(APIView):
     # Implementation similar to UserListCreateView with appropriate permissions and serializer
     authentication_classes = [JWTAuthentication]
     permission_classes = [IsAuthenticated, IsAdminOrSuperUser]
 
     def get(self, request):
-        staffs = Staff.objects.all().order_by('created_at')[:10]
-        serializer = StaffSerializer(staffs, many=True)
-        return Response({'staff': serializer.data})
+        employees = Employee.objects.all().order_by('created_at')[:10]
+        role = request.query_params.get('role')
+
+        if role:
+            employees = employees.filter(employee__position=role)
+
+        serializer = EmployeeSerializer(employees, many=True)
+        return Response({'employee': serializer.data})
 
     def post(self, request):
-        serializer = StaffSerializer(data=request.data)
+        serializer = EmployeeSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-class StaffDetailView(APIView):
+class EmployeeDetailView(APIView):
     # Implementation similar to UserDetailView with appropriate permissions and serializer
     authentication_classes = [JWTAuthentication]
     permission_classes = [IsAuthenticated, IsAdminOrSuperUser]
 
     def get_object(self, pk):
         try:
-            staff = Staff.objects.get(pk=pk)
-            self.check_object_permissions(self.request, staff)
-            return staff
-        except Staff.DoesNotExist:
+            employee = Employee.objects.get(pk=pk)
+            self.check_object_permissions(self.request, employee)
+            return employee
+        except employee.DoesNotExist:
             raise Http404
 
     def get(self, request, pk):
-        staff = self.get_object(pk)
-        serializer = StaffSerializer(staff)
+        employee = self.get_object(pk)
+        role = request.query_params.get('role')
+
+        if role:
+            employees = employees.filter(employee__position=role)
+            
+        serializer = EmployeeSerializer(employee)
         return Response(serializer.data)
 
     def put(self, request, pk):
-        staff = self.get_object(pk)
-        serializer = StaffSerializer(staff, data=request.data)
+        employee = self.get_object(pk)
+        serializer = EmployeeSerializer(employee, data=request.data)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     def delete(self, request, pk):
-        staff = self.get_object(pk)
-        staff.delete()
+        employee = self.get_object(pk)
+        employee.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 class GroupListCreateView(APIView):

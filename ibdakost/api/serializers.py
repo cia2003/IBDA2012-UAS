@@ -2,7 +2,7 @@ from rest_framework import serializers
 from rest_framework.reverse import reverse
 from django.contrib.auth.hashers import make_password
 from django.contrib.auth.models import Group
-from api.models import Tenant, User, Staff
+from api.models import Tenant, User, Employee
 from kosts.models import Kost
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
  
@@ -23,38 +23,35 @@ class EmailTokenObtainPairSerializer(TokenObtainPairSerializer):
         if not user.is_active:
             raise serializers.ValidationError('User account is disabled.')
 
-        data = super().get_token(user)
+        data = self.get_token(user)
 
         return {
             'refresh': str(data),
             'access': str(data.access_token),
             'user': {
                 'id': user.id,
-                'username': user.username,
+                'first_name': user.first_name,
+                'last_name': user.last_name,
                 'email': user.email,
                 'groups': [group.name for group in user.groups.all()]
             }
         }
 
-class UserSerializer(serializers.HyperlinkedModelSerializer):
+class UserSerializer(serializers.ModelSerializer):
     _links = serializers.SerializerMethodField()
  
     class Meta:
         model = User
-        fields = ['id', 'username', 'email', 'password', 'created_at', 'updated_at', 'status', 'is_active', '_links']
+        fields = ['id', 'first_name', 'last_name', 'email', 'password', 'is_active', 'created_at', 'updated_at', '_links']
         extra_kwargs = {
-            'password': {'write_only': True}, 
-            'is_active': {'read_only': True}
+            'password': {'write_only': True}
         }
- 
+
     def create(self, validated_data):
         """
         Override create method to hash password and create user.
         """
         validated_data['email'] = validated_data['email'].lower()
-
-        status = validated_data.get('status', 'active')
-        validated_data['is_active'] = status not in ['suspended', 'deleted']
 
         password = validated_data.pop('password')
         validated_data['password'] = make_password(password)
@@ -66,10 +63,6 @@ class UserSerializer(serializers.HyperlinkedModelSerializer):
     def update(self, instance, validated_data):
         if 'email' in validated_data:
             validated_data['email'] = validated_data['email'].lower()
-
-        if 'status' in validated_data:
-            status = validated_data['status']
-            instance.is_active = status not in ['suspended', 'deleted']
 
         for attr, value in validated_data.items():
             setattr(instance, attr, value)
@@ -116,9 +109,9 @@ class TenantSerializer(serializers.ModelSerializer):
     class Meta:
         model = Tenant
         fields = [
-            'user', 'full_name', 'gender', 'phone_number', 'occupation', 'institution', 'identity_type', 'identity_card', '_links'
+            'user', 'gender', 'phone_number', 'occupation', 'institution', 'identity_type', 'identity_card', 'created_at', 'updated_at', '_links'
         ]
-    
+
     def create(self, validated_data):
         user = validated_data.pop('user')
 
@@ -139,65 +132,70 @@ class TenantSerializer(serializers.ModelSerializer):
             }, 
             {
                 "rel": "self",
-                "href": reverse('tenant-detail', kwargs={'id': obj.id}, request=request), 
+                "href": reverse('tenant-detail', kwargs={'pk': obj.pk}, request=request), 
                 "action": "GET", 
                 "types": ["application/json"]
             }, 
             {
                 "rel": "self",
-                "href": reverse('tenant-detail', kwargs={'id': obj.id}, request=request), 
+                "href": reverse('tenant-detail', kwargs={'pk': obj.pk}, request=request), 
                 "action": "PUT", 
                 "types": ["application/json"]
             },
             {
                 "rel": "self",
-                "href": reverse('tenant-detail', kwargs={'id': obj.id}, request=request), 
+                "href": reverse('tenant-detail', kwargs={'pk': obj.pk}, request=request), 
                 "action": "DELETE", 
                 "types": ["application/json"]
             }
         ]
     
-class StaffSerializer(serializers.ModelSerializer):
+class EmployeeSerializer(serializers.ModelSerializer):
     _links = serializers.SerializerMethodField()
     user = serializers.PrimaryKeyRelatedField(queryset=User.objects.all())
 
     class Meta:
-        model = Staff
-        fields = ['user', 'full_name', 'kost', '_links']
+        model = Employee
+        fields = ['user', 'kost', 'position', 'phone_number', 'created_at', 'updated_at', '_links']
 
     def create(self, validated_data):
         user = validated_data.pop('user')
 
-        staff_group, _ = Group.objects.get_or_create(name='staff')
-        user.groups.add(staff_group)
+        if validated_data['position'] == 'staff':
+            employee_group, _ = Group.objects.get_or_create(name='employee')
+            user.groups.add(employee_group)
+        
+        if validated_data['position'] == 'manager':
+            employee_group, _ = Group.objects.get_or_create(name='admin')
+            user.groups.add(employee_group)
 
-        staff = Staff.objects.create(user=user, **validated_data)
-        return staff
+        employee = Employee.objects.create(user=user, **validated_data)
+        return employee
 
     def get__links(self, obj):
         request = self.context.get('request')
         return [
             {
                 "rel": "self",
-                "href": reverse('staff-list', request=request), 
+                "href": reverse('employee-list', request=request), 
                 "action": "POST", 
                 "types": ["application/json"]
             }, 
             {
                 "rel": "self",
-                "href": reverse('staff-detail', kwargs={'id': obj.id}, request=request), 
+                "href": reverse('employee-detail', kwargs={'pk': obj.pk}, request=request), 
                 "action": "GET", 
                 "types": ["application/json"]
             }, 
             {
                 "rel": "self",
-                "href": reverse('staff-detail', kwargs={'id': obj.id}, request=request), 
+                "href": reverse('employee-detail', kwargs={'pk': obj.pk}, request=request), 
                 "action": "PUT", 
                 "types": ["application/json"]
             },
             {
                 "rel": "self",
-                "href": reverse('staff-detail', kwargs={'id': obj.id}, request=request), 
+                "href": reverse('employee-detail', kwargs={'pk': obj.pk}, request=request), 
                 "action": "DELETE", 
                 "types": ["application/json"]
             }
