@@ -10,12 +10,15 @@ import {
   BedDouble,
   CircleCheckBig,
   CalendarClock,
+  BellRing,
 } from "lucide-react";
 import { useEffect, useMemo } from "react";
 
 export default function StaffDashboard() {
   const { staffId } = useParams();
-  const { managedKost, getKostDataByStaffId } = useStaffContext();
+  const { managedKost, getKostDataByStaffId, 
+    // notifTenantsInvoice 
+  } = useStaffContext();
   const navigate = useNavigate();
 
   const currentRooms = managedKost;
@@ -60,6 +63,10 @@ export default function StaffDashboard() {
     return overdueList;
   }, [currentRooms]);
 
+  // const handleInvoiceNotif = async()=>{
+  //   await notifTenantsInvoice()
+  // }
+
   const columns = [
     { header: "Nama Penghuni", accessor: "name" },
     { header: "No. Kamar", accessor: "roomNumber" },
@@ -82,7 +89,7 @@ export default function StaffDashboard() {
         await getKostDataByStaffId(staffId);
       }
     };
-    fetchData()
+    fetchData();
   }, [getKostDataByStaffId, staffId]);
 
   return (
@@ -148,7 +155,8 @@ export default function StaffDashboard() {
             <h3 className="font-bold text-lg text-gray-800">Quick Actions</h3>
           </div>
 
-          <div className="flex flex-col gap-3 ">
+          <div className="flex flex-row gap-3">
+            <div className="flex flex-col gap-3 ">
             <button
               onClick={() => navigate(`/dashboard/${staffId}/tambah-kamar`)}
               className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg transition-all shadow-md group text-sm"
@@ -159,6 +167,15 @@ export default function StaffDashboard() {
               />
               Tambah Kamar Baru
             </button>
+            <button className="flex items-center gap-2 bg-gray-600 hover:bg-gray-700 text-black hover:text-white font-semibold py-2 px-4 rounded-lg transition-all shadow-md group text-sm">
+              <BellRing
+                // onClick={handleInvoiceNotif}
+                size={18}
+                className="group-hover:scale-110 transition-transform"
+              />
+              Tagih Pembayaran
+            </button>
+          </div>
           </div>
         </div>
       </div>

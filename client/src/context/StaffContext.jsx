@@ -155,6 +155,20 @@ export const StaffContextProvider = ({ children }) => {
     }
   }, []);
 
+  // -- NOTIFIKASI TAGIHAN PEMBAYARAN
+  // const notifTenantsInvoice = useCallback(async()=>{
+  //   try {
+  //     const {data} = await api.post('tagih-pembayaran', staffData.idKost) // Dianggap bahwa login sukse mengembalikan data staff berupa id kost tempat ia bekerja
+  //     if(data){
+  //       toast.success("Notifikasi tagihan pembayaran berhasil dikirimkan")
+  //     }else{
+  //       toast.error("Tidak ada tenant yang memiliki tagihan pembayaran")
+  //     }
+  //   } catch (error) {
+  //     console.error(error.message)
+  //   }
+  // })
+
   // OTOMATIS FETCH DATA SAAT STAFF LOGIN
   useEffect(() => {
     if (staffData && staffData.role === "staff") {
@@ -183,6 +197,7 @@ export const StaffContextProvider = ({ children }) => {
       getNewTenantList,
       getTenantById,
       addRoom,
+      // notifTenantsInvoice
     }),
     [newTenantList, managedKost, tenantData, deleteTenant, getKostDataByStaffId, editTenant, updateRoomStatus, acceptTenant, rejectTenant, getNewTenantList, getTenantById, addRoom]
   );
