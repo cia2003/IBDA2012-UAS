@@ -1,15 +1,15 @@
 import { useState } from "react";
-import { useAppContext } from "../hook/useContext";
+import { useAppContext } from "../../hook/useContext";
 
 const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const {login} = useAppContext()
+  const {adminLogin} = useAppContext()
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-        await login(email, password); 
+        await adminLogin(email, password); 
     } catch (error) {
         console.log(error);
     }

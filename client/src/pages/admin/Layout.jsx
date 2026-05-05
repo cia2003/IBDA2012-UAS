@@ -11,7 +11,7 @@ import {
 } from "lucide-react";
 
 const Layout = () => {
-  const { staffData, logout, role } = useAppContext();
+  const { staffData, adminLogout, role } = useAppContext();
   const staffLinks = [
     {
       id: 1,
@@ -66,7 +66,7 @@ const Layout = () => {
             </span>
           </p>
           <button
-            onClick={logout}
+            onClick={adminLogout}
             className="border border-red-200 text-red-500 hover:bg-red-50 transition-colors rounded-full text-xs px-4 py-1.5"
           >
             Logout

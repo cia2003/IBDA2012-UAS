@@ -5,7 +5,7 @@ import { useAppContext } from "./hook/useContext";
 import RoomForm from "./components/ui/RoomForm";
 import OccupantForm from "./components/ui/OccupantForm";
 
-import Login from "./pages/Login";
+import Login from "./pages/admin/Login";
 import Layout from "./pages/admin/Layout";
 import StaffDashboard from "./pages/admin/staff/StaffDashboard";
 import RoomsDataDetails from "./pages/admin/staff/RoomsDataDetails";
@@ -23,9 +23,9 @@ import { Toaster } from "react-hot-toast";
 import KostForm from "./components/ui/KostForm";
 
 const ProtectedRoute = ({ children, allowedRole }) => {
-  const { isLoggedIn, role } = useAppContext();
+  const { adminIsLoggedIn, role } = useAppContext();
 
-  if (!isLoggedIn) return <Navigate to="/login" replace />;
+  if (!adminIsLoggedIn) return <Navigate to="/login" replace />;
   if (allowedRole && role !== allowedRole)
     return <Navigate to="/login" replace />;
 
@@ -33,9 +33,9 @@ const ProtectedRoute = ({ children, allowedRole }) => {
 };
 
 export default function App() {
-  const { isLoggedIn, staffData, role } = useAppContext();
+  const { adminIsLoggedIn, staffData, role } = useAppContext();
 
-  const defaultRedirect = !isLoggedIn
+  const defaultRedirect = !adminIsLoggedIn
     ? "/login"
     : role === "manager"
       ? "/dashboard/manager"
@@ -48,7 +48,7 @@ export default function App() {
         <Route
           path="/login"
           element={
-            isLoggedIn ? <Navigate to={defaultRedirect} replace /> : <Login />
+            adminIsLoggedIn ? <Navigate to={defaultRedirect} replace /> : <Login />
           }
         />
         <Route
