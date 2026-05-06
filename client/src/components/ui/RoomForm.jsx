@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Upload, ChevronDown, Save } from "lucide-react";
+import { Upload, ChevronDown, Save, ArrowLeft } from "lucide-react";
 import { useStaffContext } from "../../hook/useContext";
 import { useNavigate } from "react-router-dom";
 
@@ -10,8 +10,8 @@ const RoomForm = () => {
     category: "",
     price: "",
   });
-  const {addRoom} = useStaffContext()
-  const navigate = useNavigate()
+  const { addRoom } = useStaffContext();
+  const navigate = useNavigate();
 
   const categories = [
     { name: "Tipe 1" },
@@ -38,14 +38,22 @@ const RoomForm = () => {
     }
   };
 
-  const handleSubmit = async(e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    const data = await addRoom(roomForm)
-    navigate(-1)
+    const data = await addRoom(roomForm);
+    navigate(-1);
   };
 
   return (
     <div className="space-y-6 max-w-4xl mx-auto p-4">
+      <div className="flex justify-between items-center">
+        <button
+          onClick={() => navigate(-1)}
+          className="flex items-center gap-2 text-gray-500 hover:text-gray-800 transition-colors font-medium text-sm"
+        >
+          <ArrowLeft size={18} /> Kembali
+        </button>
+      </div>
       {/* Header Section */}
       <div className="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm flex items-center justify-between">
         <div className="flex items-center gap-3">
@@ -53,7 +61,9 @@ const RoomForm = () => {
             <Upload size={24} />
           </div>
           <div>
-            <h1 className="text-xl font-black text-gray-900">Tambah Kamar Baru</h1>
+            <h1 className="text-xl font-black text-gray-900">
+              Tambah Kamar Baru
+            </h1>
             <p className="text-xs text-gray-400 font-medium">
               Lengkapi detail informasi unit kamar baru
             </p>
@@ -62,20 +72,19 @@ const RoomForm = () => {
       </div>
 
       {/* Form Card */}
-      <form 
+      <form
         onSubmit={handleSubmit}
         className="bg-white rounded-[2rem] shadow-sm border border-gray-100 overflow-hidden"
       >
         <div className="p-8 md:p-12 space-y-8">
-          
           {/* Upload Section */}
           <div className="space-y-3">
             <label className="text-sm font-bold text-gray-700 uppercase tracking-wider">
               Foto Kamar
             </label>
             <div className="flex items-center gap-4">
-              <label 
-                htmlFor="image-upload" 
+              <label
+                htmlFor="image-upload"
                 className="cursor-pointer group relative w-28 h-28 rounded-2xl border-2 border-dashed border-gray-200 flex items-center justify-center hover:border-blue-400 transition-all overflow-hidden bg-gray-50"
               >
                 <input
@@ -86,9 +95,9 @@ const RoomForm = () => {
                   onChange={handleImageChange}
                 />
                 {roomForm.image ? (
-                  <img 
-                    src={URL.createObjectURL(roomForm.image)} 
-                    alt="Preview" 
+                  <img
+                    src={URL.createObjectURL(roomForm.image)}
+                    alt="Preview"
                     className="w-full h-full object-cover"
                   />
                 ) : (
@@ -112,7 +121,10 @@ const RoomForm = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             {/* No Kamar */}
             <div className="flex flex-col gap-2">
-              <label className="text-sm font-bold text-gray-700 uppercase tracking-wider" htmlFor="roomNumber">
+              <label
+                className="text-sm font-bold text-gray-700 uppercase tracking-wider"
+                htmlFor="roomNumber"
+              >
                 Nomor Kamar
               </label>
               <input
@@ -128,7 +140,10 @@ const RoomForm = () => {
 
             {/* Tipe Kamar */}
             <div className="flex flex-col gap-2">
-              <label className="text-sm font-bold text-gray-700 uppercase tracking-wider" htmlFor="category">
+              <label
+                className="text-sm font-bold text-gray-700 uppercase tracking-wider"
+                htmlFor="category"
+              >
                 Tipe Kamar
               </label>
               <div className="relative">
@@ -156,7 +171,10 @@ const RoomForm = () => {
 
           {/* Harga */}
           <div className="md:w-1/2 flex flex-col gap-2">
-            <label className="text-sm font-bold text-gray-700 uppercase tracking-wider" htmlFor="price">
+            <label
+              className="text-sm font-bold text-gray-700 uppercase tracking-wider"
+              htmlFor="price"
+            >
               Harga Sewa / Bulan
             </label>
             <div className="relative">
@@ -178,7 +196,7 @@ const RoomForm = () => {
 
         {/* Footer Action */}
         <div className="bg-gray-50 p-8 border-t border-gray-100 flex justify-end">
-          <button 
+          <button
             type="submit"
             className="flex items-center gap-3 px-12 py-4 bg-blue-600 text-white font-black rounded-2xl hover:bg-blue-700 hover:shadow-xl hover:shadow-blue-100 transition-all active:scale-95 uppercase tracking-widest text-xs"
           >

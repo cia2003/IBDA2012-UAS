@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Upload, Save, Edit3 } from "lucide-react";
+import { Upload, Save, Edit3, ArrowLeft } from "lucide-react";
 import { useManagerContext } from "../../hook/useContext";
 import { useNavigate, useParams } from "react-router-dom";
 import toast from "react-hot-toast";
@@ -77,6 +77,14 @@ const KostForm = () => {
 
   return (
     <div className="space-y-6 max-w-4xl">
+      <div className="flex justify-between items-center">
+        <button
+          onClick={() => navigate(-1)}
+          className="flex items-center gap-2 text-gray-500 hover:text-gray-800 transition-colors font-medium text-sm"
+        >
+          <ArrowLeft size={18} /> Kembali
+        </button>
+      </div>
       {/* Header */}
       <div className="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm flex items-center justify-between">
         <div className="flex items-center gap-3">
