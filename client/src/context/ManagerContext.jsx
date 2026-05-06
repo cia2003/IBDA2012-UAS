@@ -36,7 +36,7 @@ export const ManagerContextProvider = ({ children }) => {
   const getKostData = useCallback(async () => {
     try {
       // -- MODE BACKEND --
-      // const response = await api.get('/kost-data');
+      // const response = await api.get('/kost');
       // if(response.data) {
       //   setInitialKostData(response.data);
       //   return response.data;
