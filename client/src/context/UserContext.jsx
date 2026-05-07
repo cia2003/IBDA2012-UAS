@@ -8,12 +8,14 @@ import {
 import api from "../api/api";
 import { AppContext } from "./AppContext";
 import toast from "react-hot-toast"; 
+import { useNavigate } from "react-router-dom";
 
 export const UserContext = createContext();
 
 export const UserContextProvider = ({ children }) => {
   const [wishlist, setWishlist] = useState([]);
   const { userData } = useContext(AppContext);
+  const navigate = useNavigate()
 
   const addToWishlist = useCallback(async (roomId) => {
     if (!userData?.id) {
@@ -51,12 +53,31 @@ export const UserContextProvider = ({ children }) => {
     }
   }, [userData]);
 
+  // Mengirimkan data registrasi untuk sewa kos (Bukan resgistrasi awal user)
+  const registrationForm = useCallback(async({formData})=>{
+    try {
+      const {data} = await api.post('/sewa-kost', {
+        user_id: userData.id,
+        name: formData.name,
+        room: formData.room,
+        check_in: formData.date
+      })
+      if(data){
+        toast.success("Pengajuan sewa kost berhasil dikirimkan")
+        Navigate('/')
+      }
+    } catch (error) {
+      console.error(error.message)
+    }
+  }, [navigate, userData])
+
   const value = useMemo(() => ({
     wishlist,
     addToWishlist,
     getUserWishlist,
-    setWishlist
-  }), [wishlist, addToWishlist, getUserWishlist]);
+    setWishlist,
+    registrationForm
+  }), [wishlist, addToWishlist, getUserWishlist, registrationForm]);
 
   return <UserContext.Provider value={value}>{children}</UserContext.Provider>;
 };
