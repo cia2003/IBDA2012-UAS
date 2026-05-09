@@ -1,3 +1,7 @@
+import kost1 from './kost1.jpg'
+import kost2 from './kost2.jpg'
+import kost3 from './kost3.jpg'
+
 // Definisi Role
 export const ROLES = {
   MANAGER: "manager",
@@ -82,6 +86,7 @@ export const staff = [
 export const kostData = [
   {
     id: "K01",
+    img: kost1,
     name: "IBDA Kost A",
     address: "Jl. Merdeka No. 1",
     rooms: [
@@ -113,6 +118,7 @@ export const kostData = [
   {
     id: "K02",
     name: "IBDA Kost B",
+    img: kost2,
     address: "Jl. Sudirman No. 12",
     rooms: [
       {
@@ -137,11 +143,26 @@ export const kostData = [
           },
         ],
       },
+      {
+        id: "B03",
+        roomNumber: "203",
+        ...ROOM_TYPES.TIPE_2,
+        status: "Available",
+        resident: null,
+      },
+      {
+        id: "B04",
+        roomNumber: "203",
+        ...ROOM_TYPES.TIPE_2,
+        status: "Available",
+        resident: null,
+      },
     ],
     staffId: 3,
   },
   {
     id: "K03",
+    img: kost3,
     name: "IBDA Kost C",
     address: "Jl. Thamrin No. 5",
     rooms: [
