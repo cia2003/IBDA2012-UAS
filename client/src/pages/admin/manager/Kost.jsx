@@ -10,7 +10,7 @@ function Kost() {
   const navigate = useNavigate();
 
   const handleKostDetail = (id)=>{
-    navigate(`/dashboard/manager/kost-detail/${id}`)
+    navigate(`/admin/dashboard/manager/kost-detail/${id}`)
   }
 
   useEffect(() => {
@@ -71,7 +71,7 @@ function Kost() {
           </div>
         </div>
         <div className="shrink-0">
-          <button onClick={()=>navigate("/dashboard/manager/kost-form")} className="w-full sm:w-auto flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-2xl transition-all shadow-md active:scale-95 group text-sm">
+          <button onClick={()=>navigate("/admin/dashboard/manager/kost-form")} className="w-full sm:w-auto flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-2xl transition-all shadow-md active:scale-95 group text-sm">
             <HousePlus
               size={20}
               className="group-hover:rotate-12 transition-transform"

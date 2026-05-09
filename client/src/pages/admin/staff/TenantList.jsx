@@ -47,7 +47,7 @@ function TenantList() {
   ].sort();
 
   const handleEdit = (item) => {
-    navigate(`/dashboard/${staffId}/edit-penghuni/${item.id}`);
+    navigate(`/admin/dashboard/${staffId}/edit-penghuni/${item.id}`);
   };
 
   const handleDelete = useCallback(

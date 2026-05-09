@@ -57,7 +57,7 @@ function StaffForm() {
       : await addStaff(formData);
 
     if (success) {
-      navigate("/dashboard/manager");
+      navigate("/admin/dashboard/manager");
     }
   };
 

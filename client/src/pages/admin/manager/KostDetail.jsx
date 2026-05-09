@@ -26,7 +26,7 @@ function KostDetail() {
     ) {
       const success = await deleteKost(kostId);
       if (success) {
-        navigate("/dashboard/manager/kost");
+        navigate("/admin/dashboard/manager/kost");
       }
     }
   };
@@ -55,8 +55,10 @@ function KostDetail() {
       <div className="bg-white rounded-[2rem] border border-gray-100 shadow-sm overflow-hidden">
         <div className="grid grid-cols-1 lg:grid-cols-3">
           <div className="bg-gray-100 aspect-video lg:aspect-auto flex items-center justify-center relative overflow-hidden group">
-            <div className="absolute inset-0 bg-gradient-to-br from-gray-200 to-gray-100 animate-pulse" />
-            <House size={48} className="text-gray-300 relative z-10" />
+            {/* <div className="absolute inset-0 bg-gradient-to-br from-gray-200 to-gray-100 animate-pulse" />
+            <House size={48} className="text-gray-300 relative z-10" /> */}
+
+            <img src={kostDetail.img} alt="" />
           </div>
 
           {/* Content Info */}
@@ -78,7 +80,7 @@ function KostDetail() {
                   <Trash2 size={16} /> Hapus Kost
                 </button>
                 <button
-                  onClick={()=>navigate(`/dashboard/manager/edit-kost/${kostId}`)}
+                  onClick={()=>navigate(`/admin/dashboard/manager/edit-kost/${kostId}`)}
                   className="flex items-center bg-yellow-50 text-yellow-600 gap-2 hover:bg-yellow-600 hover:text-white px-4 py-2 rounded-2xl transition-all duration-300 font-bold text-sm border border-yellow-100"
                 >
                   <Trash2 size={16} /> Edit Kost

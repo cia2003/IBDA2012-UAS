@@ -1,4 +1,4 @@
-import { NavLink, Outlet } from "react-router-dom";
+import { NavLink, Outlet, useNavigate } from "react-router-dom";
 import { useAppContext } from "../../hook/useContext";
 import {
   BedDouble,
@@ -9,54 +9,52 @@ import {
   UserCheck,
   ContactRound,
 } from "lucide-react";
+import Logo from "../../components/ui/Logo";
 
 const Layout = () => {
   const { staffData, adminLogout, role } = useAppContext();
+  const navigate = useNavigate()
   const staffLinks = [
     {
       id: 1,
       name: "Dashboard",
-      path: `/dashboard/${staffData?.id}`,
+      path: `/admin/dashboard/${staffData?.id}`,
       icon: <LayoutDashboard />,
     },
     {
       id: 2,
       name: "Kamar",
-      path: `/dashboard/${staffData?.id}/kamar`,
+      path: `/admin/dashboard/${staffData?.id}/kamar`,
       icon: <DoorOpen />,
     },
     {
       id: 3,
       name: "Penghuni",
-      path: `/dashboard/${staffData?.id}/penghuni`,
+      path: `/admin/dashboard/${staffData?.id}/penghuni`,
       icon: <UsersRound />,
     },
     {
       id: 4,
       name: "Daftar Penghuni Baru",
-      path: `/dashboard/${staffData?.id}/penghuni-baru`,
+      path: `/admin/dashboard/${staffData?.id}/penghuni-baru`,
       icon: <UserCheck />,
     },
   ];
 
   const managerLinks = [
-    { id: 1, name: "Dashboard", path:"/dashboard/manager", icon: <LayoutDashboard /> },
-    { id: 2, name: "Daftar Kost", path:"/dashboard/manager/kost", icon: <Building2 /> },
-    { id: 3, name: "Daftar Staff", path:"/dashboard/manager/staff", icon: <ContactRound /> },
+    { id: 1, name: "Dashboard", path:"/admin/dashboard/manager", icon: <LayoutDashboard /> },
+    { id: 2, name: "Daftar Kost", path:"/admin/dashboard/manager/kost", icon: <Building2 /> },
+    { id: 3, name: "Daftar Staff", path:"/admin/dashboard/manager/staff", icon: <ContactRound /> },
   ]
 
   const sidebarLinks = role === "manager" ? managerLinks : staffLinks
 
   return (
     <div className="h-screen bg-gray-50 flex flex-col overflow-hidden">
-      {/* NAVBAR - Tetap di atas */}
+      {/* NAVBAR*/}
       <div className="flex items-center justify-between px-4 md:px-8 border-b border-gray-300 py-3 bg-white z-20 shrink-0">
-        <div className="flex items-center gap-2">
-          <img
-            className="h-8"
-            src="https://raw.githubusercontent.com/prebuiltui/prebuiltui/main/assets/dummyLogo/dummyLogoColored.svg"
-            alt="logo"
-          />
+        <div onClick={()=>navigate('/')} className="flex items-center gap-2">
+          <Logo />
         </div>
         <div className="flex items-center gap-5 text-gray-500">
           <p className="text-sm">

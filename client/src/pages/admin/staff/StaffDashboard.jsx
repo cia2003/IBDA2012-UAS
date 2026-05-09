@@ -158,7 +158,7 @@ export default function StaffDashboard() {
           <div className="flex flex-row gap-3">
             <div className="flex flex-col gap-3 ">
             <button
-              onClick={() => navigate(`/dashboard/${staffId}/tambah-kamar`)}
+              onClick={() => navigate(`/admin/dashboard/${staffId}/tambah-kamar`)}
               className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg transition-all shadow-md group text-sm"
             >
               <HousePlus

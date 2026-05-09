@@ -20,7 +20,7 @@ function Staff() {
   }, [getStaffData]);
 
   const handleEditStaff = async (id) => {
-    navigate(`/dashboard/manager/staff-form/${id}`);
+    navigate(`/admin/dashboard/manager/staff-form/${id}`);
   };
 
   const handleDeleteStaff = async (id) => {
@@ -30,7 +30,7 @@ function Staff() {
   };
   const handleAddStaff = () => {
     // console.log("Add button di klik");
-    navigate("/dashboard/manager/staff-form");
+    navigate("/admin/dashboard/manager/staff-form");
   };
 
   const columns = [

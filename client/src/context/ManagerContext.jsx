@@ -82,6 +82,20 @@ export const ManagerContextProvider = ({ children }) => {
     }
   }, []);
 
+  // --- Ambil Rooms Available ---
+  const getAvailableRooms = useCallback(async(id)=>{
+    try {
+      // const {data} = await api.get('/kamar-kosong', {kos_id: kostId})
+      // return data
+
+      const kost = initialKostDataDummy.find((k) => String(k.id) === String(id));
+      const available = kost.rooms.filter((room)=>room.status === 'Available')
+      return available
+    } catch (error) {
+      console.log(error.message)
+    }
+  },[])
+
   // --- TAMBAH STAFF ---
   const addStaff = useCallback(async (staffForm) => {
     try {
@@ -184,6 +198,7 @@ export const ManagerContextProvider = ({ children }) => {
 
   const values = useMemo(
     () => ({
+      getAvailableRooms,
       getStaffData,
       getKostData,
       addKost,
@@ -195,7 +210,7 @@ export const ManagerContextProvider = ({ children }) => {
       getKostById,
       addStaff,
     }),
-    [getStaffData, getKostData, addKost, deleteKost, editKost, deleteStaff, editStaff, getStaffById, getKostById, addStaff]
+    [getAvailableRooms, getStaffData, getKostData, addKost, deleteKost, editKost, deleteStaff, editStaff, getStaffById, getKostById, addStaff]
   );
 
   return (

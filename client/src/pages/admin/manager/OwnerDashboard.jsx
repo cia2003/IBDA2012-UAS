@@ -71,7 +71,7 @@ function OwnerDashboard() {
 
         <div className="flex flex-col gap-3 ">
           <button
-          onClick={()=>navigate("/dashboard/manager/kost-form")}
+          onClick={()=>navigate("/admin/dashboard/manager/kost-form")}
             className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg transition-all shadow-md group text-sm"
           >
             <HousePlus
@@ -82,7 +82,7 @@ function OwnerDashboard() {
           </button>
           <button
             className="flex items-center gap-2 bg-gray-400 hover:bg-gray-700 hover:text-white font-semibold py-2 px-4 rounded-lg transition-all shadow-md group text-sm"
-            onClick={()=>navigate('/dashboard/manager/staff-form')}
+            onClick={()=>navigate('/admin/dashboard/manager/staff-form')}
           >
             <UserPlus2
               size={18}
