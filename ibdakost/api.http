@@ -1,12 +1,21 @@
-@superuser_access_token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzc3NTI3Njc0LCJpYXQiOjE3Nzc1MjQwNzQsImp0aSI6IjYzYzBlNTE4Y2IzODRhMjg5MWI5YWQ2ODY2Y2E2ZTA5IiwidXNlcl9pZCI6Ijc1OTQwYmEzLTkwZjEtNGNlYi04NDNiLWFhYWJhNzExZmI4NiJ9.2ybUmBOtSem9d5OtivYZF5SyEAzUtfFqHAlCj5iZ-wo
+@superuser_access_token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzc4MzQ3NTYxLCJpYXQiOjE3NzgzNDM5NjEsImp0aSI6Ijk0MTA1ZTM2YTMyYzQ1NWZiYzA1YjdjN2EwMjhmODU4IiwidXNlcl9pZCI6IjA1Y2I2MWExLWIxOGMtNGVhNy1iY2IxLWRjYTg4NGMzMjAxYiJ9.fOD8kMGu0BEw-J0QiTTUt4Qer3cFC2DP4jhjkJsWwSQ
 @tenant_access_token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzc3NTI3ODIyLCJpYXQiOjE3Nzc1MjQyMjIsImp0aSI6ImJlMTMwY2MzMTJiMjQzZDBhOGFlNTkxM2E4MDZjMzhjIiwidXNlcl9pZCI6IjAxYzQxZTVlLTUzMzItNDQwNS04MjhhLTIwNTllMjY1MzRiNSJ9.ePZp_oHGznzF6_vf1RPGSPPkGIkbHiN_JqUKToEvLJQ
 
-GET http://localhost:8000/assign-roles/ HTTP/1.1
+POST http://localhost:8000/roomtypes/ HTTP/1.1
 Authorization: Bearer {{superuser_access_token}}
 # Accept: application/json
 Content-Type: application/json
 
-{
-    "user_id": "john@gmail.com",
-    "group_id": "john123"
-}
+# {
+#     "name": "Tipe 1", 
+#     "size": "2.5m x 2.5m", 
+#     "price": 750000,
+#     "facilities": [
+#         "3c1de5b4-3284-47b5-978c-fb489c6b171b", 
+#         "677e83f9-2892-4723-ac48-45ffdd9db6b4", 
+#         "7299584b-f715-464e-8f57-439c87e30fcc", 
+#         "9d4b7aab-54db-4f9d-a671-f43770fdc8b3", 
+#         "c4d74a55-e8f5-4d6e-9a97-17fb08fa26af", 
+#         "da1fcba8-c3d1-4eba-844b-58d1e34d6dc0"
+#     ]
+# }

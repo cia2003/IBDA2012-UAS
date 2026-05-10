@@ -1,7 +1,7 @@
 // Definisi Role
 export const ROLES = {
-    MANAGER: 'MANAGER',
-    STAFF: 'STAFF'
+    MANAGER: 'manager',
+    STAFF: 'staff'
 };
 
 // Master Data Tipe Kamar (Sesuai Deskripsi Bisnis)

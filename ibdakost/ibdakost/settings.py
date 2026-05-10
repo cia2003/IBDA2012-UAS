@@ -166,7 +166,9 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 AUTH_USER_MODEL = 'api.User'  # Gunakan model User kustom dari aplikasi api
 
-CORS_ALLOW_ALL_ORIGINS = True  # Untuk sementara, nanti diubah sesuai kebutuhan
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:5173",  # Ganti dengan URL frontend Anda
+]
 CORS_ALLOW_CREDENTIALS = True
 
 DEFAULT_FILE_STORAGE = "storages.supabase_storage.SupabaseStorage"

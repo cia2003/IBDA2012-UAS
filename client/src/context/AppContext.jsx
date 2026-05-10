@@ -6,8 +6,14 @@ import {
   ROLES,
   newTenant,
 } from "../assets/assets";
+import axios from 'axios';
 
 export const AppContext = createContext();
+
+const api = axios.create({
+  baseURL: 'http://localhost:8000/', // Ganti dengan URL backend Anda
+  withCredentials: true, // Sertakan cookie untuk autentikasi
+});
 
 const initialState = {
   isLoggedIn: false,
@@ -50,15 +56,17 @@ export const AppContextProvider = ({ children }) => {
           (kost) => kost.id === state.staffData?.assignedKost,
         );
 
-  const login = (email, password) => {
+  const login = async (email, password) => {
     dispatch({ type: "LOGIN_START" });
-    const user = staffList.find(
-      (s) => s.email === email && s.password === password,
-    );
+
+    const res = await api.post('login/', { email, password });
+    const { refresh, access, user } = res.data;
+
     if (user) {
       dispatch({ type: "LOGIN_SUCCESS", payload: user });
       navigate(
-        user.role === ROLES.MANAGER
+        // user.groups === ROLES.MANAGER
+        user.groups.includes(ROLES.MANAGER)
           ? "/dashboard/manager"
           : `/dashboard/staff/${user.id}`,
       );
@@ -75,8 +83,12 @@ export const AppContextProvider = ({ children }) => {
     navigate("/login");
   };
 
-  const getKostById = (kostId) =>
+  const getKostById = async (kostId) => {
     initialKostData.find((kost) => String(kost.id) === String(kostId)) ?? null;
+    // const res = await api.get(`kosts/${kostId}/`);
+    // return res.data;
+  }
+    // initialKostData.find((kost) => String(kost.id) === String(kostId)) ?? null;
 
   const getStaffByKostId = (kostId) => {
     const kost = initialKostData.find((k) => String(k.id) === String(kostId));
