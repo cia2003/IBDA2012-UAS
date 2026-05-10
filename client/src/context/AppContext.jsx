@@ -10,6 +10,7 @@ import axios from 'axios';
 
 export const AppContext = createContext();
 
+// Initial api instance
 const api = axios.create({
   baseURL: 'http://localhost:8000/', // Ganti dengan URL backend Anda
   withCredentials: true, // Sertakan cookie untuk autentikasi
@@ -18,7 +19,6 @@ const api = axios.create({
 const initialState = {
   isLoggedIn: false,
   staffData: null,
-  staffRole: null,
   isLoading: false,
   error: null,
 };
@@ -33,7 +33,6 @@ const AuthReducer = (state, action) => {
         isLoading: false,
         isLoggedIn: true,
         staffData: action.payload,
-        staffRole: action.payload.role,
       };
     case "LOGIN_FAILURE":
       return { ...state, isLoading: false, error: action.payload };
@@ -50,7 +49,7 @@ export const AppContextProvider = ({ children }) => {
 
   // Derived: kamar yang bisa diakses sesuai role
   const filteredRooms =
-    state.staffRole === ROLES.MANAGER
+    state.staffData?.groups?.includes(ROLES.MANAGER)
       ? initialKostData
       : initialKostData.filter(
           (kost) => kost.id === state.staffData?.assignedKost,
