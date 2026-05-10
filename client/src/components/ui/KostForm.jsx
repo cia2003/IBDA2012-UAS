@@ -35,12 +35,21 @@ const KostForm = () => {
   }, [kostId, isEditMode, getKostById]);
 
   const handleChange = (e) => {
-    const { kostId, value } = e.target;
+    const { name, value } = e.target;
     const fieldMap = {
       "name-kost": "name",
       "address-kost": "address",
       "description-kost": "description",
     };
+
+    const fieldName = fieldMap[name];
+
+    if (fieldName) {
+      setKostForm((prev) => ({
+        ...prev,
+        [fieldName]: value,
+      }));
+    }
 
     setKostForm((prev) => ({
       ...prev,
@@ -63,11 +72,11 @@ const KostForm = () => {
       if (isEditMode) {
         // --- LOGIKA EDIT ---
         await editKost(kostId, kostForm);
-        navigate("/dashboard/manager");
+        navigate("/admin/dashboard/manager");
       } else {
         // --- LOGIKA TAMBAH ---
         await addKost(kostForm);
-        navigate("/dashboard/manager");
+        navigate("/admin/dashboard/manager");
       }
     } catch (error) {
       console.error(error);
@@ -119,12 +128,12 @@ const KostForm = () => {
             <div className="flex flex-wrap items-center gap-3">
               <label htmlFor="image-input" className="cursor-pointer group">
                 <input
-                  accept="image/*"
+                  id="image-input"
+                  name="image-input"
                   type="file"
-                  kostId="image-input"
+                  accept="image/*"
                   hidden
                   onChange={handleImageChange}
-                  className="border p-3 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none"
                 />
                 <div className="relative w-24 h-24 rounded-2xl border-2 border-dashed border-gray-200 flex items-center justify-center group-hover:border-blue-400 transition-all overflow-hidden">
                   {kostForm.img ? (
@@ -158,10 +167,10 @@ const KostForm = () => {
                 Nama Kost
               </label>
               <input
-                kostId="name-kost"
+                id="name-kost" 
+                name="name-kost"
                 type="text"
                 placeholder="Masukan nama kost..."
-                className="input-style"
                 required
                 value={kostForm.name}
                 onChange={handleChange}
@@ -177,7 +186,8 @@ const KostForm = () => {
                 Alamat
               </label>
               <input
-                kostId="address-kost"
+                id="address-kost"
+                name="address-kost"
                 placeholder="Masukan alamat lengkap..."
                 type="text"
                 className="input-style"
@@ -197,7 +207,8 @@ const KostForm = () => {
               Deskripsi
             </label>
             <textarea
-              kostId="description-kost"
+              id="description-kost"
+              name="description-kost"
               placeholder="Deskripsi fasilitas, peraturan, dll..."
               rows={4}
               value={kostForm.description}
