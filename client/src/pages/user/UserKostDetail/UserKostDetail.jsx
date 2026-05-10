@@ -44,7 +44,6 @@ function UserKostDetail() {
         </p>
       </div>
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
-        {" "}
              
         <div className="lg:col-span-2 space-y-6">
                    
@@ -52,8 +51,7 @@ function UserKostDetail() {
                         Pilihan Kamar Tersedia          
           </h2>
                              
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        {/* PERBAIKAN: Mapping data kamar */}           
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {kostData.rooms && kostData.rooms.length > 0 ? (
               kostData.rooms.map((room) => (
                 <RoomCard key={room.id} data={room} kostId={kostId} />
@@ -90,7 +88,7 @@ function UserKostDetail() {
                     href={`https://wa.me/${kostData.phone?.replace(/\D/g, "") || ""}`} // Membersihkan karakter non-angka
                     target="_blank"
                     rel="noreferrer"
-                    className="w-full flex items-center justify-center gap-2 bg-green-600 hover:bg-green-700 text-white font-bold py-4 px-4 rounded-2xl transition-all active:scale-95 shadow-lg shadow-green-100"
+                    className="w-full flex items-center justify-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-4 px-4 rounded-2xl transition-all active:scale-95 shadow-lg shadow-green-100"
                   >
                     <Phone size={18} />
                     WhatsApp

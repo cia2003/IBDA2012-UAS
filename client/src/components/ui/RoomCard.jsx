@@ -107,16 +107,10 @@ const RoomCard = ({ data, kostId }) => {
         <div className="mt-5 pt-4 border-t border-zinc-100 flex items-end justify-between gap-4">
           <div>
             <p className="text-[10px] text-zinc-400 uppercase font-bold tracking-widest leading-none">Harga per bulan</p>
-            <p className={`text-2xl font-black mt-1 ${isDisabled ? "text-zinc-400" : "text-blue-600"}`}>
+            <p className={`text-xl font-black mt-1 ${isDisabled ? "text-zinc-400" : "text-blue-600"}`}>
               <span className="text-sm font-medium">Rp</span> {formattedPrice}
             </p>
           </div>
-          
-          {!isDisabled && (
-            <span className="text-sm font-bold text-blue-600 group-hover:underline flex items-center gap-1">
-              Lihat Detail
-            </span>
-          )}
         </div>
       </div>
     </Link>

@@ -30,7 +30,7 @@ export const UserContextProvider = ({ children }) => {
       });
 
       if (data) {
-        toast.success("Kamar ditambahkan ke favorit ❤️");
+        toast.success("Kamar ditambahkan ke favorit");
         setWishlist((prev) => [...prev, data]); 
       }
     } catch (error) {

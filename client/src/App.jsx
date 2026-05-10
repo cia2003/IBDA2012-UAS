@@ -38,6 +38,7 @@ import "./style.css";
 import KostTipeForm from "./pages/admin/manager/KostTipeForm";
 import TipeKost from "./pages/admin/manager/TipeKost";
 import TipeDetail from "./pages/admin/manager/TipeDetail";
+import UserRoomDetail from "./pages/user/UserRoomDetail/UserRoomDetail";
 
 const AdminProtectedRoute = ({ children, allowedRole }) => {
   const { adminIsLoggedIn, role } = useAppContext();
@@ -75,6 +76,7 @@ export default function App() {
           <Route index element={<Home />} />
           <Route path="kost" element={<h1>Semua Kost</h1>} />
           <Route path="kost/:kostId" element={<UserKostDetail />} />
+          <Route path='kost/:kostId/:roomId' element={<UserRoomDetail />} />
           <Route path="login" element={<UserLogin />} />
           <Route
             path="favorite"

@@ -101,7 +101,7 @@ export const ManagerContextProvider = ({ children }) => {
       // } catch (error) {
       //   console.error(error.message);
       // }
-      toast.success("Tipe baru berhasil ditambahkan")
+      toast.success("Tipe baru berhasil ditambahkan");
     },
     [navigate],
   );
@@ -123,7 +123,7 @@ export const ManagerContextProvider = ({ children }) => {
       // } catch (error) {
       //   console.error(error.message);
       // }
-      toast.success("Tipe berhasil diperbaharui")
+      toast.success("Tipe berhasil diperbaharui");
     },
     [navigate],
   );
@@ -281,6 +281,46 @@ export const ManagerContextProvider = ({ children }) => {
     }
   }, []);
 
+  // --- Ambil detail kamar untuk user
+  const getRoomDetails = useCallback(async (kostId, roomId) => {
+    try {
+      // const {data} = await api.get('detail-kamar', roomId)
+      // if(data){
+      //   return data
+      // }
+      // else{
+      //   toast.error("Tidak ada kamar yang tersedia")
+      // }
+
+      const kost = initialKostDataDummy.find(
+        (k) => String(k.id) === String(kostId),
+      );
+      if (!kost) {
+        console.error("Kost tidak ditemukan:", kostId);
+        return null;
+      }
+
+      const room = kost.rooms.find((r) => String(r.id) === String(roomId));
+      if (!room) {
+        console.error("Kamar tidak ditemukan:", roomId);
+        return null;
+      }
+
+      const enrichedRoomData = {
+        ...room,
+        kostName: kost.name,
+        kostAddress: kost.address,
+        kostPhone: kost.phone || "-",
+        images: room.images || [kost.img],
+      };
+
+      // Simulasi delay API (biar kerasa real)
+      return new Promise((resolve) => {
+        setTimeout(() => resolve(enrichedRoomData), 500);
+      });
+    } catch (error) {}
+  });
+
   const values = useMemo(
     () => ({
       addTipeKost,
@@ -298,6 +338,7 @@ export const ManagerContextProvider = ({ children }) => {
       getKostById,
       getTipeById,
       addStaff,
+      getRoomDetails,
     }),
     [
       getTipeKost,
@@ -314,6 +355,7 @@ export const ManagerContextProvider = ({ children }) => {
       getStaffById,
       getKostById,
       addStaff,
+      getRoomDetails,
     ],
   );
 
