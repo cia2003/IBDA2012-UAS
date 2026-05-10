@@ -1,6 +1,6 @@
-import { useState } from "react";
-import Table from "../../components/Table";
-import { useAppContext } from "../../hook/useAppContext";
+import { useEffect, useState } from "react";
+import Table from "../../../components/ui/Table";
+import { useAppContext, useStaffContext } from "../../../hook/useContext";
 import {
   Edit3,
   Trash2,
@@ -9,16 +9,16 @@ import {
   ChevronDown,
 } from "lucide-react";
 import { useNavigate, useParams } from "react-router-dom";
+import toast from "react-hot-toast";
 
 function RoomsDataDetails() {
-  const { rooms } = useAppContext();
+  const { getKostDataByStaffId, managedKost } = useStaffContext();
   const { staffId } = useParams();
   const [filterStatus, setFilterStatus] = useState("All");
   const [sortBy, setSortBy] = useState("roomNumber");
   const navigate = useNavigate();
 
-  const currentKost = rooms[0];
-  const roomsList = currentKost?.rooms || [];
+  const roomsList = managedKost?.rooms || [];
 
   const filteredData = roomsList
     .filter((room) => {
@@ -36,7 +36,7 @@ function RoomsDataDetails() {
   const toggleStatus = (id, currentStatus) => {
     const newStatus = currentStatus === "Available" ? "Occupied" : "Available";
     // console.log(`Kamar ID ${id} diubah menjadi ${newStatus}`);
-    alert(`Status Kamar #${id} diubah menjadi ${newStatus}`);
+    toast.success(`Status Kamar #${id} diubah menjadi ${newStatus}`);
   };
 
   const columns = [
@@ -116,71 +116,84 @@ function RoomsDataDetails() {
     },
   ];
 
+  const fetchData = async () => {
+    await getKostDataByStaffId(staffId);
+  };
+
+  useEffect(() => {
+    fetchData();
+  }, [staffId, fetchData]);
+
+  // useEffect(()=>{
+  //   if(managedKost){
+  //     console.log(managedKost)
+  //   }
+  // }, [managedKost])
+
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6">
       {/* Header Section */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white p-6 rounded-3xl border border-gray-100 shadow-sm">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white p-5 sm:p-6 rounded-3xl border border-gray-100 shadow-sm">
         <div className="flex items-center gap-4">
           <div className="p-3 bg-blue-600 rounded-2xl text-white shadow-lg shadow-blue-200">
-            <BedDouble size={28} />
+            <BedDouble size={24} className="sm:w-[28px] sm:h-[28px]" />
           </div>
           <div>
-            <h1 className="text-2xl font-black text-gray-900 leading-none">
+            <h1 className="text-xl sm:text-2xl font-black text-gray-900 leading-none">
               Daftar Kamar
             </h1>
-            <p className="text-sm text-gray-400 mt-1 font-medium">
-              {currentKost?.name || "Memuat lokasi..."}
+            <p className="text-xs sm:text-sm text-gray-400 mt-1 font-medium">
+              {managedKost?.name || "Memuat lokasi..."}
             </p>
           </div>
         </div>
       </div>
 
       {/* Filter & Table Section */}
-      <div className="bg-white rounded-[2rem] shadow-sm border border-gray-100 overflow-hidden">
-        {/* Toolbar */}
-        <div className="flex flex-col sm:flex-row items-center justify-between gap-4 p-6 border-b border-gray-50">
-          {/* Status Filter Tabs */}
-          <div className="flex p-1 bg-gray-100 rounded-xl w-full sm:w-fit">
-            <button
-              onClick={() => setFilterStatus("All")}
-              className={`flex-1 sm:flex-none px-6 py-2 text-xs font-bold rounded-lg transition-all ${
-                filterStatus === "All"
-                  ? "bg-white text-blue-600 shadow-sm"
-                  : "text-gray-400 hover:text-gray-600"
-              }`}
-            >
-              Semua
-            </button>
+      <div className="bg-white rounded-[1.5rem] sm:rounded-[2rem] shadow-sm border border-gray-100 overflow-hidden">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 p-4 sm:p-6 border-b border-gray-50 items-center">
+          <div className="lg:col-span-8 overflow-x-auto scrollbar-hide">
+            <div className="grid md:grid-cols-3 sm:grid-cols-1 bg-gray-100 p-1 rounded-xl w-full max-w-md">
+              <button
+                onClick={() => setFilterStatus("All")}
+                className={`px-4 py-2 text-xs font-bold rounded-lg transition-all ${
+                  filterStatus === "All"
+                    ? "bg-white text-blue-600 shadow-sm"
+                    : "text-gray-400 hover:text-gray-600"
+                }`}
+              >
+                Semua
+              </button>
 
-            <button
-              onClick={() => setFilterStatus("Available")}
-              className={`flex-1 sm:flex-none px-6 py-2 text-xs font-bold rounded-lg transition-all ${
-                filterStatus === "Available"
-                  ? "bg-emerald-500 text-white shadow-sm"
-                  : "text-gray-400 hover:text-gray-600"
-              }`}
-            >
-              Tersedia
-            </button>
+              <button
+                onClick={() => setFilterStatus("Available")}
+                className={`px-4 py-2 text-xs font-bold rounded-lg transition-all ${
+                  filterStatus === "Available"
+                    ? "bg-emerald-500 text-white shadow-sm"
+                    : "text-gray-400 hover:text-gray-600"
+                }`}
+              >
+                Tersedia
+              </button>
 
-            <button
-              onClick={() => setFilterStatus("Occupied")}
-              className={`flex-1 sm:flex-none px-6 py-2 text-xs font-bold rounded-lg transition-all ${
-                filterStatus === "Occupied"
-                  ? "bg-rose-500 text-white shadow-sm"
-                  : "text-gray-400 hover:text-gray-600"
-              }`}
-            >
-              Terisi
-            </button>
+              <button
+                onClick={() => setFilterStatus("Occupied")}
+                className={`px-4 py-2 text-xs font-bold rounded-lg transition-all ${
+                  filterStatus === "Occupied"
+                    ? "bg-rose-500 text-white shadow-sm"
+                    : "text-gray-400 hover:text-gray-600"
+                }`}
+              >
+                Terisi
+              </button>
+            </div>
           </div>
 
-          {/* Sort Dropdown */}
-          <div className="relative w-full sm:w-fit">
+          <div className="lg:col-span-4 relative">
             <select
               value={sortBy}
               onChange={(e) => setSortBy(e.target.value)}
-              className="w-full sm:w-fit appearance-none bg-gray-50 border border-gray-200 text-gray-600 py-2.5 pl-4 pr-10 rounded-xl text-xs font-bold focus:ring-2 focus:ring-blue-100 outline-none cursor-pointer"
+              className="w-full appearance-none bg-gray-50 border border-gray-200 text-gray-600 py-2.5 pl-4 pr-10 rounded-xl text-xs font-bold focus:ring-2 focus:ring-blue-100 outline-none cursor-pointer"
             >
               <option value="roomNumber">Urutkan: No. Kamar</option>
               <option value="priceHigh">Harga Tertinggi</option>
@@ -193,14 +206,16 @@ function RoomsDataDetails() {
           </div>
         </div>
 
-        {/* Table Area */}
-        <div className="p-2 sm:p-6">
+        <div className="p-2 sm:p-6 overflow-x-auto">
           <Table columns={columns} data={filteredData} />
         </div>
 
         {/* Footer Info */}
-        <div className="px-8 py-4 bg-gray-50/50 flex justify-between items-center border-t border-gray-50">
-          <p className="text-xs text-gray-500 font-semibold">
+        <div className="px-6 sm:px-8 py-4 bg-gray-50/50 flex flex-row justify-between items-center border-t border-gray-50">
+          <p className="text-[10px] sm:text-xs text-gray-500 font-semibold uppercase tracking-wider">
+            Ringkasan Data
+          </p>
+          <p className="text-xs text-gray-500 font-bold">
             <span className="text-blue-600">{filteredData.length}</span> /{" "}
             {roomsList.length} Kamar
           </p>

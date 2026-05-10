@@ -1,43 +1,71 @@
-import { createContext, useReducer } from "react";
+// Tetap logout di client meski server error
+import {
+  createContext,
+  useReducer,
+  useMemo,
+  useCallback,
+  useEffect,
+} from "react";
 import { useNavigate } from "react-router-dom";
 import {
   kostData as initialKostData,
   staff as staffList,
-  ROLES,
   newTenant,
 } from "../assets/assets";
-import axios from 'axios';
+import toast from "react-hot-toast";
+import api from "../api/api";
 
 export const AppContext = createContext();
 
-// Initial api instance
-const api = axios.create({
-  baseURL: 'http://localhost:8000/', // Ganti dengan URL backend Anda
-  withCredentials: true, // Sertakan cookie untuk autentikasi
-});
-
 const initialState = {
-  isLoggedIn: false,
+  adminIsLoggedIn: false,
   staffData: null,
+
+  userIsLoggedIn: false,
+  userData: null,
   isLoading: false,
   error: null,
 };
 
 const AuthReducer = (state, action) => {
   switch (action.type) {
-    case "LOGIN_START":
+    case "AUTH_START":
       return { ...state, isLoading: true, error: null };
-    case "LOGIN_SUCCESS":
+    case "AUTH_FAILURE":
+      return { ...state, isLoading: false, error: action.payload };
+
+    // --- ADMIN ACTIONS ---
+    case "ADMIN_LOGIN_SUCCESS":
       return {
         ...state,
         isLoading: false,
-        isLoggedIn: true,
+        adminIsLoggedIn: true,
         staffData: action.payload,
       };
-    case "LOGIN_FAILURE":
-      return { ...state, isLoading: false, error: action.payload };
-    case "LOGOUT":
-      return initialState;
+    case "ADMIN_LOGOUT":
+      return {
+        ...state,
+        adminIsLoggedIn: false,
+        staffData: null,
+        isLoading: false,
+      };
+
+    // --- USER ACTIONS ---
+    case "USER_LOGIN_SUCCESS":
+      return {
+        ...state,
+        isLoading: false,
+        userIsLoggedIn: true,
+        userData: action.payload,
+      };
+    case "USER_LOGOUT":
+      return {
+        ...state,
+        userIsLoggedIn: false,
+        userData: null,
+        isLoading: false,
+      };
+
     default:
       return state;
   }
@@ -47,98 +75,154 @@ export const AppContextProvider = ({ children }) => {
   const navigate = useNavigate();
   const [state, dispatch] = useReducer(AuthReducer, initialState);
 
-  // Derived: kamar yang bisa diakses sesuai role
-  const filteredRooms =
-    state.staffData?.groups?.includes(ROLES.MANAGER)
+  const role = state.staffData?.role ?? null;
+
+  const filteredRooms = useMemo(() => {
+    if (!state.staffData) return [];
+    return role === "manager"
       ? initialKostData
       : initialKostData.filter(
-          (kost) => kost.id === state.staffData?.assignedKost,
+          (kost) => kost.id === state.staffData.assignedKost,
+        );
+  }, [role, state.staffData]);
+
+  // Login admin
+  const adminLogin = useCallback(
+    async (email, password) => {
+      try {
+        dispatch({ type: "AUTH_START" });
+
+        // --- MODE DUMMY ---
+        const user = staffList.find(
+          (s) => s.email === email && s.password === password,
         );
 
-  const login = async (email, password) => {
-    dispatch({ type: "LOGIN_START" });
+        // --- MODE BACKEND ---
+        // const response = await api.post('/admin/login', { email, password });
+        // const user = response.data.user; // Sesuaikan jika backend mengembalikan { data: { user: ... } }
 
-    const res = await api.post('login/', { email, password });
-    const { refresh, access, user } = res.data;
-
-    if (user) {
-      dispatch({ type: "LOGIN_SUCCESS", payload: user });
-      navigate(
-        // user.groups === ROLES.MANAGER
-        user.groups.includes(ROLES.MANAGER)
-          ? "/dashboard/manager"
-          : `/dashboard/staff/${user.id}`,
-      );
-    } else {
-      dispatch({
-        type: "LOGIN_FAILURE",
-        payload: "Email atau Password salah!",
-      });
-    }
-  };
-
-  const logout = () => {
-    dispatch({ type: "LOGOUT" });
-    navigate("/login");
-  };
-
-  const getKostById = async (kostId) => {
-    initialKostData.find((kost) => String(kost.id) === String(kostId)) ?? null;
-    // const res = await api.get(`kosts/${kostId}/`);
-    // return res.data;
-  }
-    // initialKostData.find((kost) => String(kost.id) === String(kostId)) ?? null;
-
-  const getStaffByKostId = (kostId) => {
-    const kost = initialKostData.find((k) => String(k.id) === String(kostId));
-    if (!kost) return null;
-    return staffList.find((s) => s.id === kost.staffId) ?? null;
-  };
-
-  const getOccupantById = (occupantId) => {
-    for (const kost of initialKostData) {
-      for (const room of kost.rooms ?? []) {
-        if (!Array.isArray(room.resident)) continue;
-        const occupant = room.resident.find((p) => p.id == occupantId);
-        if (occupant) {
-          return {
-            ...occupant,
-            roomNumber: room.roomNumber,
-            kostName: kost.name,
-          };
+        if (user) {
+          dispatch({ type: "ADMIN_LOGIN_SUCCESS", payload: user });
+          toast.success(`Selamat Datang, ${user.name}!`);
+          if (user.role === "manager") {
+            navigate("/admin/dashboard/manager");
+          } else {
+            navigate(`/admin/dashboard/${user.id}`);
+          }
+        } else {
+          throw new Error("Email atau Password salah!");
         }
+      } catch (error) {
+        const errorMsg =
+          error.response?.data?.message || error.message || "Terjadi kesalahan";
+        dispatch({ type: "LOGIN_FAILURE", payload: errorMsg });
+        toast.error(errorMsg);
+        console.error(errorMsg);
       }
+    },
+    [navigate],
+  );
+
+  // Logout admin
+  const adminLogout = useCallback(async () => {
+    try {
+      // --- MODE BACKEND ---
+      // await api.post('/admin/logout');
+
+      // --- LOGIKA CLIENT SIDE ---
+      dispatch({ type: "ADMIN_LOGOUT" });
+      toast.success("Logout Berhasil");
+      navigate("/");
+    } catch (error) {
+      console.error(error.message);
+      dispatch({ type: "LOGOUT" });
+      navigate("/");
     }
-    return null;
-  };
+  }, [navigate]);
 
-  const fetchNewTenants = (kostId) => {
-    const data = newTenant.filter(
-      (t) => t.requestedKostId === kostId
-    );
-    return data
-  };
+  const userLogin = useCallback(
+    async (email, password) => {
+      dispatch({ type: "AUTH_START" });
+      try {
+        const { data } = await api.post("/user/login", { email, password });
+        if (data) {
+          dispatch({ type: "USER_LOGIN_SUCCESS", payload: data });
+          toast.success("Login berhasil");
+        } else {
+          toast.error("Login gagal");
+        }
+      } catch (error) {
+        toast.error("Email atau Password Salah!");
+        console.error(error.message);
+      }
+    },
+    [navigate],
+  );
 
-  const values = {
-    // Auth state
-    isLoggedIn: state.isLoggedIn,
-    staffData: state.staffData,
-    staffRole: state.staffRole,
-    isLoading: state.isLoading,
-    error: state.error,
+  const userLogout = useCallback(async () => {
+    try {
+      await api.get("/user/logout");
+      dispatch({ type: "USER_LOGOUT" });
+      toast.success("Logout Berhasil");
+      navigate("/");
+    } catch (error) {
+      console.error(error.message);
+      dispatch({ type: "LOGOUT" });
+      navigate("/");
+    }
+  });
 
-    // Data
-    allLocations: initialKostData,
-    rooms: filteredRooms,
+  const userRegister = useCallback(async (formData) => {
+    dispatch({ type: "AUTH_START" });
+    try {
+      const { data } = await api.post("/user/post/register", formData);
+      if (data) {
+        dispatch({ type: "USER_LOGIN_SUCCESS", payload: data });
+        toast.success("Register berhasil");
+      }
+    } catch (error) {}
+  });
 
-    // Functions
-    login,
-    logout,
-    getKostById,
-    getOccupantById,
-    getStaffByKostId,
-    fetchNewTenants
-  };
+  const checkAuthStatus = useCallback(async () => {
+    try {
+      // Cek admin session
+      // const adminRes = await api.get('/admin/is-auth');
+      // if(adminRes.data.success) dispatch({ type: "ADMIN_LOGIN_SUCCESS", payload: adminRes.data.user });
+      // Cek user session
+      // const userRes = await api.get('/user/is-auth');
+      // if(userRes.data.success) dispatch({ type: "USER_LOGIN_SUCCESS", payload: userRes.data.user });
+    } catch (e) {
+      console.log("No active session");
+    }
+  }, []);
+
+  useEffect(() => {
+    // Panggil isAuth jika menggunakan backend untuk menjaga session saat refresh
+    // checkAuthStatus();
+  }, [checkAuthStatus]);
+
+  const values = useMemo(
+    () => ({
+      // Admin Props
+      adminIsLoggedIn: state.adminIsLoggedIn,
+      staffData: state.staffData,
+      adminLogin,
+      adminLogout,
+      role,
+
+      // User Props
+      userIsLoggedIn: state.userIsLoggedIn,
+      userData: state.userData,
+      userLogin,
+      userLogout,
+      userRegister,
+
+      // Global Props
+      isLoading: state.isLoading,
+      error: state.error,
+    }),
+    [state, role, adminLogin, adminLogout, userLogin, userLogout],
+  );
 
   return <AppContext.Provider value={values}>{children}</AppContext.Provider>;
 };

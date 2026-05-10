@@ -1,0 +1,63 @@
+.homeContainer {
+    width: 100%;
+    min-height: 100vh;
+    background-color: #fafafa; 
+    padding: 0 40px 40px 40px; 
+}
+
+.header {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 40px 0;
+}
+
+.title {
+    font-size: 2rem;
+    color: #1e293b;
+    font-weight: 800;
+    margin-bottom: 8px;
+}
+
+.subtitle {
+    color: #64748b;
+    font-size: 1.1rem;
+}
+
+.contentSection {
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.cardGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 30px;
+}
+
+.emptyState {
+    grid-column: 1 / -1; /* Mengambil seluruh baris grid */
+    text-align: center;
+    padding: 100px 0;
+    color: #94a3b8;
+    background: white;
+    border-radius: 20px;
+    border: 2px dashed #e2e8f0;
+}
+
+@media (max-width: 768px) {
+    .homeContainer {
+        padding: 0 16px 30px 16px;
+    }
+
+    .title {
+        font-size: 1.5rem;
+    }
+
+    .header {
+        padding: 30px 0;
+    }
+    
+    .cardGrid {
+        gap: 20px;
+    }
+}
