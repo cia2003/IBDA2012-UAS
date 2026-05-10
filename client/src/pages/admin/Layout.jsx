@@ -8,6 +8,7 @@ import {
   DoorOpen,
   UserCheck,
   ContactRound,
+  VectorSquare,
 } from "lucide-react";
 import Logo from "../../components/ui/Logo";
 
@@ -45,6 +46,7 @@ const Layout = () => {
     { id: 1, name: "Dashboard", path:"/admin/dashboard/manager", icon: <LayoutDashboard /> },
     { id: 2, name: "Daftar Kost", path:"/admin/dashboard/manager/kost", icon: <Building2 /> },
     { id: 3, name: "Daftar Staff", path:"/admin/dashboard/manager/staff", icon: <ContactRound /> },
+    { id: 4, name: "Daftar Tipe Kost", path: "/admin/dashboard/manager/tipe-kost", icon: <VectorSquare />}
   ]
 
   const sidebarLinks = role === "manager" ? managerLinks : staffLinks

@@ -11,24 +11,28 @@ export const ROLES = {
 // Master Data Tipe Kamar (Sesuai Deskripsi Bisnis)
 export const ROOM_TYPES = {
   TIPE_1: {
+    id: '1',
     name: "Tipe 1",
     size: "2,5 m × 2,5 m",
     facilities: ["Kipas Angin", "Kamar Mandi Luar"],
     price: 750000,
   },
   TIPE_2: {
+    id: '2',
     name: "Tipe 2",
     size: "3 m × 3 m",
     facilities: ["Kamar Mandi Dalam"],
     price: 1250000,
   },
   TIPE_3: {
+    id: '3',
     name: "Tipe 3",
     size: "4 m × 4 m",
     facilities: ["AC", "Kamar Mandi Dalam", "TV", "Dispenser"],
     price: 2250000,
   },
   TIPE_4: {
+    id: '4',
     name: "Tipe 4",
     size: "5 m × 5 m",
     facilities: [
@@ -237,3 +241,18 @@ export const newTenant = [
     notes: "-",
   },
 ];
+export const User = [
+  {
+    id: 'U01',
+    name: 'Joshua',
+    email: 'calvinjoshua37@gmail.com',
+    password: 'user123',
+    favorite: [
+      {
+        kostId: "K03",
+        roomKost: "C01"
+      }
+    ]
+  },
+
+]

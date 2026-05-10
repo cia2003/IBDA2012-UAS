@@ -2,6 +2,7 @@ import { createContext, useCallback, useMemo, useState } from "react";
 import {
   staff as staffListDummy, // Rename agar tidak bentrok dengan state
   kostData as initialKostDataDummy,
+  ROOM_TYPES,
 } from "../assets/assets";
 import toast from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
@@ -12,6 +13,7 @@ export const ManagerContext = createContext();
 export const ManagerContextProvider = ({ children }) => {
   const [staffList, setStaffList] = useState([]);
   const [initialKostData, setInitialKostData] = useState([]);
+  const [tipeKost, setTipeKost] = useState([]);
   const navigate = useNavigate();
 
   // --- FETCHING DATA STAFF ---
@@ -82,54 +84,137 @@ export const ManagerContextProvider = ({ children }) => {
     }
   }, []);
 
-  // --- Ambil Rooms Available ---
-  const getAvailableRooms = useCallback(async(id)=>{
+  // --- Tambah Tipe Kost (Bukan Gedung) ---
+  const addTipeKost = useCallback(
+    async (formData) => {
+      // try {
+      //   const { data } = await api.post("/tambah-tipe", {
+      //     name: formData.name,
+      //     size: formData.price,
+      //     price: formData.price,
+      //     description: formData.description,
+      //   });
+      //   if (data) {
+      //     toast.success("Tipe Kamar berhasil ditambahkan");
+      //     navigate("/admin/dashboard/manager");
+      //   }
+      // } catch (error) {
+      //   console.error(error.message);
+      // }
+      toast.success("Tipe baru berhasil ditambahkan")
+    },
+    [navigate],
+  );
+
+  // --- Edit tipe kost ---
+  const editTipeKost = useCallback(
+    async (editForm) => {
+      // try {
+      //   const { data } = api.put("/edit-tipe", {
+      //     name: formData.name,
+      //     size: formData.price,
+      //     price: formData.price,
+      //     description: formData.description,
+      //   });
+      //   if (data) {
+      //     toast.success("Tipe Kamar berhasil diperbaharui");
+      //     navigate("/admin/dashboard/manager");
+      //   }
+      // } catch (error) {
+      //   console.error(error.message);
+      // }
+      toast.success("Tipe berhasil diperbaharui")
+    },
+    [navigate],
+  );
+
+  // --- Ambil Data Tipe ---
+  const getTipeKost = useCallback(async () => {
     try {
-      // const {data} = await api.get('/kamar-kosong', {kos_id: kostId})
+      // const {data} = await api.get('tipe-kost')
+      // if(data){
+      //   setTipeKost(data || [])
+      // }
       // return data
 
-      const kost = initialKostDataDummy.find((k) => String(k.id) === String(id));
-      const available = kost.rooms.filter((room)=>room.status === 'Available')
-      return available
+      const data = Array.isArray(ROOM_TYPES)
+        ? ROOM_TYPES
+        : Object.values(ROOM_TYPES);
+      return data;
     } catch (error) {
-      console.log(error.message)
-    }
-  },[])
-
-  // --- TAMBAH STAFF ---
-  const addStaff = useCallback(async (staffForm) => {
-    try {
-      // -- MODE BACKEND --
-      // const response = await api.post("/add-staff", staffForm);
-      // if (response.data) {
-      //   toast.success("Staff Berhasil Ditambahkan");
-      //   navigate("/dashboard/manager");
-      // }
-
-      // -- MODE DUMMY --
-      toast.success("Staff Berhasil Ditambahkan (Dummy)");
-      navigate("/dashboard/manager");
-    } catch (error) {
-      toast.error(error.response?.data?.message || "Staff gagal ditambahkan");
-    }
-  }, [navigate]);
-
-  // --- EDIT KOST ---
-  const editKost = useCallback(async (kostId, kostForm) => {
-    try {
-      // -- MODE BACKEND --
-      // const response = await api.put(`/edit-kost/${kostId}`, kostForm);
-      // if (response.data) {
-      //   toast.success("Kost Berhasil Diperbaharui");
-      // }
-
-      // -- MODE DUMMY --
-      toast.success("Kost Berhasil Diperbaharui (Dummy)");
-    } catch (error) {
-      toast.error("Kost gagal diperbaharui");
       console.error(error.message);
+      return [];
+    }
+  });
+
+  // --- Ambil berdasarkan Id ---
+  const getTipeById = useCallback(async (id) => {
+    try {
+      // const { data } = await api.get(`/tipe-kost/${id}`);
+      // if (data) {
+      //   return data;
+      // }
+
+      const dataArray = Object.values(ROOM_TYPES);
+
+      console.log("Mencari ID:", id);
+      console.log("Data tersedia:", dataArray);
+
+      const findTipe = dataArray.find(
+        (tipe) => String(tipe.id).trim() === String(id).trim(),
+      );
+
+      if (!findTipe) {
+        console.error("Hasil: Tipe tidak ditemukan untuk ID", id);
+        return null;
+      }
+
+      return findTipe;
+    } catch (error) {
+      console.log(error.message);
     }
   }, []);
+  // --- TAMBAH STAFF ---
+  const addStaff = useCallback(
+    async (staffForm) => {
+      try {
+        // -- MODE BACKEND --
+        // const response = await api.post("/add-staff", staffForm);
+        // if (response.data) {
+        //   toast.success("Staff Berhasil Ditambahkan");
+        //   navigate("/admin/dashboard/manager");
+        // }
+
+        // -- MODE DUMMY --
+        toast.success("Staff Berhasil Ditambahkan (Dummy)");
+        navigate("/admin/dashboard/manager");
+      } catch (error) {
+        toast.error(error.response?.data?.message || "Staff gagal ditambahkan");
+      }
+    },
+    [navigate],
+  );
+
+  // --- EDIT KOST ---
+  const editKost = useCallback(
+    async (kostId, kostForm) => {
+      try {
+        // -- MODE BACKEND --
+        // const response = await api.put(`/edit-kost/${kostId}`, kostForm);
+        // if (response.data) {
+        //   toast.success("Kost Berhasil Diperbaharui");
+        // }
+
+        // -- MODE DUMMY --
+        toast.success("Kost Berhasil Diperbaharui (Dummy)");
+        navigate("/admin/dashboard/manager");
+      } catch (error) {
+        toast.error("Kost gagal diperbaharui");
+        console.error(error.message);
+      }
+    },
+    [navigate],
+  );
 
   // --- EDIT STAFF ---
   const editStaff = useCallback(async (staffId, staffForm) => {
@@ -198,7 +283,27 @@ export const ManagerContextProvider = ({ children }) => {
 
   const values = useMemo(
     () => ({
-      getAvailableRooms,
+      addTipeKost,
+      editTipeKost,
+      tipeKost,
+      getStaffData,
+      getKostData,
+      addKost,
+      deleteKost,
+      editKost,
+      deleteStaff,
+      editStaff,
+      getStaffById,
+      getTipeKost,
+      getKostById,
+      getTipeById,
+      addStaff,
+    }),
+    [
+      getTipeKost,
+      addTipeKost,
+      editTipeKost,
+      tipeKost,
       getStaffData,
       getKostData,
       addKost,
@@ -209,8 +314,7 @@ export const ManagerContextProvider = ({ children }) => {
       getStaffById,
       getKostById,
       addStaff,
-    }),
-    [getAvailableRooms, getStaffData, getKostData, addKost, deleteKost, editKost, deleteStaff, editStaff, getStaffById, getKostById, addStaff]
+    ],
   );
 
   return (

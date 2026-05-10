@@ -1,7 +1,15 @@
 import { useEffect, useState, useCallback } from "react";
 import KPICard from "../../../components/ui/KPICard";
 
-import { House, Bed, HouseHeart, HousePlus, Zap, UserPlus2 } from "lucide-react";
+import {
+  House,
+  Bed,
+  HouseHeart,
+  HousePlus,
+  Zap,
+  UserPlus2,
+  VectorSquare
+} from "lucide-react";
 import { useManagerContext } from "../../../hook/useContext";
 import { useNavigate } from "react-router-dom";
 
@@ -22,13 +30,14 @@ function OwnerDashboard() {
   }, [fetchKostData]);
 
   const totalKost = kostData.length;
-  
+
   const totalRooms = kostData.reduce((acc, current) => {
     return acc + (current.rooms?.length || 0);
   }, 0);
 
   const occupiedRooms = kostData.reduce((acc, current) => {
-    const occupiedInThisKost = current.rooms?.filter(room => room.status === 'Occupied').length || 0;
+    const occupiedInThisKost =
+      current.rooms?.filter((room) => room.status === "Occupied").length || 0;
     return acc + occupiedInThisKost;
   }, 0);
 
@@ -43,24 +52,24 @@ function OwnerDashboard() {
 
       {/* KPI Card */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          <KPICard
-            title="Total Kost"
-            value={totalKost}
-            icon={<House className="text-blue-500" />}
-          />
-          <KPICard
-            title="Total Kamar"
-            value={totalRooms}
-            icon={<Bed className="text-purple-500" />}
-          />
-          <KPICard
-            title="Kamar Terisi"
-            value={occupiedRooms}
-            icon={<HouseHeart className="text-green-500" />}
-          />
+        <KPICard
+          title="Total Kost"
+          value={totalKost}
+          icon={<House className="text-blue-500" />}
+        />
+        <KPICard
+          title="Total Kamar"
+          value={totalRooms}
+          icon={<Bed className="text-purple-500" />}
+        />
+        <KPICard
+          title="Kamar Terisi"
+          value={occupiedRooms}
+          icon={<HouseHeart className="text-green-500" />}
+        />
       </div>
 
-    {/* CTA Links */}
+      {/* CTA Links */}
       <div className="bg-blue-50 p-6 rounded-xl border border-blue-100 shadow-sm w-fit">
         <div className="flex items-center gap-3 mb-6">
           <div className="p-2 bg-blue-500 rounded-lg text-white">
@@ -71,7 +80,7 @@ function OwnerDashboard() {
 
         <div className="flex flex-col gap-3 ">
           <button
-          onClick={()=>navigate("/admin/dashboard/manager/kost-form")}
+            onClick={() => navigate("/admin/dashboard/manager/kost-form")}
             className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg transition-all shadow-md group text-sm"
           >
             <HousePlus
@@ -82,13 +91,23 @@ function OwnerDashboard() {
           </button>
           <button
             className="flex items-center gap-2 bg-gray-400 hover:bg-gray-700 hover:text-white font-semibold py-2 px-4 rounded-lg transition-all shadow-md group text-sm"
-            onClick={()=>navigate('/admin/dashboard/manager/staff-form')}
+            onClick={() => navigate("/admin/dashboard/manager/staff-form")}
           >
             <UserPlus2
               size={18}
               className="group-hover:scale-110 transition-transform"
             />
             Tambah Staff Baru
+          </button>
+          <button
+            onClick={() => navigate("/admin/dashboard/manager/add-tipe")}
+            className="flex items-center gap-2 bg-gray-400 hover:bg-gray-700 hover:text-white font-semibold py-2 px-4 rounded-lg transition-all shadow-md group text-sm"
+          >
+            <VectorSquare
+              size={18}
+              className="group-hover:scale-110 transition-transform"
+            />
+            Tambah Tipe Rumah
           </button>
         </div>
       </div>

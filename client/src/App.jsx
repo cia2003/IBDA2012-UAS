@@ -35,6 +35,9 @@ import UserKostDetail from "./pages/user/UserKostDetail/UserKostDetail";
 // Other
 import NotFoundPage from "./pages/NotFoundPage";
 import "./style.css";
+import KostTipeForm from "./pages/admin/manager/KostTipeForm";
+import TipeKost from "./pages/admin/manager/TipeKost";
+import TipeDetail from "./pages/admin/manager/TipeDetail";
 
 const AdminProtectedRoute = ({ children, allowedRole }) => {
   const { adminIsLoggedIn, role } = useAppContext();
@@ -112,6 +115,10 @@ export default function App() {
           <Route index element={<OwnerDashboard />} />
           <Route path="kost" element={<Kost />} />
           <Route path="kost-form" element={<KostForm />} />
+          <Route path="add-tipe" element={<KostTipeForm />} />
+          <Route path="edit-tipe/:tipeId" element={<KostTipeForm />} />
+          <Route path="tipe-kost-detail/:tipeId" element={<TipeDetail />} />
+          <Route path="tipe-kost" element={<TipeKost />} />
           <Route path="edit-kost/:kostId" element={<KostForm />} />
           <Route path="kost-detail/:kostId" element={<KostDetail />} />
           <Route path="staff" element={<Staff />} />
