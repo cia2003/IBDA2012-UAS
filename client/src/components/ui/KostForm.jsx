@@ -11,7 +11,7 @@ const KostForm = () => {
   const isEditMode = Boolean(kostId);
 
   const [kostForm, setKostForm] = useState({
-    img: null,
+    image: null,
     name: "",
     address: "",
     description: "",
@@ -26,7 +26,7 @@ const KostForm = () => {
             name: oldData.name || "",
             address: oldData.address || "",
             description: oldData.description || "",
-            img: oldData.img || null,
+            image: oldData.image || null,
           });
         }
       };
@@ -50,18 +50,13 @@ const KostForm = () => {
         [fieldName]: value,
       }));
     }
-
-    setKostForm((prev) => ({
-      ...prev,
-      [fieldMap[kostId]]: value,
-    }));
   };
 
   const handleImageChange = (e) => {
     if (e.target.files && e.target.files[0]) {
       setKostForm((prev) => ({
         ...prev,
-        img: e.target.files[0],
+        image: e.target.files[0],
       }));
     }
   };
@@ -136,12 +131,12 @@ const KostForm = () => {
                   onChange={handleImageChange}
                 />
                 <div className="relative w-24 h-24 rounded-2xl border-2 border-dashed border-gray-200 flex items-center justify-center group-hover:border-blue-400 transition-all overflow-hidden">
-                  {kostForm.img ? (
+                  {kostForm.image ? (
                     <img
                       src={
-                        typeof kostForm.img === "string"
-                          ? kostForm.img
-                          : URL.createObjectURL(kostForm.img)
+                        typeof kostForm.image === "string"
+                          ? kostForm.image
+                          : URL.createObjectURL(kostForm.image)
                       }
                       alt="Preview"
                       className="w-full h-full object-cover"

@@ -3,7 +3,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework.permissions import IsAuthenticated
-from api.permissions import  IsAdminOrStaffOrSuperUser
+from api.permissions import  IsManagerOrStaffOrSuperUser
 from .models import Invoice
 from .serializers import InvoiceSerializer
 from django.http import Http404
@@ -18,7 +18,7 @@ class InvoiceListCreateView(APIView):
     def get_permissions(self):
         if self.request.method == 'POST':
             return [IsAuthenticated()]
-        return [IsAuthenticated(), IsAdminOrStaffOrSuperUser()]
+        return [IsAuthenticated(), IsManagerOrStaffOrSuperUser()]
 
     def get(self, request):
         Invoices = Invoice.objects.all().order_by('created_at')[:10]
@@ -42,7 +42,7 @@ class InvoiceDetailView(APIView):
     def get_permissions(self):
         if self.request.method == 'GET':
             return [IsAuthenticated()]
-        return [IsAuthenticated(), IsAdminOrStaffOrSuperUser()]
+        return [IsAuthenticated(), IsManagerOrStaffOrSuperUser()]
 
     def get_object(self, pk):
         try:

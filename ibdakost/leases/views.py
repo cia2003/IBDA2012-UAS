@@ -3,7 +3,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework.permissions import IsAuthenticated
-from api.permissions import  IsAdminOrStaffOrSuperUser
+from api.permissions import  IsManagerOrStaffOrSuperUser
 from .models import Lease
 from .serializers import LeaseSerializer
 from django.http import Http404
@@ -16,7 +16,7 @@ class LeaseListCreateView(APIView):
     def get_permissions(self):
         if self.request.method == 'POST':
             return [IsAuthenticated()]
-        return [IsAuthenticated(), IsAdminOrStaffOrSuperUser()]
+        return [IsAuthenticated(), IsManagerOrStaffOrSuperUser()]
 
     def get(self, request):
         leases = Lease.objects.all().order_by('created_at')[:10]
@@ -36,7 +36,7 @@ class LeaseDetailView(APIView):
     def get_permissions(self):
         if self.request.method == 'GET':
             return [IsAuthenticated()]
-        return [IsAuthenticated(), IsAdminOrStaffOrSuperUser()]
+        return [IsAuthenticated(), IsManagerOrStaffOrSuperUser()]
 
     def get_object(self, pk):
         try:

@@ -9,7 +9,7 @@ urlpatterns = [
   path('tenants/<uuid:id>/', views.TenantDetailView.as_view(), name='tenant-detail'),
 
   path('employees/', views.EmployeeListCreateView.as_view(), name='employee-list'),
-  path('employees/<uuid:id>/', views.EmployeeDetailView.as_view(), name='employee-detail'),
+  path('employees/<uuid:pk>/', views.EmployeeDetailView.as_view(), name='employee-detail'),
 
   path('groups/', views.GroupListCreateView.as_view(), name='group-list'),
   path('groups/<int:pk>/', views.GroupDetailView.as_view(), name='group-detail'),

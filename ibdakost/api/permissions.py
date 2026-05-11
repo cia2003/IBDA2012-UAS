@@ -7,13 +7,13 @@ class IsSuperUser(BasePermission):
     def has_permission(self, request, view):
         return request.user and request.user.is_authenticated and request.user.is_superuser
 
-class IsAdmin(BasePermission):
+class IsManager(BasePermission):
     """
-    Allows access to admin.
+    Allows access to Manager.
     """
 
     def has_permission(self, request, view):
-        return request.user and request.user.is_authenticated and request.user.groups.filter(name='admin').exists()
+        return request.user and request.user.is_authenticated and request.user.groups.filter(name='manager').exists()
 
 class IsStaff(BasePermission):
     """
@@ -23,40 +23,40 @@ class IsStaff(BasePermission):
     def has_permission(self, request, view):
         return request.user and request.user.is_authenticated and request.user.groups.filter(name='staff').exists()
 
-class IsAdminOrSuperUser(BasePermission):
+class IsManagerOrSuperUser(BasePermission):
     """
-    Allows access to admin and superusers.
+    Allows access to Manager and superusers.
     """
     def has_permission(self, request, view):
       return (
           request.user and request.user.is_authenticated and (
               request.user.is_superuser or
-              request.user.groups.filter(name='admin').exists()
+              request.user.groups.filter(name='manager').exists()
           )
       )
 
-class IsAdminOrStaffOrSuperUser(BasePermission):
+class IsManagerOrStaffOrSuperUser(BasePermission):
     """
-    Allows access to admin, kost staff, and superusers.
+    Allows access to Manager, staff, and superusers.
     """
     def has_permission(self, request, view):
       return (
           request.user and request.user.is_authenticated and (
               request.user.is_superuser or
-              request.user.groups.filter(name='admin').exists() or
+              request.user.groups.filter(name='manager').exists() or
               request.user.groups.filter(name='staff').exists()
           )
       )
 
-class IsOwnerOrAdminOrSuperUser(BasePermission):
+class IsOwnerOrManagerOrSuperUser(BasePermission):
     """
-    Allows access to the owner of the object, admin, and superusers.
+    Allows access to the owner of the object, Manager, and superusers.
     """
     def has_object_permission(self, request, view, obj):
         return (
             request.user and request.user.is_authenticated and (
                 request.user.is_superuser or
-                request.user.groups.filter(name='admin').exists() or
+                request.user.groups.filter(name='manager').exists() or
                 obj == request.user
             )
         )

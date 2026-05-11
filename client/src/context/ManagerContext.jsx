@@ -3,10 +3,13 @@ import {
   staff as staffListDummy, // Rename agar tidak bentrok dengan state
   kostData as initialKostDataDummy,
   ROOM_TYPES,
+  staff,
 } from "../assets/assets";
 import toast from "react-hot-toast";
-import { useNavigate } from "react-router-dom";
+import { Form, useNavigate } from "react-router-dom";
 import api from "../api/api";
+import { formDataApi } from "../api/api";
+import { useAppContext } from "../hook/useContext";
 
 export const ManagerContext = createContext();
 
@@ -14,23 +17,38 @@ export const ManagerContextProvider = ({ children }) => {
   const [staffList, setStaffList] = useState([]);
   const [initialKostData, setInitialKostData] = useState([]);
   const [tipeKost, setTipeKost] = useState([]);
+  const { userRegister } = useAppContext();
   const navigate = useNavigate();
+
+  // --- FETCHING DATA USERS ---
+  const getUsersData = useCallback(async () => {
+    try {
+      const response = await api.get('/users/');
+      return response.data.users || [];
+    } catch (error) {
+      console.error("Gagal mengambil data pengguna:", error);
+      // toast.error("Gagal mengambil data pengguna");
+    }
+  }, []);
 
   // --- FETCHING DATA STAFF ---
   const getStaffData = useCallback(async () => {
     try {
       // -- MODE BACKEND --
-      // const response = await api.get('/staff-data');
-      // if(response.data) {
-      //   setStaffList(response.data);
-      //   return response.data;
-      // }
+      const response = await api.get('employees/');
+      const { employees } = response.data;
+
+      if (employees) {
+        const staffOnly = employees.filter((staff) => staff.position === "staff");
+        setStaffList(staffOnly);
+        return staffOnly;
+      }
 
       // -- MODE DUMMY --
-      return staffListDummy;
+      // return staffListDummy;
     } catch (error) {
       console.error(error);
-      toast.error("Gagal mengambil data staff");
+      // toast.error("Gagal mengambil data staff");
     }
   }, []);
 
@@ -38,17 +56,19 @@ export const ManagerContextProvider = ({ children }) => {
   const getKostData = useCallback(async () => {
     try {
       // -- MODE BACKEND --
-      // const response = await api.get('/kost');
-      // if(response.data) {
-      //   setInitialKostData(response.data);
-      //   return response.data;
-      // }
+      const response = await formDataApi.get('kosts/');
+      const { kosts } = response.data;
+
+      if(kosts) {
+        setInitialKostData(kosts);
+        return kosts;
+      }
 
       // -- MODE DUMMY --
-      return initialKostDataDummy;
+      // return initialKostDataDummy;
     } catch (error) {
-      toast.error("Data kost gagal dimuat");
-      console.error(error.message);
+      // toast.error("Data kost gagal dimuat");
+      // console.error(error.message);
     }
   }, []);
 
@@ -56,16 +76,30 @@ export const ManagerContextProvider = ({ children }) => {
   const addKost = useCallback(async (kostForm) => {
     try {
       // -- MODE BACKEND --
-      // const response = await api.post("/add-kost", kostForm);
-      // if (response.data) {
-      //   toast.success("Kost Berhasil Ditambahkan");
-      //   return response.data;
-      // }
+      const formData = new FormData();
+      formData.append("name", kostForm.name);
+      formData.append("address", kostForm.address);
+      formData.append("description", kostForm.description);
+      if (kostForm.image) {
+        formData.append("image", kostForm.image);
+      }
+
+      for (let pair of formData.entries()) {
+        console.log(pair[0], pair[1]);
+      }
+      
+      const response = await formDataApi.post("kosts/", formData);
+      if (response.data) {
+        toast.success("Kost Berhasil Ditambahkan");
+        return response.data;
+      }
 
       // -- MODE DUMMY --
-      toast.success("Kost Berhasil Ditambahkan (Dummy)");
+      // toast.success("Kost Berhasil Ditambahkan (Dummy)");
     } catch (error) {
-      toast.error(error.response?.data?.message || "Kost gagal ditambahkan");
+      const errors = error.response?.data || {};
+      const errorMessages = Object.values(errors).flat();
+      toast.error(errorMessages.join("\n") || "Kost gagal ditambahkan");
     }
   }, []);
 
@@ -73,11 +107,11 @@ export const ManagerContextProvider = ({ children }) => {
   const getKostById = useCallback(async (id) => {
     try {
       // -- MODE BACKEND --
-      // const response = await api.get(`/kost/${id}`);
-      // return response.data;
+      const response = await formDataApi.get(`kosts/${id}`);
+      return response.data;
 
       // -- MODE DUMMY --
-      return initialKostDataDummy.find((k) => String(k.id) === String(id));
+      // return initialKostDataDummy.find((k) => String(k.id) === String(id));
     } catch (error) {
       toast.error("Data Kost gagal dimuat");
       console.error(error.message);
@@ -87,20 +121,20 @@ export const ManagerContextProvider = ({ children }) => {
   // --- Tambah Tipe Kost (Bukan Gedung) ---
   const addTipeKost = useCallback(
     async (formData) => {
-      // try {
-      //   const { data } = await api.post("/tambah-tipe", {
-      //     name: formData.name,
-      //     size: formData.price,
-      //     price: formData.price,
-      //     description: formData.description,
-      //   });
-      //   if (data) {
-      //     toast.success("Tipe Kamar berhasil ditambahkan");
-      //     navigate("/admin/dashboard/manager");
-      //   }
-      // } catch (error) {
-      //   console.error(error.message);
-      // }
+      try {
+        const { data } = await formDataApi.post("roomtypes/", {
+          name: formData.name,
+          size: formData.price,
+          price: formData.price,
+          description: formData.description,
+        });
+        if (data) {
+          toast.success("Tipe Kamar berhasil ditambahkan");
+          navigate("/admin/dashboard/manager");
+        }
+      } catch (error) {
+        console.error(error.message);
+      }
       toast.success("Tipe baru berhasil ditambahkan")
     },
     [navigate],
@@ -109,20 +143,20 @@ export const ManagerContextProvider = ({ children }) => {
   // --- Edit tipe kost ---
   const editTipeKost = useCallback(
     async (editForm) => {
-      // try {
-      //   const { data } = api.put("/edit-tipe", {
-      //     name: formData.name,
-      //     size: formData.price,
-      //     price: formData.price,
-      //     description: formData.description,
-      //   });
-      //   if (data) {
-      //     toast.success("Tipe Kamar berhasil diperbaharui");
-      //     navigate("/admin/dashboard/manager");
-      //   }
-      // } catch (error) {
-      //   console.error(error.message);
-      // }
+      try {
+        const { data } = await formDataApi.put(`roomtypes/${editForm.id}/`, {
+          name: editForm.name,
+          size: editForm.price,
+          price: editForm.price,
+          description: editForm.description,
+        });
+        if (data) {
+          toast.success("Tipe Kamar berhasil diperbaharui");
+          navigate("/admin/dashboard/manager");
+        }
+      } catch (error) {
+        console.error(error.message);
+      }
       toast.success("Tipe berhasil diperbaharui")
     },
     [navigate],
@@ -131,16 +165,18 @@ export const ManagerContextProvider = ({ children }) => {
   // --- Ambil Data Tipe ---
   const getTipeKost = useCallback(async () => {
     try {
-      // const {data} = await api.get('tipe-kost')
-      // if(data){
-      //   setTipeKost(data || [])
-      // }
-      // return data
+      const response = await formDataApi.get('roomtypes/');
+      const { roomtypes } = response.data;
 
-      const data = Array.isArray(ROOM_TYPES)
-        ? ROOM_TYPES
-        : Object.values(ROOM_TYPES);
-      return data;
+      if(roomtypes) {
+        setTipeKost(roomtypes || []);
+        return roomtypes;
+      }
+
+      // const data = Array.isArray(ROOM_TYPES)
+      //   ? ROOM_TYPES
+      //   : Object.values(ROOM_TYPES);
+      // return data;
     } catch (error) {
       console.error(error.message);
       return [];
@@ -150,10 +186,11 @@ export const ManagerContextProvider = ({ children }) => {
   // --- Ambil berdasarkan Id ---
   const getTipeById = useCallback(async (id) => {
     try {
-      // const { data } = await api.get(`/tipe-kost/${id}`);
-      // if (data) {
-      //   return data;
-      // }
+      const response = await formDataApi.get(`roomtypes/${id}`);
+      const { data } = response.data;
+      if (data) {
+        return data;
+      }
 
       const dataArray = Object.values(ROOM_TYPES);
 
@@ -179,17 +216,55 @@ export const ManagerContextProvider = ({ children }) => {
     async (staffForm) => {
       try {
         // -- MODE BACKEND --
-        // const response = await api.post("/add-staff", staffForm);
-        // if (response.data) {
-        //   toast.success("Staff Berhasil Ditambahkan");
-        //   navigate("/admin/dashboard/manager");
-        // }
+        const userData = {
+          "first_name": staffForm.firstName,
+          "last_name": staffForm.lastName,
+          "email": staffForm.email,
+          "password": staffForm.password,
+          "is_staff": true
+        };
+
+        const user = await userRegister(userData);
+
+        if (user) {
+          toast.success("User untuk staff berhasil dibuat");
+
+          const userId = user?.id;
+          let staffData;
+
+          if (staffForm.assignedKostId) {
+            staffData = {
+              "user": userId,
+              "kost": staffForm.assignedKostId,
+              "position": staffForm.position,
+              "phone_number": staffForm.phoneNumber
+            };
+          } else {
+            staffData = {
+              "user": userId,
+              "position": staffForm.position,
+              "phone_number": staffForm.phoneNumber
+            };
+          }
+
+          const staffResponse = await api.post("employees/", staffData);
+
+          console.log("Response dari penambahan staff:", staffResponse);
+
+          if (staffResponse?.data) {
+            toast.success("Staff Berhasil Ditambahkan");
+            navigate("/admin/dashboard/manager");
+          }
+        }
 
         // -- MODE DUMMY --
-        toast.success("Staff Berhasil Ditambahkan (Dummy)");
-        navigate("/admin/dashboard/manager");
+        // toast.success("Staff Berhasil Ditambahkan (Dummy)");
+        // navigate("/admin/dashboard/manager");
       } catch (error) {
-        toast.error(error.response?.data?.message || "Staff gagal ditambahkan");
+        const errors = error.response?.data || {};
+        const errorMessages = Object.values(errors).flat();
+        toast.error(errorMessages.join("\n") || "Staff gagal ditambahkan");
+        // toast.error(error.response?.data?.message || "Staff gagal ditambahkan");
       }
     },
     [navigate],
@@ -200,13 +275,13 @@ export const ManagerContextProvider = ({ children }) => {
     async (kostId, kostForm) => {
       try {
         // -- MODE BACKEND --
-        // const response = await api.put(`/edit-kost/${kostId}`, kostForm);
-        // if (response.data) {
-        //   toast.success("Kost Berhasil Diperbaharui");
-        // }
+        const response = await api.put(`/kosts/${kostId}`, kostForm);
+        if (response.data) {
+          toast.success("Kost Berhasil Diperbaharui");
+        }
 
         // -- MODE DUMMY --
-        toast.success("Kost Berhasil Diperbaharui (Dummy)");
+        // toast.success("Kost Berhasil Diperbaharui (Dummy)");
         navigate("/admin/dashboard/manager");
       } catch (error) {
         toast.error("Kost gagal diperbaharui");
@@ -286,6 +361,7 @@ export const ManagerContextProvider = ({ children }) => {
       addTipeKost,
       editTipeKost,
       tipeKost,
+      getUsersData,
       getStaffData,
       getKostData,
       addKost,
@@ -304,6 +380,7 @@ export const ManagerContextProvider = ({ children }) => {
       addTipeKost,
       editTipeKost,
       tipeKost,
+      getUsersData,
       getStaffData,
       getKostData,
       addKost,

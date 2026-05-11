@@ -75,7 +75,9 @@ export const AppContextProvider = ({ children }) => {
   const navigate = useNavigate();
   const [state, dispatch] = useReducer(AuthReducer, initialState);
 
-  const role = state.staffData?.role ?? null;
+  const isManager = state.staffData?.groups?.includes("manager") ?? false;
+  const isStaff = state.staffData?.groups?.includes("staff") ?? false;
+  const role = isManager ? "manager" : isStaff ? "staff" : null;
 
   const filteredRooms = useMemo(() => {
     if (!state.staffData) return [];
@@ -93,20 +95,29 @@ export const AppContextProvider = ({ children }) => {
         dispatch({ type: "AUTH_START" });
 
         // --- MODE DUMMY ---
-        const user = staffList.find(
-          (s) => s.email === email && s.password === password,
-        );
+        // const user = staffList.find(
+        //   (s) => s.email === email && s.password === password,
+        // );
 
         // --- MODE BACKEND ---
-        // const response = await api.post('/admin/login', { email, password });
+        const response = await api.post('login/', { email, password });
+        const { access, refresh, user } = response.data; // Sesuaikan jika backend mengembalikan { access, refresh, user }
         // const user = response.data.user; // Sesuaikan jika backend mengembalikan { data: { user: ... } }
 
         if (user) {
+          localStorage.setItem("accessToken", access);
+          localStorage.setItem("refreshToken", refresh);
+
           dispatch({ type: "ADMIN_LOGIN_SUCCESS", payload: user });
-          toast.success(`Selamat Datang, ${user.name}!`);
-          if (user.role === "manager") {
+          toast.success(`Selamat Datang, ${user.first_name}!`);
+
+          const isManager = user?.groups?.includes("manager");
+          const isStaff = user?.groups?.includes("staff");
+          const role = isManager ? "manager" : isStaff ? "staff" : null;
+
+          if (isManager) {
             navigate("/admin/dashboard/manager");
-          } else {
+          } else if (isStaff) {
             navigate(`/admin/dashboard/${user.id}`);
           }
         } else {
@@ -130,6 +141,9 @@ export const AppContextProvider = ({ children }) => {
       // await api.post('/admin/logout');
 
       // --- LOGIKA CLIENT SIDE ---
+      localStorage.removeItem("accessToken");
+      localStorage.removeItem("refreshToken");
+
       dispatch({ type: "ADMIN_LOGOUT" });
       toast.success("Logout Berhasil");
       navigate("/");
@@ -144,9 +158,14 @@ export const AppContextProvider = ({ children }) => {
     async (email, password) => {
       dispatch({ type: "AUTH_START" });
       try {
-        const { data } = await api.post("/user/login", { email, password });
-        if (data) {
-          dispatch({ type: "USER_LOGIN_SUCCESS", payload: data });
+        const response = await api.post('login/', { email, password });
+        const { access, refresh, user } = response.data; // Sesuaikan jika backend mengembalikan { access, refresh, user }
+
+        if (user) {
+          localStorage.setItem("accessToken", access);
+          localStorage.setItem("refreshToken", refresh);
+
+          dispatch({ type: "USER_LOGIN_SUCCESS", payload: user });
           toast.success("Login berhasil");
         } else {
           toast.error("Login gagal");
@@ -161,7 +180,10 @@ export const AppContextProvider = ({ children }) => {
 
   const userLogout = useCallback(async () => {
     try {
-      await api.get("/user/logout");
+      // await api.get("/user/logout");
+      localStorage.removeItem("accessToken");
+      localStorage.removeItem("refreshToken");
+
       dispatch({ type: "USER_LOGOUT" });
       toast.success("Logout Berhasil");
       navigate("/");
@@ -175,12 +197,16 @@ export const AppContextProvider = ({ children }) => {
   const userRegister = useCallback(async (formData) => {
     dispatch({ type: "AUTH_START" });
     try {
-      const { data } = await api.post("/user/post/register", formData);
+      const { data } = await api.post("users/", formData);
       if (data) {
         dispatch({ type: "USER_LOGIN_SUCCESS", payload: data });
         toast.success("Register berhasil");
+        return data;
       }
-    } catch (error) {}
+    } catch (error) {
+      toast.error("Register gagal");
+      console.error(error.message);
+    }
   });
 
   const checkAuthStatus = useCallback(async () => {

@@ -42,7 +42,7 @@ class UserSerializer(serializers.ModelSerializer):
  
     class Meta:
         model = User
-        fields = ['id', 'first_name', 'last_name', 'email', 'password', 'is_active', 'created_at', 'updated_at', '_links']
+        fields = ['id', 'first_name', 'last_name', 'email', 'password', 'is_active', 'is_staff', 'created_at', 'updated_at', '_links']
         extra_kwargs = {
             'password': {'write_only': True}
         }
@@ -69,6 +69,10 @@ class UserSerializer(serializers.ModelSerializer):
 
         instance.save()
         return instance
+    
+    def delete(self, instance):
+        instance.groups.clear()  # Hapus semua grup yang terkait dengan user
+        instance.delete()
     
     def get__links(self, obj):
         request = self.context.get('request')

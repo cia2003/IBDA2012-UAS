@@ -47,7 +47,7 @@ class Migration(migrations.Migration):
                 ('occupation', models.CharField(max_length=255)),
                 ('institution', models.CharField(max_length=255)),
                 ('identity_type', models.CharField(max_length=100)),
-                ('identity_card', models.ImageField(upload_to='identity_cards/', validators=[api.validators.validate_image_type, api.validators.validate_ktp_image_size])),
+                ('identity_card', models.ImageField(upload_to='identity_cards/', validators=[api.validators.validate_ktp_image_size])),
                 ('created_at', models.DateTimeField(auto_now_add=True)),
                 ('updated_at', models.DateTimeField(auto_now=True)),
             ],

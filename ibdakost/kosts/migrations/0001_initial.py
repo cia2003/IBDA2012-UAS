@@ -20,7 +20,7 @@ class Migration(migrations.Migration):
                 ('name', models.CharField(max_length=255)),
                 ('address', models.TextField()),
                 ('description', models.TextField()),
-                ('image', models.ImageField(upload_to='kost_images/', validators=[kosts.validators.validate_file_size, kosts.validators.validate_image_type])),
+                ('image', models.ImageField(upload_to='kost_images/', validators=[kosts.validators.validate_file_size])),
                 ('created_at', models.DateTimeField(auto_now_add=True)),
                 ('updated_at', models.DateTimeField(auto_now=True)),
             ],

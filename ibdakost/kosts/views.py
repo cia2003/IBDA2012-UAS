@@ -5,7 +5,7 @@ from rest_framework.views import APIView
 from django.contrib.auth.models import Group
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework.permissions import IsAuthenticated
-from api.permissions import IsAdminOrSuperUser
+from api.permissions import IsManagerOrSuperUser
 from .serializers import KostSerializer
 from .models import Kost
 from django.http import Http404
@@ -17,7 +17,7 @@ class KostListCreateView(APIView):
     def get_permissions(self):
         if self.request.method == 'GET':
             return [IsAuthenticated()]
-        return [IsAuthenticated(), IsAdminOrSuperUser()]
+        return [IsAuthenticated(), IsManagerOrSuperUser()]
 
     def get(self, request):
         kosts = Kost.objects.all().order_by('created_at')[:10]
@@ -36,7 +36,7 @@ class KostDetailView(APIView):
 
     def get_permissions(self):
         if self.request.method == 'DELETE':
-            return [IsAuthenticated(), IsAdminOrSuperUser()]
+            return [IsAuthenticated(), IsManagerOrSuperUser()]
         return [IsAuthenticated()]
 
     def get_object(self, pk):

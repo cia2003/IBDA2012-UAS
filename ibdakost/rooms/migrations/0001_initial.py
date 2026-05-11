@@ -48,7 +48,7 @@ class Migration(migrations.Migration):
                 ('id', models.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False)),
                 ('name', models.CharField(max_length=255)),
                 ('is_available', models.BooleanField(default=True)),
-                ('image', models.ImageField(upload_to='room_images/', validators=[kosts.validators.validate_image_type, kosts.validators.validate_file_size])),
+                ('image', models.ImageField(upload_to='room_images/', validators=[kosts.validators.validate_file_size])),
                 ('created_at', models.DateTimeField(auto_now_add=True)),
                 ('updated_at', models.DateTimeField(auto_now=True)),
                 ('kost', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='kosts.kost')),

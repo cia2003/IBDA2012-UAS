@@ -5,7 +5,7 @@ from rest_framework.views import APIView
 from django.contrib.auth.models import Group
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework.permissions import IsAuthenticated
-from api.permissions import IsAdminOrStaffOrSuperUser, IsAdminOrSuperUser
+from api.permissions import IsManagerOrStaffOrSuperUser, IsManagerOrSuperUser
 from .serializers import RoomTypeSerializer, FacilitySerializer, RoomSerializer
 from .models import RoomType, Facility, Room
 from django.http import Http404
@@ -17,7 +17,7 @@ class RoomListCreateView(APIView):
     def get_permissions(self):
         if self.request.method == 'GET':
             return [IsAuthenticated()]
-        return [IsAuthenticated(), IsAdminOrStaffOrSuperUser()]
+        return [IsAuthenticated(), IsManagerOrStaffOrSuperUser()]
 
     def get(self, request):
         rooms = Room.objects.all().order_by('created_at')[:10]
@@ -36,7 +36,7 @@ class RoomDetailView(APIView):
 
     def get_permissions(self):
         if self.request.method == 'DELETE':
-            return [IsAuthenticated(), IsAdminOrStaffOrSuperUser()]
+            return [IsAuthenticated(), IsManagerOrStaffOrSuperUser()]
         return [IsAuthenticated()]
         # return []
 
@@ -70,7 +70,7 @@ class RoomTypeListCreateView(APIView):
     def get_permissions(self):
         if self.request.method == 'GET':
             return [IsAuthenticated()]
-        return [IsAuthenticated(), IsAdminOrStaffOrSuperUser()]
+        return [IsAuthenticated(), IsManagerOrStaffOrSuperUser()]
         # return []
 
     def get(self, request):
@@ -91,7 +91,7 @@ class FacilityListCreateView(APIView):
     def get_permissions(self):
         if self.request.method == 'GET':
             return [IsAuthenticated()]
-        return [IsAuthenticated(), IsAdminOrStaffOrSuperUser()]
+        return [IsAuthenticated(), IsManagerOrStaffOrSuperUser()]
 
     def get(self, request):
         facilities = Facility.objects.all().order_by('created_at')[:10]
@@ -111,7 +111,7 @@ class RoomTypeDetailView(APIView):
 
     def get_permissions(self):
         if self.request.method == 'DELETE':
-            return [IsAuthenticated(), IsAdminOrStaffOrSuperUser()]
+            return [IsAuthenticated(), IsManagerOrStaffOrSuperUser()]
         return [IsAuthenticated()]
         # return []
 
@@ -144,7 +144,7 @@ class FacilityDetailView(APIView):
 
     def get_permissions(self):
         if self.request.method == 'DELETE':
-            return [IsAuthenticated(), IsAdminOrStaffOrSuperUser()]
+            return [IsAuthenticated(), IsManagerOrStaffOrSuperUser()]
         return [IsAuthenticated()]
         # return []
 

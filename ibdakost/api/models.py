@@ -2,7 +2,7 @@ import uuid
 from django.db import models
 from django.contrib.auth.models import AbstractBaseUser
 from kosts.models import Kost
-from .validators import validate_ktp_image_size, validate_image_type
+from .validators import validate_ktp_image_size
 
 # Create your models here.
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin
@@ -52,7 +52,7 @@ class Tenant(models.Model):
     occupation = models.CharField(max_length=255)
     institution = models.CharField(max_length=255)
     identity_type = models.CharField(max_length=100)
-    identity_card = models.ImageField(upload_to='identity_cards/', validators=[validate_image_type, validate_ktp_image_size])
+    identity_card = models.ImageField(upload_to='identity_cards/', validators=[validate_ktp_image_size])
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)

@@ -76,10 +76,10 @@ function OccupantForm() {
       >
         <div className="p-6 md:p-12">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-y-6 gap-x-8">
-            {/* Nama Lengkap */}
+            {/* Nama Depan */}
             <div className="space-y-2">
               <label className="text-[10px] font-bold text-gray-400 uppercase tracking-[0.15em] ml-1">
-                Nama Lengkap
+                Nama Depan
               </label>
               <div className="relative group">
                 <User
@@ -88,9 +88,30 @@ function OccupantForm() {
                 />
                 <input
                   className="w-full outline-none py-3 sm:py-3.5 pl-12 pr-4 rounded-2xl border border-gray-100 bg-gray-50 focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-50 transition-all font-semibold text-gray-700 text-sm sm:text-base"
-                  value={formData.name}
+                  value={formData.firstName}
                   onChange={(e) =>
-                    setFormData({ ...formData, name: e.target.value })
+                    setFormData({ ...formData, firstName: e.target.value })
+                  }
+                  required
+                />
+              </div>
+            </div>
+
+            {/* Nama Belakang */}
+            <div className="space-y-2">
+              <label className="text-[10px] font-bold text-gray-400 uppercase tracking-[0.15em] ml-1">
+                Nama Belakang
+              </label>
+              <div className="relative group">
+                <User
+                  className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-300 group-focus-within:text-blue-500 transition-colors"
+                  size={20}
+                />
+                <input
+                  className="w-full outline-none py-3 sm:py-3.5 pl-12 pr-4 rounded-2xl border border-gray-100 bg-gray-50 focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-50 transition-all font-semibold text-gray-700 text-sm sm:text-base"
+                  value={formData.lastName}
+                  onChange={(e) =>
+                    setFormData({ ...formData, lastName: e.target.value })
                   }
                   required
                 />

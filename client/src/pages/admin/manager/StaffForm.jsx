@@ -11,10 +11,11 @@ function StaffForm() {
   const formRole = Boolean(staffId);
   const [kostList, setKostList] = useState([]);
   const [formData, setFormData] = useState({
-    name: "",
-    role: "staff",
-    telephone: "",
-    assignedKost: "",
+    firstName: "",
+    lastName: "",
+    position: "staff",
+    phoneNumber: "",
+    assignedKostId: "",
     email: "",
     password: ""
   });
@@ -28,10 +29,11 @@ function StaffForm() {
             console.log("Data ditemukan:", data); // Debugging
             if (data) {
                 setFormData({
-                    name: data.name || "",
-                    role: data.role || "",
-                    telephone: data.telephone || "",
-                    assignedKost: data.assignedKost || "",
+                    firstName: data.firstName || "",
+                    lastName: data.lastName || "",
+                    position: data.position || "",
+                    phoneNumber: data.phoneNumber || "",
+                    assignedKostId: data.assignedKost?.id || "",
                     email: data.email || "",
                     password: data.password || ""
                 });
@@ -89,20 +91,32 @@ function StaffForm() {
       <div className="bg-white p-6 rounded-[1.5rem] shadow-sm border border-gray-100">
         <form onSubmit={handleSubmit} className="grid grid-cols-1 lg:grid-cols-2 gap-4">
           <div className="flex flex-col gap-2">
-            <label className="text-sm font-bold text-gray-700">Nama Lengkap</label>
+            <label className="text-sm font-bold text-gray-700">Nama Depan</label>
             <input 
-              name="name"
+              name="firstName"
               type="text" 
-              value={formData.name} 
+              value={formData.firstName} 
               onChange={handleChange} 
-              placeholder="Masukan nama staff..."
+              placeholder="Masukan nama depan staff..."
+              className="border p-3 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none"
+            />
+          </div>
+
+          <div className="flex flex-col gap-2">
+            <label className="text-sm font-bold text-gray-700">Nama Belakang</label>
+            <input 
+              name="lastName"
+              type="text" 
+              value={formData.lastName} 
+              onChange={handleChange} 
+              placeholder="Masukan nama belakang staff..."
               className="border p-3 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none"
             />
           </div>
 
           <div className="flex flex-col gap-2">
             <label className="text-sm font-bold text-gray-700">Jabatan</label>
-            <select name="role" value={formData.role} onChange={handleChange} className="border p-3 rounded-xl">
+            <select name="position" value={formData.position} onChange={handleChange} className="border p-3 rounded-xl">
               <option value="staff">Staff</option>
               <option value="manager">Manager</option>
             </select>
@@ -110,12 +124,17 @@ function StaffForm() {
 
           <div className="flex flex-col gap-2">
             <label className="text-sm font-bold text-gray-700">Penempatan Kost</label>
-            <select name="assignedKost" value={formData.assignedKost} onChange={handleChange} className="border p-3 rounded-xl">
+            <select name="assignedKostId" value={formData.assignedKostId} onChange={handleChange} className="border p-3 rounded-xl">
               <option value="">Pilih Kost...</option>
               {kostList.map((k) => (
-                <option key={k.id} value={k.name}>{k.name}</option>
+                <option key={k.id} value={k.id}>{k.name}</option>
               ))}
             </select>
+          </div>
+
+          <div className="flex flex-col gap-2">
+            <label className="text-sm font-bold text-gray-700">Nomor Telepon</label>
+            <input name="phoneNumber" type="text" value={formData.phoneNumber} onChange={handleChange} className="border p-3 rounded-xl"/>
           </div>
 
           <div className="flex flex-col gap-2">

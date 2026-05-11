@@ -3,17 +3,36 @@ import { useEffect, useState } from "react";
 import { useManagerContext } from "../../../hook/useContext";
 import Table from "../../../components/ui/Table";
 import { useNavigate } from "react-router-dom";
+import api from "../../../api/api";
+
 
 function Staff() {
   const navigate = useNavigate();
   const [staff, setStaff] = useState([]);
-  const { getStaffData, editStaff, deleteStaff } = useManagerContext();
+  const { getUsersData, getKostData, getStaffData, editStaff, deleteStaff } = useManagerContext();
 
   useEffect(() => {
     const fetchStaff = async () => {
+      const users = await getUsersData();
+      const kostData = await getKostData();
       const data = await getStaffData();
+
       if (data) {
-        setStaff(data);
+        const enrichedStaff = data.map((item) => {
+          const user = users.find(u => u.id === item.user);
+          const kost = kostData.find(k => k.id === item.kost);
+
+          return {
+            name: `${user.first_name} ${user.last_name}`,
+            phone_number: item.phone_number,
+            assignedKost: kost ? kost.name : "Belum Ditentukan",
+            email: user.email,
+          };
+        });
+        setStaff(enrichedStaff);
+
+      } else {
+        console.error("Gagal mengambil data staff");
       }
     };
     fetchStaff();
@@ -46,7 +65,7 @@ function Staff() {
     },
     {
       header: "No Telepon",
-      accessor: "telephone",
+      accessor: "phone_number",
       cell: (val) => <span className="text-gray-600 font-medium">{val}</span>,
     },
     { header: "Email", accessor: "email" },
