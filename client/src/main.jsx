@@ -20,5 +20,5 @@ createRoot(document.getElementById("root")).render(
         </StaffContextProvider>
       </ManagerContextProvider>
     </AppContextProvider>
-  </BrowserRouter>
+  </BrowserRouter>,
 );

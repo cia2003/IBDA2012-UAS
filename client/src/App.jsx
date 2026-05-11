@@ -24,21 +24,22 @@ import Kost from "./pages/admin/manager/Kost";
 import Staff from "./pages/admin/manager/Staff";
 import StaffForm from "./pages/admin/manager/StaffForm";
 import KostDetail from "./pages/admin/manager/KostDetail";
+import KostTipeForm from "./pages/admin/manager/KostTipeForm";
+import TipeKost from "./pages/admin/manager/TipeKost";
+import TipeDetail from "./pages/admin/manager/TipeDetail";
 
 // User Pages
 import Home from "./pages/user/Home/Home";
 import User from "./pages/user/User";
 import WishList from "./pages/user/WishList";
-import UserLogin from "./pages/user/UserLogin";
+import UserLogin from "./pages/user/UserLogin/UserLogin";
 import UserKostDetail from "./pages/user/UserKostDetail/UserKostDetail";
+import UserRoomDetail from "./pages/user/UserRoomDetail/UserRoomDetail";
+import RegistrationForm from "./pages/user/RegistrationForm/RegistrationForm";
 
 // Other
 import NotFoundPage from "./pages/NotFoundPage";
 import "./style.css";
-import KostTipeForm from "./pages/admin/manager/KostTipeForm";
-import TipeKost from "./pages/admin/manager/TipeKost";
-import TipeDetail from "./pages/admin/manager/TipeDetail";
-import UserRoomDetail from "./pages/user/UserRoomDetail/UserRoomDetail";
 
 const AdminProtectedRoute = ({ children, allowedRole }) => {
   const { adminIsLoggedIn, role } = useAppContext();
@@ -76,17 +77,25 @@ export default function App() {
           <Route index element={<Home />} />
           <Route path="kost" element={<h1>Semua Kost</h1>} />
           <Route path="kost/:kostId" element={<UserKostDetail />} />
-          <Route path='kost/:kostId/:roomId' element={<UserRoomDetail />} />
-          <Route path="login" element={<UserLogin />} />
+          <Route path="kost/:kostId/:roomId" element={<UserRoomDetail />} />
           <Route
-            path="favorite"
+            path="wishlist"
             element={
               <UserProtectedRoute>
                 <WishList />
               </UserProtectedRoute>
             }
           />
+          <Route
+            path="/registration/:kostId/:roomId"
+            element={
+              <UserProtectedRoute>
+                <RegistrationForm />
+              </UserProtectedRoute>
+            }
+          />
         </Route>
+        <Route path="/login" element={<UserLogin />} />
 
         {/* ── Staff Routes ── */}
         <Route

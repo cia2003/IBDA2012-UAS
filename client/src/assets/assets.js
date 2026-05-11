@@ -243,16 +243,24 @@ export const newTenant = [
 ];
 export const User = [
   {
-    id: 'U01',
-    name: 'Joshua',
-    email: 'calvinjoshua37@gmail.com',
-    password: 'user123',
-    favorite: [
-      {
-        kostId: "K03",
-        roomKost: "C01"
-      }
-    ]
+    id: "U01",
+    name: "Joshua",
+    email: "calvinjoshua37@gmail.com",
+    password: "user123",
+    wishlist: [
+      { id: "WL01", kostId: "K01", roomId: "A02" }, // IBDA Kost A - Kamar 102 (Available)
+      { id: "WL02", kostId: "K03", roomId: "C02" }, // IBDA Kost C - Kamar 302 (Available)
+    ],
   },
-
-]
+  {
+    id: "U02",
+    name: "Siti",
+    email: "siti@email.com",
+    password: "siti123",
+    wishlist: [
+      { id: "WL03", kostId: "K02", roomId: "B01" }, // IBDA Kost B - Kamar 201 (Available)
+      { id: "WL04", kostId: "K02", roomId: "B03" }, // IBDA Kost B - Kamar 203 (Available)
+      { id: "WL05", kostId: "K01", roomId: "A02" }, // IBDA Kost A - Kamar 102 (Available)
+    ],
+  },
+];

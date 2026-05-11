@@ -10,7 +10,7 @@ import { useNavigate } from "react-router-dom";
 import {
   kostData as initialKostData,
   staff as staffList,
-  newTenant,
+  User as userList,
 } from "../assets/assets";
 import toast from "react-hot-toast";
 import api from "../api/api";
@@ -99,7 +99,7 @@ export const AppContextProvider = ({ children }) => {
 
         // --- MODE BACKEND ---
         // const response = await api.post('/admin/login', { email, password });
-        // const user = response.data.user; // Sesuaikan jika backend mengembalikan { data: { user: ... } }
+        // const user = response.data.user;
 
         if (user) {
           dispatch({ type: "ADMIN_LOGIN_SUCCESS", payload: user });
@@ -115,7 +115,7 @@ export const AppContextProvider = ({ children }) => {
       } catch (error) {
         const errorMsg =
           error.response?.data?.message || error.message || "Terjadi kesalahan";
-        dispatch({ type: "LOGIN_FAILURE", payload: errorMsg });
+        dispatch({ type: "AUTH_FAILURE", payload: errorMsg });
         toast.error(errorMsg);
         console.error(errorMsg);
       }
@@ -129,66 +129,116 @@ export const AppContextProvider = ({ children }) => {
       // --- MODE BACKEND ---
       // await api.post('/admin/logout');
 
-      // --- LOGIKA CLIENT SIDE ---
       dispatch({ type: "ADMIN_LOGOUT" });
       toast.success("Logout Berhasil");
       navigate("/");
     } catch (error) {
       console.error(error.message);
-      dispatch({ type: "LOGOUT" });
+      dispatch({ type: "ADMIN_LOGOUT" });
       navigate("/");
     }
   }, [navigate]);
 
+  // Login user (dummy)
   const userLogin = useCallback(
     async (email, password) => {
       dispatch({ type: "AUTH_START" });
       try {
-        const { data } = await api.post("/user/login", { email, password });
-        if (data) {
-          dispatch({ type: "USER_LOGIN_SUCCESS", payload: data });
-          toast.success("Login berhasil");
+        // --- MODE DUMMY ---
+        const user = userList.find(
+          (u) => u.email === email && u.password === password,
+        );
+
+        // --- MODE BACKEND ---
+        // const { data } = await api.post("/user/login", { email, password });
+        // if (data) {
+        //   dispatch({ type: "USER_LOGIN_SUCCESS", payload: data });
+        //   toast.success("Login berhasil");
+        //   navigate("/");
+        // }
+
+        if (user) {
+          dispatch({ type: "USER_LOGIN_SUCCESS", payload: user });
+          toast.success(`Selamat Datang, ${user.name}!`);
+          navigate("/");
         } else {
-          toast.error("Login gagal");
+          throw new Error("Email atau Password salah!");
         }
       } catch (error) {
-        toast.error("Email atau Password Salah!");
-        console.error(error.message);
+        const errorMsg =
+          error.response?.data?.message || error.message || "Terjadi kesalahan";
+        dispatch({ type: "AUTH_FAILURE", payload: errorMsg });
+        toast.error(errorMsg);
+        console.error(errorMsg);
       }
     },
     [navigate],
   );
 
+  // Logout user
   const userLogout = useCallback(async () => {
     try {
-      await api.get("/user/logout");
+      // --- MODE BACKEND ---
+      // await api.get("/user/logout");
+
       dispatch({ type: "USER_LOGOUT" });
       toast.success("Logout Berhasil");
       navigate("/");
     } catch (error) {
       console.error(error.message);
-      dispatch({ type: "LOGOUT" });
+      dispatch({ type: "USER_LOGOUT" });
       navigate("/");
     }
-  });
+  }, [navigate]);
 
-  const userRegister = useCallback(async (formData) => {
-    dispatch({ type: "AUTH_START" });
-    try {
-      const { data } = await api.post("/user/post/register", formData);
-      if (data) {
-        dispatch({ type: "USER_LOGIN_SUCCESS", payload: data });
-        toast.success("Register berhasil");
+  // Register user (dummy)
+  const userRegister = useCallback(
+    async (formData) => {
+      dispatch({ type: "AUTH_START" });
+      try {
+        // --- MODE DUMMY ---
+        // Cek apakah email sudah terdaftar
+        const existingUser = userList.find((u) => u.email === formData.email);
+        if (existingUser) {
+          throw new Error("Email sudah terdaftar!");
+        }
+
+        // Buat user baru dan simpan ke state (tidak persisten, hanya di session)
+        const newUser = {
+          id: `U${Date.now()}`,
+          name: formData.name,
+          email: formData.email,
+          password: formData.password,
+          favorite: [],
+        };
+
+        // --- MODE BACKEND ---
+        // const { data } = await api.post("/user/post/register", formData);
+        // if (data) {
+        //   dispatch({ type: "USER_LOGIN_SUCCESS", payload: data });
+        //   toast.success("Register berhasil");
+        //   navigate("/");
+        // }
+
+        dispatch({ type: "USER_LOGIN_SUCCESS", payload: newUser });
+        toast.success("Register Berhasil! Selamat Datang!");
+        navigate("/");
+      } catch (error) {
+        const errorMsg =
+          error.response?.data?.message || error.message || "Terjadi kesalahan";
+        dispatch({ type: "AUTH_FAILURE", payload: errorMsg });
+        toast.error(errorMsg);
+        console.error(errorMsg);
       }
-    } catch (error) {}
-  });
+    },
+    [navigate],
+  );
 
   const checkAuthStatus = useCallback(async () => {
     try {
-      // Cek admin session
+      // --- MODE BACKEND ---
       // const adminRes = await api.get('/admin/is-auth');
       // if(adminRes.data.success) dispatch({ type: "ADMIN_LOGIN_SUCCESS", payload: adminRes.data.user });
-      // Cek user session
       // const userRes = await api.get('/user/is-auth');
       // if(userRes.data.success) dispatch({ type: "USER_LOGIN_SUCCESS", payload: userRes.data.user });
     } catch (e) {
@@ -209,6 +259,7 @@ export const AppContextProvider = ({ children }) => {
       adminLogin,
       adminLogout,
       role,
+      filteredRooms,
 
       // User Props
       userIsLoggedIn: state.userIsLoggedIn,
@@ -221,7 +272,16 @@ export const AppContextProvider = ({ children }) => {
       isLoading: state.isLoading,
       error: state.error,
     }),
-    [state, role, adminLogin, adminLogout, userLogin, userLogout],
+    [
+      state,
+      role,
+      filteredRooms,
+      adminLogin,
+      adminLogout,
+      userLogin,
+      userLogout,
+      userRegister,
+    ],
   );
 
   return <AppContext.Provider value={values}>{children}</AppContext.Provider>;

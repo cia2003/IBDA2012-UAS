@@ -321,8 +321,10 @@ export const ManagerContextProvider = ({ children }) => {
     } catch (error) {}
   });
 
+  
   const values = useMemo(
     () => ({
+      kostData: initialKostDataDummy,
       addTipeKost,
       editTipeKost,
       tipeKost,
@@ -356,6 +358,7 @@ export const ManagerContextProvider = ({ children }) => {
       getKostById,
       addStaff,
       getRoomDetails,
+      initialKostDataDummy
     ],
   );
 

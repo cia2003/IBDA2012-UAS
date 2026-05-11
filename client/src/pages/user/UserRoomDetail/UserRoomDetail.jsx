@@ -11,6 +11,7 @@ import {
   Phone,
   Heart,
   Trash2,
+  BookmarkPlus,
 } from "lucide-react";
 
 import styles from "./userRoomDetail.module.css";
@@ -167,16 +168,11 @@ function UserRoomDetail() {
 
               <div className="grid grid-cols-2 md:grid-cols-2 gap-3">
                 <button
-                onClick={() =>
-                  window.open(
-                    `https://wa.me/${roomDetails.kostPhone}`,
-                    "_blank",
-                  )
-                }
+                onClick={() => navigate(`/registration/${kostId}/${roomId}`)}
                 className="flex items-center justify-center bg-blue-600 text-white gap-2 hover:bg-blue-800 hover:text-white px-5 py-2.5 rounded-2xl transition-all duration-300 font-bold text-sm border border-red-100 shadow-sm w-fit"
               >
-                <Phone size={20} />
-                Hubungi Pengelola
+                <BookmarkPlus size={20} />
+                Pesan Kamar
               </button>
               <button
                 onClick={handleWishlist}
