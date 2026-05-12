@@ -58,7 +58,7 @@ function KostDetail() {
             {/* <div className="absolute inset-0 bg-gradient-to-br from-gray-200 to-gray-100 animate-pulse" />
             <House size={48} className="text-gray-300 relative z-10" /> */}
 
-            <img src={kostDetail.img} alt="" />
+            <img src={kostDetail.image} alt="" />
           </div>
 
           {/* Content Info */}

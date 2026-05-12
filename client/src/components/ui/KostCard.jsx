@@ -20,7 +20,7 @@ const KostCard = ({ data }) => {
       {/* Area Gambar */}
       <div className="relative aspect-[4/3] overflow-hidden">
         <img 
-          src={data.img} 
+          src={data.image} 
           alt={data.name}
           className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
         />

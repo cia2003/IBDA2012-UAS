@@ -1,3 +1,5 @@
+import os
+
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -9,6 +11,7 @@ from api.permissions import IsManagerOrSuperUser
 from .serializers import KostSerializer
 from .models import Kost
 from django.http import Http404
+from ibdakost.supabase_client import StorageService
 
 # Create your views here.
 class KostListCreateView(APIView):
@@ -22,7 +25,9 @@ class KostListCreateView(APIView):
     def get(self, request):
         kosts = Kost.objects.all().order_by('created_at')[:10]
         serializer = KostSerializer(kosts, many=True)
-        return Response({'kosts': serializer.data})
+        data = serializer.data
+        
+        return Response({'kosts': data})
 
     def post(self, request):
         serializer = KostSerializer(data=request.data)
@@ -52,7 +57,7 @@ class KostDetailView(APIView):
 
     def put(self, request, pk):
         kost = self.get_object(pk)
-        serializer = KostSerializer(kost, data=request.data)
+        serializer = KostSerializer(kost, data=request.data, partial=True)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data)

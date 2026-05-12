@@ -1,7 +1,6 @@
 import uuid
 from django.db import models
 from kosts.models import Kost
-from storages.supabase_storage import SupabaseStorage
 from kosts.validators import validate_file_size
 
 # Create your models here.

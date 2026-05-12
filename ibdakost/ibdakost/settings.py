@@ -16,6 +16,7 @@ import dj_database_url
 from dotenv import load_dotenv
 import os
 import sys
+
 load_dotenv()  # Load environment variables from .env file  
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -82,8 +83,10 @@ STORAGES = {
             "secret_key": os.getenv("AWS_SECRET_ACCESS_KEY"),
             "bucket_name": os.getenv("AWS_STORAGE_BUCKET_NAME"),
             "region_name": os.getenv("AWS_S3_REGION_NAME"),
-            "object_parameters": os.getenv("AWS_S3_OBJECT_PARAMETERS"),
-            "querystring_auth": os.getenv("AWS_QUERYSTRING_AUTH"),
+            "object_parameters": {
+                "CacheControl": "max-age=86400",
+            },
+            "querystring_auth": True,
             "location": "media",
         },
     },
@@ -95,8 +98,10 @@ STORAGES = {
             "secret_key": os.getenv("AWS_SECRET_ACCESS_KEY"),  # 00
             "bucket_name": os.getenv("AWS_STORAGE_BUCKET_NAME"),
             "region_name": os.getenv("AWS_S3_REGION_NAME"),
-            "object_parameters": os.getenv("AWS_S3_OBJECT_PARAMETERS"),
-            "querystring_auth": os.getenv("AWS_QUERYSTRING_AUTH"),
+            "object_parameters": {
+                "CacheControl": "max-age=86400",
+            },
+            "querystring_auth": True,
             "location": "static",
         },
     },

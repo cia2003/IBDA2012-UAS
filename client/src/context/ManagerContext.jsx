@@ -44,7 +44,12 @@ export const ManagerContextProvider = ({ children }) => {
         const enrichedStaff = await Promise.all(
           staffOnly.map(async (item) => {
             const user = await getUserById(item.user);
-            const kost = await getKostById(item.kost);
+            let kost = null;
+
+            if (item.kost && item.kost !== null) {
+              kost = await getKostById(item.kost);
+            }
+  
             return {
               userId: item.user,
               kostId: item.kost,
@@ -98,12 +103,8 @@ export const ManagerContextProvider = ({ children }) => {
       if (kostForm.image) {
         formData.append("image", kostForm.image);
       }
-
-      for (let pair of formData.entries()) {
-        console.log(pair[0], pair[1]);
-      }
       
-      const response = await formDataApi.post("kosts/", formData);
+      const response = await formDataApi.post("kosts/", kostForm);
       if (response.data) {
         toast.success("Kost Berhasil Ditambahkan");
         return response.data;
@@ -290,7 +291,16 @@ export const ManagerContextProvider = ({ children }) => {
     async (kostId, kostForm) => {
       try {
         // -- MODE BACKEND --
-        const response = await api.put(`kosts/${kostId}`, kostForm);
+        const formData = new FormData();
+        formData.append("name", kostForm.name);
+        formData.append("address", kostForm.address);
+        formData.append("description", kostForm.description);
+        if (kostForm.image instanceof File) {
+          formData.append("image", kostForm.image);
+        }
+
+        const response = await formDataApi.put(`kosts/${kostId}/`, formData);
+
         if (response.data) {
           toast.success("Kost Berhasil Diperbaharui");
         }
@@ -368,15 +378,15 @@ export const ManagerContextProvider = ({ children }) => {
   const deleteKost = useCallback(async (kostId) => {
     try {
       // -- MODE BACKEND --
-      // const response = await api.delete(`/delete-kost/${kostId}`);
-      // if(response.data) {
-      //   toast.success("Data Kost berhasil dihapus");
-      //   return true;
-      // }
+      const response = await formDataApi.delete(`kosts/${kostId}/`);
+      if(response.status === 204) {
+        toast.success("Data Kost berhasil dihapus");
+        return true;
+      }
 
       // -- MODE DUMMY --
-      toast.success("Data Kost berhasil dihapus (Dummy)");
-      return true;
+      // toast.success("Data Kost berhasil dihapus (Dummy)");
+      // return true;
     } catch (error) {
       toast.error("Kost gagal dihapus");
       console.error(error.message);
@@ -407,7 +417,13 @@ export const ManagerContextProvider = ({ children }) => {
       // -- MODE BACKEND --
       const response = await api.get(`employees/${id}/`);
       const getUser = await getUserById(response.data.user);
-      const getKost = await getKostById(response.data.kost);
+
+      let getKost = null;
+      if (response.data.kost && response.data.kost !== null) {
+        getKost = await getKostById(response.data.kost);
+      }
+      console.log("Data staff yang diambil:", response.data);
+      
       if (response.data && getUser) {
         return {
           userId: response.data.user,

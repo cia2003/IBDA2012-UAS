@@ -3,6 +3,7 @@ from rest_framework.reverse import reverse
 from django.contrib.auth.hashers import make_password
 from django.contrib.auth.models import Group
 from kosts.models import Kost
+from storages.backends.s3boto3 import S3Boto3Storage
 
 class KostSerializer(serializers.HyperlinkedModelSerializer):
     _links = serializers.SerializerMethodField()
