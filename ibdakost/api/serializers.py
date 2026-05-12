@@ -64,10 +64,15 @@ class UserSerializer(serializers.ModelSerializer):
         if 'email' in validated_data:
             validated_data['email'] = validated_data['email'].lower()
 
+        if 'password' in validated_data:
+            password = validated_data.pop('password')
+            validated_data['password'] = make_password(password)
+        
         for attr, value in validated_data.items():
             setattr(instance, attr, value)
 
         instance.save()
+        
         return instance
     
     def delete(self, instance):

@@ -70,7 +70,37 @@ INSTALLED_APPS = [
     # Aplikasi pihak ketiga
     'rest_framework',
     'corsheaders',
+    'storages',
 ]
+
+STORAGES = {
+    "default": {
+        "BACKEND": "storages.backends.s3boto3.S3Boto3Storage",
+        "OPTIONS": {
+            "endpoint_url": os.getenv("AWS_S3_ENDPOINT_URL"),
+            "access_key": os.getenv("AWS_ACCESS_KEY_ID"),
+            "secret_key": os.getenv("AWS_SECRET_ACCESS_KEY"),
+            "bucket_name": os.getenv("AWS_STORAGE_BUCKET_NAME"),
+            "region_name": os.getenv("AWS_S3_REGION_NAME"),
+            "object_parameters": os.getenv("AWS_S3_OBJECT_PARAMETERS"),
+            "querystring_auth": os.getenv("AWS_QUERYSTRING_AUTH"),
+            "location": "media",
+        },
+    },
+    "staticfiles": {
+        "BACKEND": "storages.backends.s3boto3.S3Boto3Storage",
+        "OPTIONS": {
+            "endpoint_url": os.getenv("AWS_S3_ENDPOINT_URL"),
+            "access_key": os.getenv("AWS_ACCESS_KEY_ID"),
+            "secret_key": os.getenv("AWS_SECRET_ACCESS_KEY"),  # 00
+            "bucket_name": os.getenv("AWS_STORAGE_BUCKET_NAME"),
+            "region_name": os.getenv("AWS_S3_REGION_NAME"),
+            "object_parameters": os.getenv("AWS_S3_OBJECT_PARAMETERS"),
+            "querystring_auth": os.getenv("AWS_QUERYSTRING_AUTH"),
+            "location": "static",
+        },
+    },
+}
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',

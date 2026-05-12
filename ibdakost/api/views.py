@@ -182,6 +182,7 @@ class EmployeeDetailView(APIView):
     def delete(self, request, pk):
         employee = self.get_object(pk)
         employee.delete()
+        print(request.user.groups.all())
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 class GroupListCreateView(APIView):

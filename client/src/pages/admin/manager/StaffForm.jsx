@@ -33,7 +33,7 @@ function StaffForm() {
                     lastName: data.lastName || "",
                     position: data.position || "",
                     phoneNumber: data.phoneNumber || "",
-                    assignedKostId: data.assignedKost?.id || "",
+                    assignedKostId: data.assignedKostId || "",
                     email: data.email || "",
                     password: data.password || ""
                 });

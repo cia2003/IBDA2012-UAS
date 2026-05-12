@@ -40,8 +40,23 @@ export const ManagerContextProvider = ({ children }) => {
 
       if (employees) {
         const staffOnly = employees.filter((staff) => staff.position === "staff");
-        setStaffList(staffOnly);
-        return staffOnly;
+
+        const enrichedStaff = await Promise.all(
+          staffOnly.map(async (item) => {
+            const user = await getUserById(item.user);
+            const kost = await getKostById(item.kost);
+            return {
+              userId: item.user,
+              kostId: item.kost,
+              name: `${user.first_name} ${user.last_name}`,
+              phone_number: item.phone_number,
+              assignedKost: kost ? kost.name : "Belum Ditentukan",
+              email: user.email,
+            };
+          })
+        );
+        setStaffList(enrichedStaff);
+        return enrichedStaff;
       }
 
       // -- MODE DUMMY --
@@ -107,7 +122,7 @@ export const ManagerContextProvider = ({ children }) => {
   const getKostById = useCallback(async (id) => {
     try {
       // -- MODE BACKEND --
-      const response = await formDataApi.get(`kosts/${id}`);
+      const response = await formDataApi.get(`kosts/${id}/`);
       return response.data;
 
       // -- MODE DUMMY --
@@ -186,7 +201,7 @@ export const ManagerContextProvider = ({ children }) => {
   // --- Ambil berdasarkan Id ---
   const getTipeById = useCallback(async (id) => {
     try {
-      const response = await formDataApi.get(`roomtypes/${id}`);
+      const response = await formDataApi.get(`roomtypes/${id}/`);
       const { data } = response.data;
       if (data) {
         return data;
@@ -275,7 +290,7 @@ export const ManagerContextProvider = ({ children }) => {
     async (kostId, kostForm) => {
       try {
         // -- MODE BACKEND --
-        const response = await api.put(`/kosts/${kostId}`, kostForm);
+        const response = await api.put(`kosts/${kostId}`, kostForm);
         if (response.data) {
           toast.success("Kost Berhasil Diperbaharui");
         }
@@ -292,16 +307,58 @@ export const ManagerContextProvider = ({ children }) => {
   );
 
   // --- EDIT STAFF ---
+  const editUser = useCallback(async (userId, userForm) => {
+    try {
+      const response = await api.put(`users/${userId}/`, userForm);
+      const data = response.data;
+
+      if (data) {
+        toast.success("Data pengguna berhasil diperbaharui")
+        return data;
+      }
+    } catch (error) {
+      toast.error("Data pengguna gagal diperbaharui");
+      console.error(error.message);
+    }
+  }, []);
+
   const editStaff = useCallback(async (staffId, staffForm) => {
     try {
       // -- MODE BACKEND --
-      // const response = await api.put(`/edit-staff/${staffId}`, staffForm);
-      // if(response.data) {
-      //   toast.success("Staff Berhasil Diperbaharui");
-      // }
+        const userData = {
+          "first_name": staffForm.firstName,
+          "last_name": staffForm.lastName,
+          "email": staffForm.email,
+          "password": staffForm.password,
+        };
 
+        const user = await editUser(staffId, userData);
+        console.log("User setelah update:", user);
+        
+        if (user) {
+          const userId = user?.id;
+          let staffData;
+
+          if (staffForm.assignedKostId) {
+            staffData = {
+              "user": userId,
+              "kost": staffForm.assignedKostId,
+              "position": staffForm.position,
+              "phone_number": staffForm.phoneNumber
+            };
+          } else {
+            staffData = {
+              "user": userId,
+              "position": staffForm.position,
+              "phone_number": staffForm.phoneNumber
+            };
+          }
+
+          const staffResponse = await api.put(`employees/${staffId}/`, staffData);
+          toast.success("Staff Berhasil Diperbaharui");
+        }
       // -- MODE DUMMY --
-      toast.success("Staff Berhasil Diperbaharui (Dummy)");
+      // toast.success("Staff Berhasil Diperbaharui (Dummy)");
     } catch (error) {
       toast.error("Staff gagal diperbaharui");
     }
@@ -330,13 +387,15 @@ export const ManagerContextProvider = ({ children }) => {
   const deleteStaff = useCallback(async (staffId) => {
     try {
       // -- MODE BACKEND --
-      // const response = await api.delete(`/delete-staff/${staffId}`);
-      // if(response.data) {
-      //   toast.success("Data staff berhasil dihapus");
-      // }
+      const responseEmployee = await api.delete(`employees/${staffId}/`);
+      const responseUser = await api.delete(`users/${staffId}/`);
+
+      if(responseEmployee.status === 204 && responseUser.status === 204) {
+        toast.success("Data staff berhasil dihapus");
+      }
 
       // -- MODE DUMMY --
-      toast.success("Data staff berhasil dihapus (Dummy)");
+      // toast.success("Data staff berhasil dihapus (Dummy)");
     } catch (error) {
       toast.error("Staff gagal dihapus");
     }
@@ -346,11 +405,34 @@ export const ManagerContextProvider = ({ children }) => {
   const getStaffById = useCallback(async (id) => {
     try {
       // -- MODE BACKEND --
-      // const response = await api.get(`/staff/${id}`);
-      // return response.data;
+      const response = await api.get(`employees/${id}/`);
+      const getUser = await getUserById(response.data.user);
+      const getKost = await getKostById(response.data.kost);
+      if (response.data && getUser) {
+        return {
+          userId: response.data.user,
+          kostId: response.data.kost,
+          firstName: getUser.first_name || "",
+          lastName: getUser.last_name || "",
+          position: response.data.position || "",
+          phoneNumber: response.data.phone_number || "",
+          assignedKostId: response.data.kost || "",
+          email: getUser.email || "",
+          password: "", // Password tidak dikembalikan untuk keamanan
+        };
+      }
 
       // -- MODE DUMMY --
-      return staffListDummy.find((s) => s.id === Number(id));
+      // return staffListDummy.find((s) => s.id === Number(id));
+    } catch (error) {
+      console.error(error.message);
+    }
+  }, []);
+
+  const getUserById = useCallback(async (id) => {
+    try {
+      const response = await api.get(`users/${id}/`);
+      return response.data;
     } catch (error) {
       console.error(error.message);
     }

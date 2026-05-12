@@ -9,27 +9,14 @@ import api from "../../../api/api";
 function Staff() {
   const navigate = useNavigate();
   const [staff, setStaff] = useState([]);
-  const { getUsersData, getKostData, getStaffData, editStaff, deleteStaff } = useManagerContext();
+  const { getStaffData, editStaff, deleteStaff } = useManagerContext();
 
   useEffect(() => {
     const fetchStaff = async () => {
-      const users = await getUsersData();
-      const kostData = await getKostData();
       const data = await getStaffData();
-
+  
       if (data) {
-        const enrichedStaff = data.map((item) => {
-          const user = users.find(u => u.id === item.user);
-          const kost = kostData.find(k => k.id === item.kost);
-
-          return {
-            name: `${user.first_name} ${user.last_name}`,
-            phone_number: item.phone_number,
-            assignedKost: kost ? kost.name : "Belum Ditentukan",
-            email: user.email,
-          };
-        });
-        setStaff(enrichedStaff);
+        setStaff(data);
 
       } else {
         console.error("Gagal mengambil data staff");
@@ -38,13 +25,14 @@ function Staff() {
     fetchStaff();
   }, [getStaffData]);
 
-  const handleEditStaff = async (id) => {
-    navigate(`/admin/dashboard/manager/staff-form/${id}`);
+  const handleEditStaff = async (item) => {
+    // console.log("Edit button di klik untuk ID:", item.userId);
+    navigate(`/admin/dashboard/manager/staff-form/${item.userId}`);
   };
 
-  const handleDeleteStaff = async (id) => {
-    if (id) {
-      await deleteStaff(id);
+  const handleDeleteStaff = async (item) => {
+    if (item?.userId) {
+      await deleteStaff(item.userId);
     }
   };
   const handleAddStaff = () => {
