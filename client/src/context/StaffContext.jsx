@@ -131,7 +131,6 @@ export const StaffContextProvider = ({ children }) => {
       const response = await api.get(`leases/`); // Asumsikan endpoint ini mengembalikan semua lease
       const { leases } = response.data; // Asumsikan response mengandung field leases yang merupakan array semua lease
       const pendingLeases = leases.filter((lease) => String(lease.room.kost) === String(kostId) && lease.status === 'pending');
-      setPendingLease(pendingLeases);
       return pendingLeases;
     } catch (error) {
       console.error(error.message);
@@ -157,6 +156,18 @@ export const StaffContextProvider = ({ children }) => {
       await api.delete(`tenants/${tenantId}/`);
 
       // toast.success("Penghuni Berhasil Dihapus");
+    } catch (error) {
+      console.error(error.message);
+    }
+  }, []);
+
+  // --- GET ALL TENANT ---
+  const getAllTenants = useCallback(async () => { 
+    try {
+      // -- MODE BACKEND --
+      const response = await api.get(`tenants/`); // Asumsikan endpoint ini mengembalikan semua tenant
+      const { tenants } = response.data; // Asumsikan response mengandung field tenants yang merupakan array semua tenant
+      return tenants;
     } catch (error) {
       console.error(error.message);
     }

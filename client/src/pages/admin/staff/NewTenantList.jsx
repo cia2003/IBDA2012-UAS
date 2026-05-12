@@ -1,27 +1,60 @@
 import { UserCheck, Check, X, Phone, Search, ChevronDown } from "lucide-react";
 import { useStaffContext } from "../../../hook/useContext";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { useParams } from "react-router-dom";
 import Table from "../../../components/ui/Table";
 import toast from "react-hot-toast";
 
 function NewTenantList() {
   const { staffId } = useParams();
-  const { getNewTenantList, newTenantList, getKostDataByStaffId, managedKost } =
+  const { newTenantList, getKostDataByStaffId, managedKost, getAllRoomsByKostId, getPendingLeases, getTenantById } =
     useStaffContext();
   const [searchNewTenant, setSearchNewTenant] = useState("");
   const [selectedFilter, setSelectedFilter] = useState("All"); // Default ke "All"
+  const [rooms, setRooms] = useState([]);
+  const [tenants, setTenants] = useState([]);
+  const [leases, setLeases] = useState([]);
 
-  const kostId = managedKost?.id;
+  const roomMap = useMemo(() => {
+    return Object.fromEntries(
+      (rooms || []).map((room) => [room.id, room]),
+    );
+  }, [rooms]);
 
-  const filteredTenants = newTenantList.filter((t) => {
-    const matchesSearch = t.name
+  const allTenants = useMemo(() => {
+    if (!leases?.length || !rooms?.length || !managedKost?.id) return [];
+
+    return leases
+      .filter ((lease) => {
+        const room = roomMap?.[lease?.room?.id];
+
+        return (
+          room &&
+          String(room.kost) === String(managedKost?.id)
+        );
+      })
+      .map((lease) => {
+        const room = roomMap?.[lease?.room?.id];
+        const certainTenant = tenants.find(t => String(t.user) === String(lease.tenant?.user));
+
+        return {
+          id: lease.tenant?.user, 
+          name: certainTenant?.name || lease.tenant?.name || lease.tenant?.user || "Nama tidak tersedia",
+          gender: certainTenant?.gender || lease.tenant?.gender || "Gender tidak tersedia",
+          contact: certainTenant?.contact || lease.tenant?.contact || "Kontak tidak tersedia",
+          checkInDate: lease.checkInDate,
+          roomNumber: room.name,
+        }
+      });
+  }, [leases, rooms, roomMap, managedKost?.id]);
+
+  const filteredTenants = allTenants.filter((person) => {
+    const matchesSearch = person.name
       .toLowerCase()
       .includes(searchNewTenant.toLowerCase());
-    const matchesGender =
-      selectedFilter === "All" || t.gender === selectedFilter;
-
-    return matchesSearch && matchesGender;
+    const matchesRoom =
+      selectedFilter === "All" || person.gender === selectedFilter;
+    return matchesSearch && matchesRoom;
   });
 
   // Logika Accept Tenant
@@ -74,10 +107,37 @@ function NewTenantList() {
   };
 
   useEffect(() => {
-    if (kostId) {
-      getNewTenantList(kostId);
-    }
-  }, [kostId, getNewTenantList]);
+    const fetchTenants = async () => {
+      if (!leases?.length) return;
+
+      const uniqueIds = [...new Set(
+        leases.map((lease) => lease.tenant?.user).filter(Boolean)
+      )];
+
+      const results = await Promise.all(
+        uniqueIds.map((id) => getTenantById(id))
+      );
+      setTenants(results.filter(Boolean));
+    };
+
+    fetchTenants();
+  }, [leases, getTenantById]);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      if (!managedKost?.id) return;
+
+      const roomsData = await getAllRoomsByKostId(managedKost.id);
+      setRooms(roomsData || []);
+
+      const leasesData = await getPendingLeases(managedKost.id);
+      setLeases(leasesData || []);
+
+      console.log("Leases:", leasesData);
+      console.log("Rooms:", roomsData);
+    };
+    fetchData();
+  }, [managedKost?.id, getAllRoomsByKostId, getPendingLeases]);
 
   const columns = [
     {
