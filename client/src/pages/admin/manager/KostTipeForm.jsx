@@ -9,12 +9,14 @@ function KostTipeForm() {
 
   const [tipe, setTipe] = useState({
     name: "",
-    description: "",
+    facility_ids: [],
     size: "",
     price: "",
   });
 
-  const {addTipeKost, editTipeKost, getTipeById} = useManagerContext()
+  const [facilities, setFacilities] = useState([]);
+
+  const {addTipeKost, editTipeKost, getTipeById, getFacilities} = useManagerContext()
 
   // Handler universal untuk semua input
   const handleChange = (e) => {
@@ -28,10 +30,7 @@ function KostTipeForm() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     
-    const facilitiesArray = tipe.description
-      .split(",") 
-      .map((item) => item.trim()) 
-      .filter((item) => item !== ""); 
+    const facilitiesArray = tipe.facility_ids;
 
     const dataToSubmit = {
       ...tipe,
@@ -42,16 +41,35 @@ function KostTipeForm() {
     try {
       if (!tipeId) {
         await addTipeKost(dataToSubmit);
-        alert("Tipe kamar berhasil ditambahkan!");
+        // alert("Tipe kamar berhasil ditambahkan!");
       } else {
         await editTipeKost(dataToSubmit);
-        alert("Tipe kamar berhasil diperbarui!");
+        // alert("Tipe kamar berhasil diperbarui!");
       }
       navigate(-1);
     } catch (error) {
       console.error("Gagal menyimpan data:", error);
       alert("Terjadi kesalahan saat menyimpan data.");
     }
+  };
+
+  const handleFacilityChange = (facilityId) => {
+    try {
+      setTipe((prev) => {
+        const clearnIds = prev.facility_ids.filter(Boolean);
+        const exists = clearnIds.includes(facilityId);
+
+        return {
+          ...prev,
+          facility_ids: exists 
+            ? clearnIds.filter((id) => id !== facilityId)
+            : [...clearnIds, facilityId],
+        };
+      });      
+    } catch (error) {
+      console.error("Gagal memperbarui fasilitas:", error);
+    }
+
   };
 
   const fetchTipeEdit = useCallback(async () => {
@@ -62,10 +80,9 @@ function KostTipeForm() {
       if (data) {
         setTipe({
           name: data.name || "",
-          // Kembalikan array ke string koma agar bisa dibaca Textarea
-          description: Array.isArray(data.facilities) 
-            ? data.facilities.join(", ") 
-            : data.description || "",
+          facility_ids: Array.isArray(data.facilities) 
+            ? data.facilities.map((f) => f.id)
+            : data.facility_ids || [],
           size: data.size || "",
           price: data.price || "",
         });
@@ -74,6 +91,19 @@ function KostTipeForm() {
       console.error("Gagal mengambil data edit:", error.message);
     }
   }, [tipeId, getTipeById]);
+
+  useEffect(() => {
+    const fetchFacilities = async () => {
+      try {
+        const facilitiesData = await getFacilities();
+        setFacilities(facilitiesData);
+      } catch (error) {
+        console.error("Gagal mengambil data fasilitas:", error.message);
+      }
+    };
+
+    fetchFacilities();
+  }, [getFacilities]);
 
   useEffect(() => {
     if (tipeId) {
@@ -167,7 +197,7 @@ function KostTipeForm() {
           </div>
 
           {/* Deskripsi */}
-          <div className="flex flex-col gap-2">
+          {/* <div className="flex flex-col gap-2">
             <label className="text-sm font-bold text-gray-700 ml-1">
               Deskripsi Fasilitas
             </label>
@@ -179,6 +209,31 @@ function KostTipeForm() {
               placeholder="Sebutkan fasilitas tipe kamar ini..."
               className="border border-gray-200 p-3.5 rounded-2xl focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all resize-none"
             />
+          </div> */}
+          <div className="flex flex-col gap-3">
+            <label className="text-sm font-bold text-gray-700 ml-1">
+              Apa saja fasilitasnya?
+            </label>
+
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+              {facilities.map((facility) => (
+                <label
+                  key={facility.id}
+                  className="flex items-center gap-3 border border-gray-200 rounded-2xl p-3 cursor-pointer hover:border-blue-400 transition"
+                >
+                  <input
+                    type="checkbox"
+                    checked={tipe.facility_ids.includes(facility.id)}
+                    onChange={() => handleFacilityChange(facility.id)}
+                    className="w-4 h-4"
+                  />
+
+                  <span className="text-sm font-medium text-gray-700">
+                    {facility.name}
+                  </span>
+                </label>
+              ))}
+            </div>
           </div>
         </div>
 

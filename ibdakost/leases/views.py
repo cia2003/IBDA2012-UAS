@@ -19,7 +19,7 @@ class LeaseListCreateView(APIView):
         return [IsAuthenticated(), IsManagerOrStaffOrSuperUser()]
 
     def get(self, request):
-        leases = Lease.objects.all().order_by('created_at')[:10]
+        leases = Lease.objects.all().order_by('created_at')
         serializer = LeaseSerializer(leases, many=True)
         return Response({'leases': serializer.data})
 

@@ -104,7 +104,7 @@ export const ManagerContextProvider = ({ children }) => {
         formData.append("image", kostForm.image);
       }
       
-      const response = await formDataApi.post("kosts/", kostForm);
+      const response = await formDataApi.post("kosts/", formData);
       if (response.data) {
         toast.success("Kost Berhasil Ditambahkan");
         return response.data;
@@ -134,38 +134,74 @@ export const ManagerContextProvider = ({ children }) => {
     }
   }, []);
 
+  // --- Dapatkan Fasilitas ---
+  const getFacilities = useCallback(async () => {
+    try {
+      const response = await formDataApi.get('facilities/');
+      const { facilities } = response.data;
+
+      if (facilities) {
+        return facilities;
+      }
+    } catch (error) {
+      console.error(error.message);
+    }
+  }, []);
+
+  const getFacilityById = useCallback(async (id) => {
+    try {
+      const response = await formDataApi.get(`facilities/${id}/`);
+      return response.data;
+    } catch (error) {
+      console.error(error.message);
+    }
+  }, []);
+
   // --- Tambah Tipe Kost (Bukan Gedung) ---
   const addTipeKost = useCallback(
-    async (formData) => {
+    async (roomTypeData) => {
       try {
-        const { data } = await formDataApi.post("roomtypes/", {
-          name: formData.name,
-          size: formData.price,
-          price: formData.price,
-          description: formData.description,
+        const formData = new FormData();
+        formData.append("name", roomTypeData.name);
+        formData.append("size", roomTypeData.size);
+        formData.append("price", roomTypeData.price);
+
+        roomTypeData.facility_ids.forEach((id) => {
+          formData.append("facilities", id);
         });
+
+        const response = await formDataApi.post("roomtypes/", formData);
+
+        const data = response.data;
+
         if (data) {
           toast.success("Tipe Kamar berhasil ditambahkan");
           navigate("/admin/dashboard/manager");
         }
       } catch (error) {
+        toast.error("Tipe Kamar gagal ditambahkan");
         console.error(error.message);
       }
-      toast.success("Tipe baru berhasil ditambahkan")
+
     },
     [navigate],
   );
 
   // --- Edit tipe kost ---
   const editTipeKost = useCallback(
-    async (editForm) => {
+    async (roomTypeData) => {
       try {
-        const { data } = await formDataApi.put(`roomtypes/${editForm.id}/`, {
-          name: editForm.name,
-          size: editForm.price,
-          price: editForm.price,
-          description: editForm.description,
+        const formData = new FormData();
+        formData.append("name", roomTypeData.name);
+        formData.append("size", roomTypeData.size);
+        formData.append("price", roomTypeData.price);
+
+        roomTypeData.facility_ids.forEach((id) => {
+          formData.append("facilities", id);
         });
+
+        const { data } = await formDataApi.put(`roomtypes/${roomTypeData.id}/`, formData);
+
         if (data) {
           toast.success("Tipe Kamar berhasil diperbaharui");
           navigate("/admin/dashboard/manager");
@@ -173,7 +209,6 @@ export const ManagerContextProvider = ({ children }) => {
       } catch (error) {
         console.error(error.message);
       }
-      toast.success("Tipe berhasil diperbaharui")
     },
     [navigate],
   );
@@ -182,11 +217,11 @@ export const ManagerContextProvider = ({ children }) => {
   const getTipeKost = useCallback(async () => {
     try {
       const response = await formDataApi.get('roomtypes/');
-      const { roomtypes } = response.data;
+      const { room_types} = response.data;
 
-      if(roomtypes) {
-        setTipeKost(roomtypes || []);
-        return roomtypes;
+      if(room_types) {
+        setTipeKost(room_types || []);
+        return room_types;
       }
 
       // const data = Array.isArray(ROOM_TYPES)
@@ -197,36 +232,58 @@ export const ManagerContextProvider = ({ children }) => {
       console.error(error.message);
       return [];
     }
-  });
+  }, []);
 
   // --- Ambil berdasarkan Id ---
   const getTipeById = useCallback(async (id) => {
     try {
       const response = await formDataApi.get(`roomtypes/${id}/`);
-      const { data } = response.data;
+      const data = response.data;
+
       if (data) {
-        return data;
+        const roomTypeData = {
+          id: data.id,
+          name: data.name,
+          size: data.size,
+          price: data.price,
+          facility_ids: Array.isArray(data.facilities)
+            ? await Promise.all(data.facilities.map(async (id) => {
+                const facilityData = await getFacilityById(id);
+                return facilityData ? facilityData.id : null;
+              }))
+            : [],
+            
+          facilities: Array.isArray(data.facilities)            
+            ? await Promise.all(data.facilities.map(async (id) => {
+                const facilityData = await getFacilityById(id);
+                return facilityData ? facilityData.name : null;
+              }))
+            : [],
+        };
+
+        // console.log("Data tipe kost yang diambil:", roomTypeData);
+        
+        return roomTypeData;
       }
 
-      const dataArray = Object.values(ROOM_TYPES);
-
-      console.log("Mencari ID:", id);
-      console.log("Data tersedia:", dataArray);
-
-      const findTipe = dataArray.find(
-        (tipe) => String(tipe.id).trim() === String(id).trim(),
-      );
-
-      if (!findTipe) {
-        console.error("Hasil: Tipe tidak ditemukan untuk ID", id);
-        return null;
-      }
-
-      return findTipe;
     } catch (error) {
       console.log(error.message);
     }
   }, []);
+
+  const deleteTipeKost = useCallback(async (tipeId) => {
+    try {
+      const response = await formDataApi.delete(`roomtypes/${tipeId}/`);
+      if (response.status === 204) {
+        toast.success("Tipe Kamar berhasil dihapus");
+        return true;
+      }
+    } catch (error) {
+      toast.error("Gagal menghapus Tipe Kamar");
+      console.error(error.message);
+    }
+  }, []);
+
   // --- TAMBAH STAFF ---
   const addStaff = useCallback(
     async (staffForm) => {
@@ -264,8 +321,6 @@ export const ManagerContextProvider = ({ children }) => {
           }
 
           const staffResponse = await api.post("employees/", staffData);
-
-          console.log("Response dari penambahan staff:", staffResponse);
 
           if (staffResponse?.data) {
             toast.success("Staff Berhasil Ditambahkan");
@@ -343,7 +398,6 @@ export const ManagerContextProvider = ({ children }) => {
         };
 
         const user = await editUser(staffId, userData);
-        console.log("User setelah update:", user);
         
         if (user) {
           const userId = user?.id;
@@ -411,6 +465,34 @@ export const ManagerContextProvider = ({ children }) => {
     }
   }, []);
 
+  const getStaffByKostId = useCallback(async (kostId) => {
+    try {
+
+      const response = await api.get(`employees/?kost=${kostId}`);
+      const { employees } = response.data;
+
+      if (employees) {
+        const staffOnly = employees.filter((staff) => staff.position === "staff");
+        const enrichedStaff = await Promise.all(
+          staffOnly.map(async (item) => {
+            const user = await getUserById(item.user);
+            return {
+              userId: item.user,
+              kostId: item.kost,
+              name: `${user.first_name} ${user.last_name}`,
+              phone_number: item.phone_number,
+              email: user.email,
+            };
+          })
+        );
+        return enrichedStaff;
+      }
+    } catch (error) {
+      console.error("Gagal mengambil data staff:", error);
+      return [];
+    }
+  }, []);
+
   // --- AMBIL STAFF BY ID ---
   const getStaffById = useCallback(async (id) => {
     try {
@@ -422,7 +504,6 @@ export const ManagerContextProvider = ({ children }) => {
       if (response.data.kost && response.data.kost !== null) {
         getKost = await getKostById(response.data.kost);
       }
-      console.log("Data staff yang diambil:", response.data);
       
       if (response.data && getUser) {
         return {
@@ -456,11 +537,15 @@ export const ManagerContextProvider = ({ children }) => {
 
   const values = useMemo(
     () => ({
+      getFacilities,
+      getFacilityById,
       addTipeKost,
       editTipeKost,
+      deleteTipeKost,
       tipeKost,
       getUsersData,
       getStaffData,
+      getStaffByKostId,
       getKostData,
       addKost,
       deleteKost,
@@ -474,12 +559,16 @@ export const ManagerContextProvider = ({ children }) => {
       addStaff,
     }),
     [
+      getFacilities,
+      getFacilityById,
       getTipeKost,
       addTipeKost,
       editTipeKost,
+      deleteTipeKost,
       tipeKost,
       getUsersData,
       getStaffData,
+      getStaffByKostId,
       getKostData,
       addKost,
       deleteKost,

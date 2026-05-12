@@ -1,23 +1,24 @@
-import { useState } from "react";
+import { use, useState, useEffect } from "react";
 import { Upload, ChevronDown, Save, ArrowLeft } from "lucide-react";
-import { useStaffContext } from "../../hook/useContext";
+import { useStaffContext, useManagerContext } from "../../hook/useContext";
 import { useNavigate } from "react-router-dom";
 
 const RoomForm = () => {
   const [roomForm, setRoomForm] = useState({
     image: null,
     roomNumber: "",
-    category: "",
-    price: "",
+    category: "", // pastikan untuk mengisi ini dengan ID tipe kamar yang sesuai
   });
+  const [categories, setCategories] = useState([]);
   const { addRoom } = useStaffContext();
+  const { getTipeKost } = useManagerContext();
   const navigate = useNavigate();
 
-  const categories = [
-    { name: "Tipe 1" },
-    { name: "Tipe 2" },
-    { name: "Tipe 3" },
-  ];
+  // const categories = [
+  //   { name: "Tipe 1" },
+  //   { name: "Tipe 2" },
+  //   { name: "Tipe 3" },
+  // ];
 
   // Handler untuk input teks dan select
   const handleChange = (e) => {
@@ -43,6 +44,16 @@ const RoomForm = () => {
     const data = await addRoom(roomForm);
     navigate(-1);
   };
+
+  useEffect(() => {
+    const fetchCategories = async () => {
+      const data = await getTipeKost();
+      if (data) {
+        setCategories(data);
+      }
+    };
+    fetchCategories();
+  }, [getTipeKost]);
 
   return (
     <div className="space-y-6 max-w-4xl mx-auto p-4">
@@ -155,9 +166,9 @@ const RoomForm = () => {
                   required
                 >
                   <option value="">Pilih Kategori</option>
-                  {categories.map((item, index) => (
-                    <option key={index} value={item.name}>
-                      {item.name}
+                  {categories.map((category) => (
+                    <option key={category.id} value={category.id}>
+                      {category.name}
                     </option>
                   ))}
                 </select>
@@ -169,7 +180,7 @@ const RoomForm = () => {
             </div>
           </div>
 
-          {/* Harga */}
+          {/* Harga
           <div className="md:w-1/2 flex flex-col gap-2">
             <label
               className="text-sm font-bold text-gray-700 uppercase tracking-wider"
@@ -191,7 +202,7 @@ const RoomForm = () => {
                 required
               />
             </div>
-          </div>
+          </div> */}
         </div>
 
         {/* Footer Action */}

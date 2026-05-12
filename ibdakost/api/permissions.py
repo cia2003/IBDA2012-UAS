@@ -57,6 +57,7 @@ class IsOwnerOrManagerOrSuperUser(BasePermission):
             request.user and request.user.is_authenticated and (
                 request.user.is_superuser or
                 request.user.groups.filter(name='manager').exists() or
+                obj.user == request.user or
                 obj == request.user
             )
         )

@@ -80,7 +80,7 @@ class TenantListCreateView(APIView):
         return []
 
     def get(self, request):
-        tenants = Tenant.objects.all().order_by('created_at')[:10]
+        tenants = Tenant.objects.all().order_by('created_at')
         serializer = TenantSerializer(tenants, many=True)
         return Response({'tenants': serializer.data})
 
@@ -132,11 +132,14 @@ class EmployeeListCreateView(APIView):
     permission_classes = [IsAuthenticated, IsManagerOrSuperUser]
 
     def get(self, request):
-        employees = Employee.objects.all().order_by('created_at')[:10]
+        employees = Employee.objects.all().order_by('created_at')
         role = request.query_params.get('role')
+        kost = request.query_params.get('kost')
 
         if role:
             employees = employees.filter(position=role)
+        if kost:
+            employees = employees.filter(kost=kost)
 
         serializer = EmployeeSerializer(employees, many=True)
         return Response({'employees': serializer.data})
@@ -151,8 +154,12 @@ class EmployeeListCreateView(APIView):
 class EmployeeDetailView(APIView):
     # Implementation similar to UserDetailView with appropriate permissions and serializer
     authentication_classes = [JWTAuthentication]
-    permission_classes = [IsAuthenticated, IsManagerOrSuperUser]
 
+    def get_permissions(self):
+        if self.request.method == 'DELETE':
+            return [IsAuthenticated(), IsManagerOrSuperUser()]
+        return [IsAuthenticated(), IsOwnerOrManagerOrSuperUser()]
+    
     def get_object(self, pk):
         try:
             employee = Employee.objects.get(pk=pk)
@@ -164,9 +171,12 @@ class EmployeeDetailView(APIView):
     def get(self, request, pk):
         employee = self.get_object(pk)
         role = request.query_params.get('role')
+        kost = request.query_params.get('kost')
 
         if role:
-            employees = employees.filter(employee__position=role)
+            employees = employees.filter(position=role)
+        if kost:
+            employees = employees.filter(kost=kost)
             
         serializer = EmployeeSerializer(employee)
         return Response(serializer.data)

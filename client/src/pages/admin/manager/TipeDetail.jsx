@@ -10,11 +10,12 @@ import {
   Info,
   Layers,
 } from "lucide-react";
+import toast from "react-hot-toast";
 
 function TipeDetail() {
   const { tipeId } = useParams();
   const navigate = useNavigate();
-  const { getTipeById } = useManagerContext();
+  const { getTipeById, deleteTipeKost } = useManagerContext();
   const [tipeDetail, setTipeDetail] = useState(null);
 
   const fetchTipeDetail = useCallback(async () => {
@@ -31,9 +32,19 @@ function TipeDetail() {
   }, [fetchTipeDetail]);
 
   const handleDelete = async () => {
-    if (window.confirm("Apakah Anda yakin ingin menghapus tipe kamar ini?")) {
-      console.log("Menghapus ID:", tipeId);
-      navigate(-1);
+    if (
+      window.confirm(
+        "Apakah Anda yakin ingin menghapus properti kost ini secara permanen?",
+      )
+    ) {
+      const success = await deleteTipeKost(tipeId);
+
+      if (success) {
+        toast.success("Tipe kamar berhasil dihapus");
+        navigate("/admin/dashboard/manager/tipe-kost");
+      } else {
+        toast.error("Gagal menghapus tipe kamar. Silakan coba lagi.");
+      }
     }
   };
 

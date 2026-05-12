@@ -1,6 +1,6 @@
-import { useEffect, useState } from "react";
+import { use, useEffect, useMemo, useState } from "react";
 import Table from "../../../components/ui/Table";
-import { useAppContext, useStaffContext } from "../../../hook/useContext";
+import { useAppContext, useManagerContext, useStaffContext } from "../../../hook/useContext";
 import {
   Edit3,
   Trash2,
@@ -12,77 +12,131 @@ import { useNavigate, useParams } from "react-router-dom";
 import toast from "react-hot-toast";
 
 function RoomsDataDetails() {
-  const { getKostDataByStaffId, managedKost } = useStaffContext();
+  const { getKostDataByStaffId, managedKost, getAllRoomsByKostId } = useStaffContext();
+  const { getTipeKost } = useManagerContext();
   const { staffId } = useParams();
+  const [roomList, setRoomList] = useState([]);
+  const [roomTypes, setRoomTypes] = useState([]);
   const [filterStatus, setFilterStatus] = useState("All");
   const [sortBy, setSortBy] = useState("roomNumber");
   const navigate = useNavigate();
 
-  const roomsList = managedKost?.rooms || [];
+  // const roomsList = managedKost?.rooms || [];
 
-  const filteredData = roomsList
+  const roomTypeMap  = useMemo(() => {
+    return Object.fromEntries(
+      roomTypes.map((type) => [type.id, type])
+    );
+  }, [roomTypes]
+  );
+
+  const enrichedRoomList = useMemo(() => {
+    return roomList.map((room) => {
+      const roomType = roomTypeMap[room.room_type];
+
+      return {
+        ...room,
+
+        // flatten fields (INI PENTING)
+        room_type_name: roomType?.name ?? "-",
+        room_type_price: roomType?.price ?? 0,
+      };
+    });
+  }, [roomList, roomTypeMap]);
+
+  const filteredData = enrichedRoomList
     .filter((room) => {
       if (filterStatus === "All") return true;
-      return room.status === filterStatus;
+      if (filterStatus === "Available") return room.is_available === true;
+      if (filterStatus === "Occupied") return room.is_available === false;
+      return true;
     })
     .sort((a, b) => {
-      if (sortBy === "priceHigh") return b.price - a.price;
-      if (sortBy === "priceLow") return a.price - b.price;
-      return a.roomNumber.localeCompare(b.roomNumber, undefined, {
+      const priceA = Number(a.room_type_price ?? 0);
+      const priceB = Number(b.room_type_price ?? 0);
+
+      if (sortBy === "priceHigh") return priceB - priceA;
+      if (sortBy === "priceLow") return priceA - priceB;
+
+      return (a.name ?? "").localeCompare(b.name ?? "", undefined, {
         numeric: true,
       });
     });
 
   const toggleStatus = (id, currentStatus) => {
-    const newStatus = currentStatus === "Available" ? "Occupied" : "Available";
-    // console.log(`Kamar ID ${id} diubah menjadi ${newStatus}`);
-    toast.success(`Status Kamar #${id} diubah menjadi ${newStatus}`);
+    let newStatus = !currentStatus;
+    setRoomList((prev) => {
+      prev.map((room) => {
+        if (room.id === id) {
+          room.is_available = newStatus;
+        }        return room;
+      });
+      return [...prev];
+    });
+
+
+    toast.success(`Status Kamar #${id} diubah menjadi ${newStatus ? "Available" : "Occupied"}`);
+    // const newStatus = currentStatus === "Available" ? "Occupied" : "Available";
+    // // console.log(`Kamar ID ${id} diubah menjadi ${newStatus}`);
+    // toast.success(`Status Kamar #${id} diubah menjadi ${newStatus}`);
   };
 
   const columns = [
     {
       header: "No. Kamar",
-      accessor: "roomNumber",
-      cell: (val) => <span className="font-bold text-gray-900">#{val}</span>,
-    },
-    {
-      header: "Tipe",
       accessor: "name",
-      cell: (value) => (
-        <span className="font-medium text-gray-600">{value}</span>
+      cell: (val) => (
+        <span className="font-bold text-gray-900">#{val}</span>
       ),
     },
+
     {
-      header: "Harga / Bulan",
-      accessor: "price",
+      header: "Tipe",
+      accessor: "room_type_name",
       cell: (value) => (
-        <span className="text-blue-600 font-semibold">
-          Rp {value.toLocaleString("id-ID")}
+        <span className="font-medium text-gray-600">
+          {value ?? "-"}
         </span>
       ),
     },
+
+    {
+      header: "Harga / Bulan",
+      accessor: "room_type_price",
+      cell: (value) => (
+        <span className="text-blue-600 font-semibold">
+          Rp {(Number(value ?? 0)).toLocaleString("id-ID")}
+        </span>
+      ),
+    },
+
     {
       header: "Status",
-      accessor: "status",
+      accessor: "is_available",
       cell: (value) => (
         <span
           className={`px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest border ${
-            value === "Available"
+            value === true
               ? "bg-emerald-50 text-emerald-600 border-emerald-100"
               : "bg-rose-50 text-rose-600 border-rose-100"
           }`}
         >
-          {value}
+          {value === true ? "Available" : "Occupied"}
         </span>
       ),
     },
+
     {
       header: "Penghuni",
       accessor: "resident",
       cell: (value) => (
         <div className="flex items-center gap-2">
           <div
-            className={`px-2 py-0.5 rounded-md text-xs font-bold ${Array.isArray(value) && value.length > 0 ? "bg-indigo-100 text-indigo-600" : "bg-gray-100 text-gray-400"}`}
+            className={`px-2 py-0.5 rounded-md text-xs font-bold ${
+              Array.isArray(value) && value.length > 0
+                ? "bg-indigo-100 text-indigo-600"
+                : "bg-gray-100 text-gray-400"
+            }`}
           >
             {Array.isArray(value) ? value.length : 0}
           </div>
@@ -92,43 +146,147 @@ function RoomsDataDetails() {
         </div>
       ),
     },
+
     {
       header: "Action",
       accessor: "id",
       cell: (id, item) => {
-        // Cek apakah status saat ini Available
-        const isAvailable = item.status === "Available";
+        let isAvailable = item.is_available;
 
         return (
-          <div className="flex items-center gap-4">
-            <label className="relative inline-flex cursor-pointer items-center group">
-              <input
-                type="checkbox"
-                className="sr-only peer"
-                checked={isAvailable}
-                onChange={() => toggleStatus(item.roomNumber, item.status)}
-              />
-              <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-100 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
-            </label>
-          </div>
+          <label className="relative inline-flex cursor-pointer items-center group">
+            <input
+              type="checkbox"
+              className="sr-only peer"
+              checked={isAvailable}
+              onChange={() =>
+                toggleStatus(item.id, item.is_available)
+              }
+            />
+            <div className="w-11 h-6 bg-gray-200 peer-focus:ring-4 peer-focus:ring-blue-100 rounded-full peer peer-checked:after:translate-x-full after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 peer-checked:bg-blue-600"></div>
+          </label>
         );
       },
     },
   ];
 
-  const fetchData = async () => {
-    await getKostDataByStaffId(staffId);
-  };
+  // const columns = [
+  //   {
+  //     header: "No. Kamar",
+  //     accessor: "name",
+  //     cell: (val) => <span className="font-bold text-gray-900">#{val}</span>,
+  //   },
+  //   {
+  //     header: "Tipe",
+  //     accessor: "room_type?.name",
+  //     cell: (value) => (
+  //       <span className="font-medium text-gray-600">{value}</span>
+  //     ),
+  //   },
+  //   {
+  //     header: "Harga / Bulan",
+  //     accessor: "room_type?.price",
+  //     cell: (value) => (
+  //       <span className="text-blue-600 font-semibold">
+  //         Rp {Number(value ?? 0).toLocaleString("id-ID")}
+  //       </span>
+  //     ),
+  //   },
+  //   {
+  //     header: "Status",
+  //     accessor: "status",
+  //     cell: (value) => (
+  //       <span
+  //         className={`px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest border ${
+  //           value === "Available"
+  //             ? "bg-emerald-50 text-emerald-600 border-emerald-100"
+  //             : "bg-rose-50 text-rose-600 border-rose-100"
+  //         }`}
+  //       >
+  //         {value}
+  //       </span>
+  //     ),
+  //   },
+  //   {
+  //     header: "Penghuni",
+  //     accessor: "resident",
+  //     cell: (value) => (
+  //       <div className="flex items-center gap-2">
+  //         <div
+  //           className={`px-2 py-0.5 rounded-md text-xs font-bold ${Array.isArray(value) && value.length > 0 ? "bg-indigo-100 text-indigo-600" : "bg-gray-100 text-gray-400"}`}
+  //         >
+  //           {Array.isArray(value) ? value.length : 0}
+  //         </div>
+  //         <span className="text-gray-400 text-[11px] font-medium uppercase">
+  //           Orang
+  //         </span>
+  //       </div>
+  //     ),
+  //   },
+  //   {
+  //     header: "Action",
+  //     accessor: "id",
+  //     cell: (id, item) => {
+  //       // Cek apakah status saat ini Available
+  //       const isAvailable = item.status === "Available";
+
+  //       return (
+  //         <div className="flex items-center gap-4">
+  //           <label className="relative inline-flex cursor-pointer items-center group">
+  //             <input
+  //               type="checkbox"
+  //               className="sr-only peer"
+  //               checked={isAvailable}
+  //               onChange={() => toggleStatus(item.roomNumber, item.status)}
+  //             />
+  //             <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-100 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+  //           </label>
+  //         </div>
+  //       );
+  //     },
+  //   },
+  // ];
+
+  // const fetchData = async () => {
+  //   await getKostDataByStaffId(staffId);
+  // };
 
   useEffect(() => {
-    fetchData();
-  }, [staffId, fetchData]);
+    if (staffId) {
+      getKostDataByStaffId(staffId);
+    }
+  }, [staffId, getKostDataByStaffId]);
+
+  useEffect(() => {
+    const fetchRooms = async () => {
+      if (!managedKost?.id) return;
+      
+      const rooms = await getAllRoomsByKostId(managedKost.id);
+      if (rooms) {
+        setRoomList(rooms);
+      }
+    }
+    fetchRooms();
+  }, [managedKost?.id, getAllRoomsByKostId]);
+
+  useEffect(() => {
+    const fetchRoomTypeData = async () => {
+      const roomTypesData = await getTipeKost();
+      setRoomTypes(roomTypesData);
+    };
+    fetchRoomTypeData();
+  }, [getTipeKost]);
 
   // useEffect(()=>{
   //   if(managedKost){
   //     console.log(managedKost)
   //   }
   // }, [managedKost])
+  // useEffect(() => {
+  //   console.log("filteredData:", filteredData);
+  //   console.log(filteredData[0]?.room_type_price);
+  //   console.log(filteredData[0]?.is_available);
+  // }, [roomList, roomTypes, enrichedRoomList, filteredData]);
 
   return (
     <div className="space-y-4 sm:space-y-6">
@@ -217,7 +375,7 @@ function RoomsDataDetails() {
           </p>
           <p className="text-xs text-gray-500 font-bold">
             <span className="text-blue-600">{filteredData.length}</span> /{" "}
-            {roomsList.length} Kamar
+            {roomList.length} Kamar
           </p>
         </div>
       </div>

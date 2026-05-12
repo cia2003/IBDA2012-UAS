@@ -107,7 +107,7 @@ function OwnerDashboard() {
               size={18}
               className="group-hover:scale-110 transition-transform"
             />
-            Tambah Tipe Rumah
+            Tambah Tipe Kamar
           </button>
         </div>
       </div>

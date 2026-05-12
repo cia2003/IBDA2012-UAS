@@ -13,7 +13,7 @@ function TipeKost() {
     const data = await getTipeKost();
     if (data) {
       setTipeData(data);
-      console.log(data)
+      return data;
     }
   }, [getTipeKost]);
 
@@ -82,7 +82,7 @@ function TipeKost() {
         </div>
         <div className="shrink-0">
           <button
-            onClick={() => navigate("/admin/dashboard/manager/kost-type-form")}
+            onClick={() => navigate("/admin/dashboard/manager/add-tipe")}
             className="w-full sm:w-auto flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-2xl transition-all shadow-md active:scale-95 group text-sm"
           >
             <HousePlus

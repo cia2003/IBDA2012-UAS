@@ -62,7 +62,7 @@ const Layout = () => {
           <p className="text-sm">
             Hi!{" "}
             <span className="font-semibold text-gray-800">
-              {staffData?.name || "StaffLayout"}
+              {staffData?.first_name || "StaffLayout"}
             </span>
           </p>
           <button

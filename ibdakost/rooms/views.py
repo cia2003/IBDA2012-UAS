@@ -94,7 +94,7 @@ class FacilityListCreateView(APIView):
         return [IsAuthenticated(), IsManagerOrStaffOrSuperUser()]
 
     def get(self, request):
-        facilities = Facility.objects.all().order_by('created_at')[:10]
+        facilities = Facility.objects.all().order_by('created_at')
         serializer = FacilitySerializer(facilities, many=True)
         return Response({'facilities': serializer.data})
 

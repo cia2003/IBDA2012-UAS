@@ -177,7 +177,7 @@ class EmployeeSerializer(serializers.ModelSerializer):
                 user.groups.add(employee_group)
             
             if validated_data['position'] == 'manager':
-                employee_group, _ = Group.objects.get_or_create(name='admin')
+                employee_group, _ = Group.objects.get_or_create(name='manager')
                 user.groups.add(employee_group)
 
         employee = Employee.objects.create(user=user, **validated_data)
