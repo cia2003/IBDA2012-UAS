@@ -5,27 +5,43 @@ import { useManagerContext } from "../../hook/useContext";
 import { useEffect, useState } from "react";
 
 // Definisikan pola ID kost di satu tempat agar mudah diubah
-const KOST_ID_REGEX = /^K\d+$/i;
+// const KOST_ID_REGEX = /^K\d+$/i;
+const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
 export default function Breadcrumb() {
   const location = useLocation();
-  const { getKostById } = useManagerContext();
+  const { getKostById, getTipeById } = useManagerContext();
   const pathnames = location.pathname.split("/").filter(Boolean);
   const [dynamicLabels, setDynamicLabels] = useState({});
 
   useEffect(() => {
     const fetchLabels = async () => {
-      // Filter hanya segment yang belum ada labelnya dan cocok pola ID kost
-      const toFetch = pathnames.filter(
-        (value) => KOST_ID_REGEX.test(value) && !dynamicLabels[value]
-      );
-
-      if (toFetch.length === 0) return;
+      const routeFetchers = {
+        kost: getKostById, 
+        roomtype: getTipeById
+      }
 
       const entries = await Promise.all(
-        toFetch.map(async (value) => {
-          const data = await getKostById(value);
-          return data?.name ? [value, data.name] : null;
+        pathnames.map(async (value, index) => {
+          if (!UUID_REGEX.test(value) || dynamicLabels[value]) {
+            return null;
+          }
+
+          const resource = pathnames[index - 1];
+          const fetcher = routeFetchers[resource];
+
+          if (!fetcher) return null;
+
+          try {
+            const data = await fetcher(value);
+
+            return data?.name
+              ? [value, data.name]
+              : null;
+          } catch (error) {
+            console.error(error);
+            return null
+          }
         })
       );
 
@@ -37,7 +53,8 @@ export default function Breadcrumb() {
     };
 
     fetchLabels();
-  }, [location.pathname]);
+
+  }, [location.pathname, getKostById]);
 
   if (pathnames.length === 0) return null;
 
@@ -51,10 +68,11 @@ export default function Breadcrumb() {
         const last = index === pathnames.length - 1;
         const to = `/${pathnames.slice(0, index + 1).join("/")}`;
 
-        const displayName =
-          dynamicLabels[value] ||
-          value.replace(/-/g, " ").replace(/\b\w/g, (l) => l.toUpperCase());
-
+        const displayName = UUID_REGEX.test(value)
+          ? dynamicLabels[value] || "Detail"
+          : value
+            .replace(/-/g, " ")
+            .replace(/\b\w/g, (l) => l.toUpperCase());
         return (
           <div key={to} className="flex items-center space-x-2">
             <ChevronRight size={16} className="text-gray-300" />

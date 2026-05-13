@@ -21,4 +21,5 @@ export const useStaffContext=()=>{
 
 export const useUserContext=()=>{
     const context = useContext(UserContext)
+    return context
 }

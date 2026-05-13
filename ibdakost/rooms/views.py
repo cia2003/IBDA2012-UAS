@@ -4,9 +4,9 @@ from rest_framework.views import APIView
 # from django.shortcuts import get_object_or_404
 from django.contrib.auth.models import Group
 from rest_framework_simplejwt.authentication import JWTAuthentication
-from rest_framework.permissions import IsAuthenticated
-from api.permissions import IsManagerOrStaffOrSuperUser, IsManagerOrSuperUser
-from .serializers import RoomTypeSerializer, FacilitySerializer, RoomSerializer
+from rest_framework.permissions import IsAuthenticated, AllowAny
+from api.permissions import IsManagerOrStaffOrSuperUser
+from .serializers import RoomTypeSerializer, FacilitySerializer, RoomSerializer, RoomDetailsSerializer
 from .models import RoomType, Facility, Room
 from django.http import Http404
 
@@ -16,7 +16,7 @@ class RoomListCreateView(APIView):
 
     def get_permissions(self):
         if self.request.method == 'GET':
-            return [IsAuthenticated()]
+            return [AllowAny()]
         return [IsAuthenticated(), IsManagerOrStaffOrSuperUser()]
 
     def get(self, request):
@@ -37,19 +37,25 @@ class RoomDetailView(APIView):
     def get_permissions(self):
         if self.request.method == 'DELETE':
             return [IsAuthenticated(), IsManagerOrStaffOrSuperUser()]
-        return [IsAuthenticated()]
+        return [AllowAny()]
         # return []
 
     def get_object(self, pk):
         try:
-            return Room.objects.get(pk=pk)
+            return Room.objects.select_related(
+                'kost',
+                'room_type'
+            ).get(pk=pk)
+
         except Room.DoesNotExist:
             raise Http404
 
     def get(self, request, pk):
         room = self.get_object(pk)
-        serializer = RoomSerializer(room)
-        return Response(serializer.data)
+
+        serializer = RoomDetailsSerializer(room)
+
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
     def put(self, request, pk):
         room = self.get_object(pk)
@@ -69,7 +75,7 @@ class RoomTypeListCreateView(APIView):
 
     def get_permissions(self):
         if self.request.method == 'GET':
-            return [IsAuthenticated()]
+            return [AllowAny()]
         return [IsAuthenticated(), IsManagerOrStaffOrSuperUser()]
         # return []
 
@@ -90,7 +96,7 @@ class FacilityListCreateView(APIView):
 
     def get_permissions(self):
         if self.request.method == 'GET':
-            return [IsAuthenticated()]
+            return [AllowAny()]
         return [IsAuthenticated(), IsManagerOrStaffOrSuperUser()]
 
     def get(self, request):
@@ -112,7 +118,7 @@ class RoomTypeDetailView(APIView):
     def get_permissions(self):
         if self.request.method == 'DELETE':
             return [IsAuthenticated(), IsManagerOrStaffOrSuperUser()]
-        return [IsAuthenticated()]
+        return [AllowAny()]
         # return []
 
     def get_object(self, pk):
@@ -145,7 +151,7 @@ class FacilityDetailView(APIView):
     def get_permissions(self):
         if self.request.method == 'DELETE':
             return [IsAuthenticated(), IsManagerOrStaffOrSuperUser()]
-        return [IsAuthenticated()]
+        return [AllowAny()]
         # return []
 
     def get_object(self, pk):
@@ -171,3 +177,4 @@ class FacilityDetailView(APIView):
         facility = self.get_object(pk)
         facility.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
+

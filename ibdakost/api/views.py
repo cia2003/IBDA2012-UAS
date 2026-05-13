@@ -4,10 +4,10 @@ from rest_framework.views import APIView
 from django.shortcuts import get_object_or_404
 from django.contrib.auth.models import Group
 from rest_framework_simplejwt.authentication import JWTAuthentication
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, AllowAny
 from api.permissions import IsManagerOrSuperUser, IsOwnerOrManagerOrSuperUser
 from .models import User, Tenant, Employee
-from .serializers import EmailTokenObtainPairSerializer, TenantSerializer, UserSerializer, EmployeeSerializer, GroupSerializer
+from .serializers import EmailTokenObtainPairSerializer, TenantSerializer, UserSerializer, EmployeeSerializer, GroupSerializer, EmployeeContactSerializer
 from django.http import Http404
 from rest_framework_simplejwt.views import TokenObtainPairView
 
@@ -24,7 +24,7 @@ class UserListCreateView(APIView):
     
 
     def get(self, request):
-        users = User.objects.all().order_by('first_name')[:10]
+        users = User.objects.all().order_by('first_name')
         serializer = UserSerializer(users, many=True)
         return Response({'users': serializer.data})
 
@@ -126,6 +126,25 @@ class TenantDetailView(APIView):
         tenant.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
+class KostContactView(APIView):
+    permission_classes = [AllowAny]
+
+    def get(self, request, kost_id):
+        employee = Employee.objects.filter(
+            kost_id=kost_id,
+            position="staff"
+        ).select_related('user').first()
+
+        if not employee:
+            return Response(
+                {"message": "Kontak pengelola tidak tersedia"},
+                status=status.HTTP_404_NOT_FOUND
+            )
+
+        serializer = EmployeeContactSerializer(employee)
+
+        return Response(serializer.data)
+
 class EmployeeListCreateView(APIView):
     # Implementation similar to UserListCreateView with appropriate permissions and serializer
     authentication_classes = [JWTAuthentication]
@@ -165,7 +184,7 @@ class EmployeeDetailView(APIView):
             employee = Employee.objects.get(pk=pk)
             self.check_object_permissions(self.request, employee)
             return employee
-        except employee.DoesNotExist:
+        except Employee.DoesNotExist:
             raise Http404
 
     def get(self, request, pk):

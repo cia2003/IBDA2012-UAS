@@ -7,7 +7,11 @@ from kosts.models import Kost
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
  
 class EmailTokenObtainPairSerializer(TokenObtainPairSerializer):
+    email = serializers.EmailField()
+    password = serializers.CharField(write_only=True)
+
     username_field = "email"
+
     def validate(self, attrs):
         email = attrs.get('email')
         password = attrs.get('password')
@@ -23,11 +27,11 @@ class EmailTokenObtainPairSerializer(TokenObtainPairSerializer):
         if not user.is_active:
             raise serializers.ValidationError('User account is disabled.')
 
-        data = self.get_token(user)
+        refresh = self.get_token(user)
 
         return {
-            'refresh': str(data),
-            'access': str(data.access_token),
+            'refresh': str(refresh),
+            'access': str(refresh.access_token),
             'user': {
                 'id': user.id,
                 'first_name': user.first_name,
@@ -158,7 +162,7 @@ class TenantSerializer(serializers.ModelSerializer):
                 "types": ["application/json"]
             }
         ]
-    
+
 class EmployeeSerializer(serializers.ModelSerializer):
     _links = serializers.SerializerMethodField()
     user = serializers.PrimaryKeyRelatedField(queryset=User.objects.all())
@@ -211,6 +215,18 @@ class EmployeeSerializer(serializers.ModelSerializer):
                 "types": ["application/json"]
             }
         ]
+
+class EmployeeContactSerializer(serializers.ModelSerializer):
+    # user = serializers.PrimaryKeyRelatedField(queryset=User.objects.all())
+    full_name = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Employee
+        fields = ['full_name', 'phone_number']
+
+    def get_full_name(self, obj):
+        return f"{obj.user.first_name} {obj.user.last_name}"
+
 
 class GroupSerializer(serializers.HyperlinkedModelSerializer):
     _links = serializers.SerializerMethodField()

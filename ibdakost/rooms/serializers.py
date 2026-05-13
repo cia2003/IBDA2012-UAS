@@ -3,6 +3,7 @@ from rest_framework.reverse import reverse
 from django.contrib.auth.hashers import make_password
 from django.contrib.auth.models import Group
 from .models import RoomType, Facility, Room
+from kosts.models import Kost
 
 
 class FacilitySerializer(serializers.ModelSerializer):
@@ -54,7 +55,7 @@ class RoomTypeSerializer(serializers.ModelSerializer):
                 "types": ["application/json"]
             }
         ]
-
+    
 class RoomSerializer(serializers.ModelSerializer):
     _links = serializers.SerializerMethodField()
 
@@ -89,5 +90,40 @@ class RoomSerializer(serializers.ModelSerializer):
                 "action": "DELETE",
                 "types": ["application/json"]
             }
+        ]
+
+class RoomTypeMiniSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = RoomType
+        fields = ['id', 'name', 'price', 'size']
+
+
+class KostMiniSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Kost
+        fields = ['id', 'name', 'address']
+
+
+class RoomDetailsSerializer(serializers.ModelSerializer):
+    room_type = RoomTypeMiniSerializer(read_only=True)
+    kost = KostMiniSerializer(read_only=True)
+    facilities = FacilitySerializer(
+        many=True,
+        read_only=True,
+        source='room_type.facilities'
+    )
+
+    class Meta:
+        model = Room
+        fields = [
+            'id',
+            'kost',
+            'room_type',
+            'facilities',
+            'name',
+            'is_available',
+            'image',
+            'created_at',
+            'updated_at'
         ]
 

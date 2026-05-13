@@ -2,31 +2,51 @@ import { Heart, Maximize2, User, Lock } from "lucide-react";
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import toast from "react-hot-toast";
+import { useUserContext } from "../../hook/useContext";
 
 const RoomCard = ({ data, kostId }) => {
   const [isHovered, setIsHovered] = useState(false);
-  const [isFavorite, setIsFavorite] = useState(false); 
+  // const [isFavorite, setIsFavorite] = useState(false); 
+  const { addToWishlist, removeWishlist, wishlist } = useUserContext();
 
 
-  const isDisabled = data.status === 'Occupied';
+  const isDisabled = data.is_available === false;
 
-  const handleWishlist = (e) => {
+  const existingWishlist = wishlist.find(
+    (item) => item.room === data.id
+  );
+
+  const isFavorite = !!existingWishlist;
+
+  const handleWishlist = async (e) => {
     e.stopPropagation(); 
     e.preventDefault();
     
     if (isDisabled) return;
 
-    const newStatus = !isFavorite;
-    setIsFavorite(newStatus);
-    
-    if (newStatus) {
-      toast.success("Kamar ditambahkan ke wishlist ❤️");
-    } else {
-      toast("Kamar dihapus dari wishlist", { icon: '🗑️' });
+    try {
+      if (!isFavorite) {
+        const result = await addToWishlist(data.id);
+
+        if (result) {
+          toast.success("Kamar ditambahkan ke wishlist ❤️");
+        }
+        
+      } else {
+        const success = await removeWishlist(existingWishlist.id);
+
+        if (success) {
+          toast("Kamar dihapus dari wishlist", { icon: '🗑️' });
+        }
+        
+      }      
+    } catch (error) {
+      console.error(error)
     }
+
   };
 
-  const formattedPrice = data.price?.toLocaleString('id-ID');
+  const formattedPrice = Number(data.room_type.price)?.toLocaleString('id-ID');
 
   return (
     <Link 
@@ -40,8 +60,8 @@ const RoomCard = ({ data, kostId }) => {
     >
       <div className="relative aspect-video overflow-hidden">
         <img 
-          src={data.images?.[0] || "https://images.unsplash.com/photo-1598928636135-d146006ff4be?q=80&w=600"} 
-          alt={`Kamar ${data.type}`}
+          src={data.image || "https://images.unsplash.com/photo-1598928636135-d146006ff4be?q=80&w=600"} 
+          alt={`Kamar ${data.room_type.name}`}
           className={`w-full h-full object-cover transition-transform duration-700 ${!isDisabled && "group-hover:scale-105"}`}
         />
         
@@ -94,12 +114,12 @@ const RoomCard = ({ data, kostId }) => {
             <div className="flex items-center gap-3 mt-1.5 text-sm text-zinc-500">
               <div className="flex items-center gap-1">
                 <Maximize2 size={14} className={isDisabled ? "text-zinc-300" : "text-blue-400"} />
-                {data.size || "3x4"} m²
+                 Ukuran Kamar: {data.room_type.size || "3x4"} m²
               </div>
-              <div className="flex items-center gap-1">
+              {/* <div className="flex items-center gap-1">
                 <User size={14} className={isDisabled ? "text-zinc-300" : "text-blue-400"} />
                 {data.capacity || 1} Orang
-              </div>
+              </div> */}
             </div>
           </div>
         </div>

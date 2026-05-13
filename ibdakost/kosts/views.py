@@ -6,7 +6,7 @@ from rest_framework.views import APIView
 # from django.shortcuts import get_object_or_404
 from django.contrib.auth.models import Group
 from rest_framework_simplejwt.authentication import JWTAuthentication
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, AllowAny
 from api.permissions import IsManagerOrSuperUser
 from .serializers import KostSerializer
 from .models import Kost
@@ -19,11 +19,11 @@ class KostListCreateView(APIView):
 
     def get_permissions(self):
         if self.request.method == 'GET':
-            return [IsAuthenticated()]
+            return [AllowAny()]
         return [IsAuthenticated(), IsManagerOrSuperUser()]
 
     def get(self, request):
-        kosts = Kost.objects.all().order_by('created_at')[:10]
+        kosts = Kost.objects.all().order_by('created_at')
         serializer = KostSerializer(kosts, many=True)
         data = serializer.data
         
@@ -40,9 +40,11 @@ class KostDetailView(APIView):
     authentication_classes = [JWTAuthentication]
 
     def get_permissions(self):
-        if self.request.method == 'DELETE':
+        if self.request.method == 'DELETE' or self.request.method == 'PUT':
             return [IsAuthenticated(), IsManagerOrSuperUser()]
-        return [IsAuthenticated()]
+        if self.request.method == 'GET':
+            return [AllowAny()]
+        # return [IsAuthenticated()]
 
     def get_object(self, pk):
         try:

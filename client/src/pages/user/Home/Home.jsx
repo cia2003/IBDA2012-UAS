@@ -1,21 +1,39 @@
 import { useEffect, useCallback, useState } from "react";
 import KostCard from "../../../components/ui/KostCard";
-import { useManagerContext } from "../../../hook/useContext";
+import { useManagerContext, useUserContext } from "../../../hook/useContext";
 import style from "./home.module.css";
 
 function Home() {
   const [kost, setKost] = useState([]);
+  const { getUnauthenticatedKostData, getUnauthenticatedRooms, getUnauthenticatedRoomTypes } = useUserContext();
   const { getKostData } = useManagerContext();
 
   const fetchKost = useCallback(async () => {
     try {
-      const data = await getKostData();
-      setKost(data || []);
+      const accessToken = localStorage.getItem("accessToken");
+      const data = await getUnauthenticatedKostData();
+
+      const roomResponse = await getUnauthenticatedRooms();
+      const filteredRooms = roomResponse.filter(room => room.is_available === true);
+
+      const roomTypes = await getUnauthenticatedRoomTypes();
+
+      const kostWithRooms = data.map(kostItem => {
+        const roomsForKost = filteredRooms.filter(room => room.kost === kostItem.id);
+        const roomsWithType = roomsForKost.map(room => {
+          const roomType = roomTypes.find(type => type.id === room.room_type);
+          return { ...room, room_type: roomType };
+        });
+
+        return { ...kostItem, rooms: roomsWithType };
+      });
+
+      setKost(kostWithRooms || []);
     } catch (error) {
       console.error("Gagal fetching kost:", error);
       setKost([]);
     }
-  }, [getKostData]);
+  }, [getUnauthenticatedKostData, getUnauthenticatedRooms, getUnauthenticatedRoomTypes]);
 
   useEffect(() => {
     fetchKost();

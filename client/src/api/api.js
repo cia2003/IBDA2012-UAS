@@ -16,6 +16,14 @@ const formDataApi = axios.create({
   },
 });
 
+const unauthenticatedApi = axios.create({
+  baseURL: "http://localhost:8000/", // Ganti URL nya nanti
+  headers: {
+    "Content-Type": "application/json",
+    "Accept": "application/json",
+  },
+});
+
 // Interceptor untuk menambahkan token ke setiap request
 api.interceptors.request.use(
   (config) => { 
@@ -30,6 +38,22 @@ api.interceptors.request.use(
   (error) => {
     return Promise.reject(error);
   },
+);
+
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    const status = error.response?.status;
+
+    if (status === 401) {
+      localStorage.removeItem("accessToken");
+      localStorage.removeItem("refreshToken");
+
+      window.location.href = "/login";
+    }
+
+    return Promise.reject(error);
+  }
 );
 
 formDataApi.interceptors.request.use(
@@ -47,5 +71,21 @@ formDataApi.interceptors.request.use(
   },
 );
 
+formDataApi.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    const status = error.response?.status;
+
+    if (status === 401) {
+      localStorage.removeItem("accessToken");
+      localStorage.removeItem("refreshToken");
+
+      window.location.href = "/login";
+    }
+
+    return Promise.reject(error);
+  }
+);
+
 export default api
-export { formDataApi };
+export { formDataApi, unauthenticatedApi };

@@ -49,6 +49,20 @@ export const StaffContextProvider = ({ children }) => {
     }
   }, []);
 
+  const getStaffDataByKostId = useCallback(async (kostId) => {
+    try {
+      // -- MODE BACKEND --
+      const response = await api.get(`kosts/${kostId}/contact/`); // Asumsikan endpoint ini mengembalikan daftar kontak staff berdasarkan ID kost
+      const employee = response.data; // Asumsikan response mengandung field employees yang merupakan array staff
+
+      return employee
+      
+    } catch (error) {
+      console.error(error.message);
+      return null;
+    }
+  }, []);
+
   // --- UPDATE ROOM STATUS ---
   const updateRoomStatus = useCallback(async (roomId, status) => {
     try {
@@ -291,6 +305,7 @@ export const StaffContextProvider = ({ children }) => {
       newTenantList,
       managedKost,
       tenantData,
+      getStaffDataByKostId,
       getAllRoomsByKostId,
       getAcceptedLeases,
       getPendingLeases,
@@ -306,7 +321,7 @@ export const StaffContextProvider = ({ children }) => {
       addRoom,
       // notifTenantsInvoice
     }),
-    [newTenantList, managedKost, tenantData, deleteTenant, getKostDataByStaffId, editTenant, updateRoomStatus, acceptTenant, rejectTenant, getNewTenantList, getTenantById, addRoom]
+    [newTenantList, managedKost, tenantData, deleteTenant, getKostDataByStaffId, editTenant, updateRoomStatus, acceptTenant, rejectTenant, getNewTenantList, getTenantById, addRoom, getStaffDataByKostId]
   );
 
   return <StaffContext.Provider value={value}>{children}</StaffContext.Provider>;

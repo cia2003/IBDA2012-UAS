@@ -5,11 +5,15 @@ const KostCard = ({ data }) => {
   const navigate = useNavigate();
 
   const availableRoomsCount = data.rooms?.filter(
-    (room) => room.status === "Available"
+    (room) => room.is_available === true
   ).length || 0;
 
   const lowestPrice = data.rooms?.length > 0 
-    ? Math.min(...data.rooms.map(room => room.price)) 
+    ? Math.min(
+      ...data.rooms
+        .map(room => Number(room.room_type?.price))
+        .filter(p => Number.isFinite(p))
+    ) 
     : 0;
 
   return (
