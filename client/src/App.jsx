@@ -33,9 +33,9 @@ import Home from "./pages/user/Home/Home";
 import User from "./pages/user/User";
 import WishList from "./pages/user/WishList";
 import UserLogin from "./pages/user/UserLogin/UserLogin";
-import UserKostDetail from "./pages/user/UserKostDetail/UserKostDetail";
+import UserKostDetail from "./pages/user/UserKostDetail";
 import UserRoomDetail from "./pages/user/UserRoomDetail/UserRoomDetail";
-import RegistrationForm from "./pages/user/RegistrationForm/RegistrationForm";
+import RegistrationForm from "./pages/user/RegistrationForm";
 
 // Other
 import NotFoundPage from "./pages/NotFoundPage";
