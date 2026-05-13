@@ -2,7 +2,6 @@ import { useEffect, useCallback, useState } from "react";
 import KostCard from "../../../components/ui/KostCard";
 import { useManagerContext } from "../../../hook/useContext";
 import style from "./home.module.css";
-import SearchBar from "../../../components/layout/SearchBar";
 
 import {
   Search,
