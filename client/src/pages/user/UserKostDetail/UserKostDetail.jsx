@@ -24,10 +24,9 @@ function UserKostDetail() {
     fetchKostInfo();
   }, [fetchKostInfo]);
 
-  useEffect(() => {
-    console.log(kostData);
-  });
-
+  useEffect(()=>{
+    console.log(kostData)
+  },[kostData])
   if (!kostData)
     return (
       <div className="p-20 text-center font-medium animate-pulse">

@@ -62,12 +62,6 @@ const UserProtectedRoute = ({ children }) => {
 export default function App() {
   const { adminIsLoggedIn, role, staffData } = useAppContext();
 
-  const adminDefaultRedirect = !adminIsLoggedIn
-    ? "/admin/login"
-    : role === "manager"
-      ? "/admin/dashboard/manager"
-      : `/admin/dashboard/${staffData?.id}`;
-
   return (
     <>
       <Toaster />

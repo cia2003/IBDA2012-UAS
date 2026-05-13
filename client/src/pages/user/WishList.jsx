@@ -1,23 +1,11 @@
-import React, { useCallback, useEffect, useMemo } from "react";
+import React, { useEffect } from "react";
 import { useUserContext } from "../../hook/useContext";
-import { HeartOff, MapPin, ArrowRight, ShoppingCart } from "lucide-react";
+import { HeartOff, MapPin } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
 const Wishlist = () => {
   const { wishlist, deleteWishlist } = useUserContext();
   const navigate = useNavigate();
-
-  useEffect(() => {
-    console.log("Isi wishlist:", wishlist);
-  }, [wishlist]);
-
-  const handleDelete = useCallback(async()=>{
-    try {
-        const data = await deleteWishlist(wishlistId)
-    } catch (error) {
-        console.error(error.message)
-    }
-  })
 
   if (wishlist.length === 0) {
     return (
@@ -27,8 +15,7 @@ const Wishlist = () => {
         </div>
         <h2 className="text-2xl font-black text-zinc-800">Belum ada favorit</h2>
         <p className="text-zinc-500 max-w-xs mt-2">
-          Mungkin kamu harus jalan-jalan sebentar dan simpan kost yang kamu
-          suka.
+          Mungkin kamu harus jalan-jalan sebentar dan simpan kost yang kamu suka.
         </p>
         <button
           onClick={() => navigate("/")}
@@ -41,70 +28,77 @@ const Wishlist = () => {
   }
 
   return (
-    <div className="max-w-7xl mx-auto p-6 md:p-12">
-      <header className="mb-12">
+    <div className="max-w-[1600px] mx-auto p-6 md:p-10">
+      <header className="mb-10">
         <h1 className="text-4xl font-black text-zinc-900 tracking-tight">
           Favorit Saya
         </h1>
         <p className="text-zinc-500 font-medium">
-          Kamar pilihan yang sudah kamu simpan.
+          {wishlist.length} Kamar pilihan yang sudah kamu simpan.
         </p>
       </header>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+      {/* Grid diubah menjadi lg:grid-cols-4 */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
         {wishlist.map((item) => (
           <div
             key={item.wishlistId}
-            className="group bg-white rounded-[2.5rem] border border-zinc-100 shadow-xl shadow-zinc-200/40 overflow-hidden hover:-translate-y-2 transition-all duration-300"
+            className="group bg-white rounded-[2rem] border border-zinc-100 shadow-lg shadow-zinc-200/40 overflow-hidden hover:-translate-y-1 transition-all duration-300"
           >
-            {/* Image & Delete Button */}
-            <div className="relative h-64">
+            {/* Image Section */}
+            <div className="relative h-48">
               <img
                 src={item.image}
-                className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                alt={item.name}
+                className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                alt={item.name || item.kost_name}
               />
+              
+              {/* Room Number Badge */}
+              <div className="absolute top-3 left-3 px-3 py-1 bg-indigo-600/90 backdrop-blur-md text-white rounded-xl text-xs font-black shadow-lg">
+                No. {item.roomInfo.number || item.room_number}
+              </div>
+
+              {/* Delete Button */}
               <button
-                onClick={() => handleDelete(item.id)}
-                className="absolute top-4 right-4 p-3 bg-white/90 backdrop-blur rounded-2xl text-red-500 hover:bg-red-500 hover:text-white transition-all shadow-lg"
+                onClick={() => deleteWishlist(item.wishlistId)}
+                className="absolute top-3 right-3 p-2.5 bg-white/90 backdrop-blur rounded-xl text-red-500 hover:bg-red-500 hover:text-white transition-all shadow-md"
               >
-                <HeartOff size={20} />
+                <HeartOff size={18} />
               </button>
             </div>
 
-            {/* Information */}
-            <div className="p-8">
-              <div className="mb-6">
-                <h3 className="text-2xl font-black text-zinc-800 truncate leading-tight">
-                  {item.name}
+            {/* Information Section */}
+            <div className="p-5">
+              <div className="mb-4">
+                <h3 className="text-lg font-black text-zinc-800 truncate leading-tight">
+                  {item.name || item.kost_name}
                 </h3>
-                <div className="flex items-center gap-2 text-zinc-400 font-bold text-sm mt-1">
-                  <MapPin size={14} />
-                  Kamar {item.roomInfo.roomNumber} • {item.location}
+                <div className="flex items-center gap-1.5 text-zinc-400 font-bold text-[11px] mt-1">
+                  <MapPin size={12} className="shrink-0" />
+                  <span className="truncate">{item.location}</span>
                 </div>
               </div>
 
-              <div className="flex items-baseline gap-1 mb-8">
-                <span className="text-3xl font-black text-indigo-600">
-                  Rp {item.roomInfo.price}
+              <div className="flex items-baseline gap-1 mb-6">
+                <span className="text-xl font-black text-indigo-600">
+                  Rp {item.roomInfo.price.toLocaleString("id-ID") || item.price.toLocaleString("id-ID")}
                 </span>
-                <span className="text-xs font-black text-zinc-300 uppercase tracking-widest">
-                  / Bulan
+                <span className="text-[10px] font-black text-zinc-300 uppercase tracking-tighter">
+                  / Bln
                 </span>
               </div>
 
-              <div className="flex gap-3">
+              {/* Action Buttons */}
+              <div className="grid grid-cols-2 gap-2">
                 <button
-                  onClick={() => navigate(`/kost/${item.id}`)}
-                  className="flex-1 py-4 bg-zinc-50 text-zinc-600 font-black rounded-2xl hover:bg-zinc-200 transition-all text-xs uppercase tracking-widest border border-zinc-100"
+                  onClick={() => navigate(`/kost/${item.id || item.kost_id}/${item.roomInfo.id || item.room_id}`)}
+                  className="py-3 bg-zinc-50 text-zinc-600 font-black rounded-xl hover:bg-zinc-200 transition-all text-[10px] uppercase tracking-widest border border-zinc-100"
                 >
                   Detail
                 </button>
                 <button
-                  onClick={() =>
-                    navigate(`/registrasi/${item.id}/${item.roomInfo.id}`)
-                  }
-                  className="flex-1 py-4 bg-indigo-600 text-white font-black rounded-2xl shadow-lg shadow-indigo-100 hover:bg-indigo-700 transition-all text-xs uppercase tracking-widest"
+                  onClick={() => navigate(`/registration/${item.id || item.kost_id}/${item.roomInfo.id || item.room_id}`)}
+                  className="py-3 bg-indigo-600 text-white font-black rounded-xl shadow-md shadow-indigo-100 hover:bg-indigo-700 transition-all text-[10px] uppercase tracking-widest"
                 >
                   Sewa
                 </button>

@@ -95,9 +95,9 @@ export const kostData = [
     address: "Jl. Merdeka No. 1",
     rooms: [
       {
+        ...ROOM_TYPES.TIPE_1,
         id: "A01",
         roomNumber: "101",
-        ...ROOM_TYPES.TIPE_1,
         status: "Occupied",
         resident: [
           {
@@ -110,9 +110,9 @@ export const kostData = [
         ],
       },
       {
+        ...ROOM_TYPES.TIPE_2,
         id: "A02",
         roomNumber: "102",
-        ...ROOM_TYPES.TIPE_2,
         status: "Available",
         resident: null,
       },
@@ -126,16 +126,16 @@ export const kostData = [
     address: "Jl. Sudirman No. 12",
     rooms: [
       {
+        ...ROOM_TYPES.TIPE_1,
         id: "B01",
         roomNumber: "201",
-        ...ROOM_TYPES.TIPE_1,
         status: "Available",
         resident: null,
       },
       {
+        ...ROOM_TYPES.TIPE_2,
         id: "B02",
         roomNumber: "202",
-        ...ROOM_TYPES.TIPE_2,
         status: "Occupied",
         resident: [
           {
@@ -148,16 +148,16 @@ export const kostData = [
         ],
       },
       {
+        ...ROOM_TYPES.TIPE_2,
         id: "B03",
         roomNumber: "203",
-        ...ROOM_TYPES.TIPE_2,
         status: "Available",
         resident: null,
       },
       {
+        ...ROOM_TYPES.TIPE_2,
         id: "B04",
         roomNumber: "203",
-        ...ROOM_TYPES.TIPE_2,
         status: "Available",
         resident: null,
       },
@@ -171,9 +171,9 @@ export const kostData = [
     address: "Jl. Thamrin No. 5",
     rooms: [
       {
+        ...ROOM_TYPES.TIPE_3,
         id: "C01",
         roomNumber: "301",
-        ...ROOM_TYPES.TIPE_3,
         status: "Occupied",
         resident: [
           {
@@ -195,9 +195,9 @@ export const kostData = [
         ],
       },
       {
+        ...ROOM_TYPES.TIPE_4,
         id: "C02",
         roomNumber: "302",
-        ...ROOM_TYPES.TIPE_4,
         status: "Available",
         resident: null,
       },

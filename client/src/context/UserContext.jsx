@@ -12,7 +12,6 @@ import toast from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
 import { kostData, User } from "../assets/assets";
 
-
 export const UserContext = createContext();
 
 export const UserContextProvider = ({ children }) => {
@@ -20,7 +19,7 @@ export const UserContextProvider = ({ children }) => {
   const { userData } = useContext(AppContext);
   const navigate = useNavigate();
 
-  const addToWishlist = useCallback(
+  const addWishlist = useCallback(
     async (kostId, roomId) => {
       if (!userData?.id) {
         toast.error("Silakan login terlebih dahulu");
@@ -38,18 +37,30 @@ export const UserContextProvider = ({ children }) => {
         // }
 
         const alreadyAdded = wishlist.some(
-          (w) => w.kostId === kostId && w.roomId === roomId,
+          (w) => String(w.roomInfo?.id) === String(roomId),
         );
 
         if (alreadyAdded) {
           toast("Kamar sudah ada di favorit", { icon: "ℹ️" });
           return;
         }
+        const kost = kostData.find((k) => String(k.id) === String(kostId));
+        const room = kost?.rooms?.find((r) => String(r.id) === String(roomId));
 
         const newWishlistItem = {
-          id: `WL${Math.floor(Math.random() * 1000)}`, // Generate dummy ID
-          kostId: kostId,
-          roomId: roomId,
+          wishlistId: `WL${Math.floor(Math.random() * 1000)}`,
+          id: kostId,
+          name: kost?.name || "Kost Baru",
+          location: kost?.address || "Lokasi",
+          image:
+            room?.img ||
+            "https://images.unsplash.com/photo-1598928636135-d146006ff4be?q=80&w=600",
+          roomInfo: {
+            id: roomId,
+            number: room?.roomNumber || "N/A",
+            price: room?.price || 0,
+            type: room?.name || "Standard",
+          },
         };
 
         setWishlist((prev) => [...prev, newWishlistItem]);
@@ -75,7 +86,9 @@ export const UserContextProvider = ({ children }) => {
       //   toast.success("Berhasil dihapus dari favorit");
       // }
 
-      // setWishlist(prev.filter((item) => item.wishlistId !== wishlistId));
+      setWishlist((prev) =>
+        prev.filter((item) => item.wishlistId !== wishlistId),
+      );
       toast.success("Berhasil dihapus dari favorit");
     } catch (error) {
       console.error(error.message);
@@ -83,41 +96,74 @@ export const UserContextProvider = ({ children }) => {
   }, []);
 
   const getUserWishlist = useCallback(async () => {
-    if (!userData?.id) return;
-
     try {
+     if (!userData?.id) return;
+
+      // const {data} = await api.get('/wishlist', {
+      //   user_id: userId,
+      // })
+
+      // if(data){
+      //   const wishList = {
+      //     wishlistId: data.id,
+      //     kostId: data.kost_id,
+      //     name: data.kost_name,
+      //     location: data.location,
+      //     image: data.room_image,
+      //     roomId: data.room_id,
+      //     roomNumber: data.room_number,
+      //     price: data.price,
+      //     type: data.type
+      //   }
+      // }
+
+      // setWishlist(wishlist)
+
       const currentUserFullData = User.find(
         (u) => String(u.id) === String(userData.id),
       );
 
       if (currentUserFullData?.wishlist) {
-        // Enrich each wishlist item with kost + room data
         const enriched = currentUserFullData.wishlist.map((wl) => {
-          const kost = kostData.find((k) => k.id === wl.kostId);
-          const room = kost?.rooms?.find((r) => r.id === wl.roomId);
+          // 1. Cari Kost
+          const kost = kostData.find((k) => String(k.id) === String(wl.kostId));
+
+          // 2. Cari Kamar (Gunakan optional chaining yang kuat)
+          const room = kost?.rooms?.find(
+            (r) => String(r.id) === String(wl.roomId),
+          );
+
+          // DEBUG: Jika masih undefined, kita log di sini
+          if (!room) {
+            console.log(
+              `Gagal menemukan Kamar ID: ${wl.roomId} di Kost ID: ${wl.kostId}`,
+            );
+            console.log("Daftar kamar yang tersedia di kost ini:", kost?.rooms);
+          }
 
           return {
-            wishlistId: wl.id, // used by deleteWishlist & key prop
-            id: wl.kostId, // used by navigate(`/kost/${item.id}`)
-            name: kost?.name,
-            location: kost?.location,
-            image: kost?.image, // or room?.image if rooms have their own image
+            wishlistId: wl.id,
+            id: wl.kostId,
+            name: kost?.name || "Kost Tidak Ditemukan",
+            location: kost?.address || "Alamat tidak ada",
+            image:
+              room?.img ||
+              "https://images.unsplash.com/photo-1598928636135-d146006ff4be?q=80&w=600", // Fallback ke gambar kost jika gambar kamar tidak ada
             roomInfo: {
               id: room?.id,
-              number: room?.number,
-              price: room?.price,
+              number: room?.roomNumber || "N/A",
+              price: room?.price || 0,
+              type: room?.name || "Tipe Tidak Diketahui", // Mengambil nama dari ROOM_TYPES
             },
           };
         });
 
         setWishlist(enriched);
-      } else {
-        setWishlist([]);
       }
     } catch (error) {
       console.error("Error fetching wishlist:", error.message);
     }
-  }, [userData]);
+  }, [userData, kostData]); // kostData HARUS ada di sini agar fungsi dipicu ulang saat data siap
 
   // Mengirimkan data registrasi untuk sewa kos (Bukan resgistrasi awal user)
   const handleRegistration = useCallback(
@@ -158,13 +204,13 @@ export const UserContextProvider = ({ children }) => {
   const value = useMemo(
     () => ({
       wishlist,
-      addToWishlist,
+      addWishlist,
       deleteWishlist,
       getUserWishlist,
       setWishlist,
       handleRegistration,
     }),
-    [wishlist, addToWishlist, getUserWishlist, handleRegistration],
+    [wishlist, addWishlist, getUserWishlist, handleRegistration],
   );
 
   return <UserContext.Provider value={value}>{children}</UserContext.Provider>;
