@@ -4,6 +4,7 @@ from django.contrib.auth.hashers import make_password
 from django.contrib.auth.models import Group
 from .models import RoomType, Facility, Room
 from kosts.models import Kost
+from leases.models import Lease
 
 
 class FacilitySerializer(serializers.ModelSerializer):
@@ -127,3 +128,66 @@ class RoomDetailsSerializer(serializers.ModelSerializer):
             'updated_at'
         ]
 
+class RoomProductionSerializer(serializers.ModelSerializer):
+    roomNumber = serializers.CharField(source="name")
+    price = serializers.SerializerMethodField()
+    status = serializers.SerializerMethodField()
+    room_type = serializers.SerializerMethodField()
+    resident = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Room
+        fields = [
+            "id",
+            "roomNumber",
+            "status",
+            "price",
+            "image",
+            "room_type",
+            "resident",
+        ]
+
+    # =========================
+    # PRICE dari RoomType
+    # =========================
+    def get_price(self, obj):
+        return obj.room_type.price
+
+    # =========================
+    # ROOM TYPE MINI
+    # =========================
+    def get_room_type(self, obj):
+        return {
+            "id": str(obj.room_type.id),
+            "name": obj.room_type.name,
+            "size": obj.room_type.size,
+        }
+
+    # =========================
+    # STATUS (LEASE BASED)
+    # =========================
+    def get_status(self, obj):
+        return Lease.objects.filter(
+            room=obj,
+            status="accepted",
+            is_validated=True
+        ).exists() and "Occupied" or "Available"
+
+    # =========================
+    # RESIDENT (FROM LEASE)
+    # =========================
+    def get_resident(self, obj):
+        leases = (
+            Lease.objects
+            .filter(room=obj, status="accepted", is_validated=True)
+            .select_related("tenant__user")
+        )
+
+        return [
+            {
+                "id": str(l.id),
+                "name": f"{l.tenant.user.first_name} {l.tenant.user.last_name}",
+                "contact": l.tenant.phone_number,
+            }
+            for l in leases
+        ]

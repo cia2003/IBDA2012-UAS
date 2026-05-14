@@ -4,6 +4,8 @@ from django.contrib.auth.hashers import make_password
 from django.contrib.auth.models import Group
 from api.models import Tenant, User, Employee
 from kosts.models import Kost
+from rooms.models import Room
+from leases.models import Lease
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
  
 class EmailTokenObtainPairSerializer(TokenObtainPairSerializer):
@@ -226,6 +228,48 @@ class EmployeeContactSerializer(serializers.ModelSerializer):
 
     def get_full_name(self, obj):
         return f"{obj.user.first_name} {obj.user.last_name}"
+    
+class ResidentSerializer(serializers.Serializer):
+    id = serializers.UUIDField()
+    name = serializers.CharField()
+    contact = serializers.CharField()
+    paymentDueDate = serializers.IntegerField()
+
+
+class StaffRoomSerializer(serializers.ModelSerializer):
+    roomNumber = serializers.CharField(source="name")
+    status = serializers.SerializerMethodField()
+    resident = serializers.SerializerMethodField()
+    price = serializers.DecimalField(
+        source="room_type.price",
+        max_digits=12,
+        decimal_places=2
+    )
+
+    class Meta:
+        model = Room
+        fields = ["id", "roomNumber", "status", "resident", "price"]
+        
+    def get_status(self, obj):
+        print(obj.is_available, type(obj.is_available))
+        return "Available" if obj.is_available else "Occupied"
+
+    def get_resident(self, obj):
+        leases = Lease.objects.filter(
+            room=obj,
+            status="accepted",
+            is_validated=True
+        ).select_related("tenant__user")
+
+        return [
+            {
+                "id": str(lease.id),
+                "name": f"{lease.tenant.user.first_name} {lease.tenant.user.last_name}",
+                "contact": lease.tenant.phone_number,
+                "paymentDueDate": lease.end_date.day
+            }
+            for lease in leases
+        ]
 
 
 class GroupSerializer(serializers.HyperlinkedModelSerializer):

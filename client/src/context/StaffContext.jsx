@@ -26,28 +26,42 @@ export const StaffContextProvider = ({ children }) => {
   // --- GET KOST DATA BY STAFF ID ---
   const getKostDataByStaffId = useCallback(async (staffId) => {
     if (!staffId) return;
+
     try {
       // -- MODE BACKEND --
-      const response = await api.get(`employees/${staffId}/`);
-      if(response.data){
-        const kostId = response.data.kost; // Asumsikan response mengandung field kost yang merupakan ID kost yang dikelola
-        const kostResponse = await api.get(`kosts/${kostId}/`); // Ambil data kost berdasarkan ID
 
-        if (kostResponse.data) {
-          setManagedKost(kostResponse.data);
-        }
-        return response.data;
+      const response = await formDataApi.get(`staff/${staffId}/kost/`);
+
+      if (response.data) {
+        setManagedKost(response.data);
       }
 
-      // -- MODE DUMMY --
-      // const data = initialKostData.find((t) => String(t.staffId) === String(staffId));
-      // if (data) {
-      //   setManagedKost(data);
-      // }
+      return response.data
+
     } catch (error) {
       console.error(error.message);
     }
   }, []);
+
+  const getRoomListProduction = useCallback(async (kostId) => {
+    try {
+      const response = await api.get(`kosts/${kostId}/rooms/`);
+      const data = response.data;
+
+      if (data) {
+        setManagedKost((prev) => ({
+          ...prev,
+          rooms: response.data.rooms ?? response.data,
+        }));
+      }
+
+      return data      
+    } catch (error) {
+      console.error(error.message);
+      return null;
+    }
+
+  }, []); 
 
   const getStaffDataByKostId = useCallback(async (kostId) => {
     try {
@@ -64,14 +78,34 @@ export const StaffContextProvider = ({ children }) => {
   }, []);
 
   // --- UPDATE ROOM STATUS ---
-  const updateRoomStatus = useCallback(async (roomId, status) => {
+  const updateRoomStatus = useCallback(async (roomId, isAvailable) => {
     try {
-      // -- MODE BACKEND --
-      const response = await api.put(`rooms/${roomId}/`, { status });
-      if(response.data) toast.success('Status kamar diperbaharui');
+      const response = await api.put(`rooms/${roomId}/`, {
+        is_available: isAvailable,
+      });
 
-      // -- MODE DUMMY --
-      // toast.success(`Kamar ${roomId} kini ${status} (Dummy)`);
+      if (response.data) {
+        toast.success("Status kamar diperbaharui");
+
+        setManagedKost((prev) => {
+          if (!prev?.managedKost) return prev;
+
+          return {
+            ...prev,
+            managedKost: {
+              ...prev.managedKost,
+              rooms: prev.managedKost.rooms.map((r) =>
+                r.id === roomId
+                  ? {
+                      ...r,
+                      status: isAvailable ? "Available" : "Occupied",
+                    }
+                  : r
+              ),
+            },
+          };
+        });
+      }
     } catch (error) {
       console.error(error.message);
     }
@@ -81,7 +115,6 @@ export const StaffContextProvider = ({ children }) => {
   const addRoom = useCallback(async (roomForm) => {
     try {
       // -- MODE BACKEND --
-      console.log(managedKost.id);
 
       const formData = new FormData();
       formData.append('kost', managedKost.id); // Asumsikan managedKost sudah memiliki ID kost yang dikelola
@@ -105,6 +138,31 @@ export const StaffContextProvider = ({ children }) => {
       // -- MODE BACKEND --
       const response = await api.get(`rooms/${roomId}/`);
       return response.data;
+    } catch (error) {
+      console.error(error.message);
+    }
+  }, []);
+
+  // Get Room Details
+
+  const getRoomDetails = useCallback(async (roomId) => {
+    try {
+      // -- MODE BACKEND --
+      const response = await api.get(`rooms/${roomId}/`);
+      const data = response.data;
+
+      if (data) {
+        // const kostResponse = await api.get(`kosts/${data.kost}/`);
+        const resKost = data.kost;
+
+        const result = {
+          kostName: resKost.name, 
+          roomNumber: data.name
+        }
+
+        return result;
+      }
+      
     } catch (error) {
       console.error(error.message);
     }
@@ -305,6 +363,7 @@ export const StaffContextProvider = ({ children }) => {
       newTenantList,
       managedKost,
       tenantData,
+      getRoomDetails,
       getStaffDataByKostId,
       getAllRoomsByKostId,
       getAcceptedLeases,
@@ -321,7 +380,7 @@ export const StaffContextProvider = ({ children }) => {
       addRoom,
       // notifTenantsInvoice
     }),
-    [newTenantList, managedKost, tenantData, deleteTenant, getKostDataByStaffId, editTenant, updateRoomStatus, acceptTenant, rejectTenant, getNewTenantList, getTenantById, addRoom, getStaffDataByKostId]
+    [newTenantList, managedKost, tenantData, deleteTenant, getKostDataByStaffId, editTenant, updateRoomStatus, acceptTenant, rejectTenant, getNewTenantList, getTenantById, addRoom, getStaffDataByKostId, getRoomDetails]
   );
 
   return <StaffContext.Provider value={value}>{children}</StaffContext.Provider>;

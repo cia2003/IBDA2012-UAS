@@ -6,7 +6,7 @@ from django.contrib.auth.models import Group
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from api.permissions import IsManagerOrStaffOrSuperUser
-from .serializers import RoomTypeSerializer, FacilitySerializer, RoomSerializer, RoomDetailsSerializer
+from .serializers import RoomTypeSerializer, FacilitySerializer, RoomSerializer, RoomDetailsSerializer, RoomProductionSerializer
 from .models import RoomType, Facility, Room
 from django.http import Http404
 
@@ -178,3 +178,20 @@ class FacilityDetailView(APIView):
         facility.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
+class RoomListProductionView(APIView):
+    def get(self, request, kost_id=None):
+        rooms = (
+            Room.objects
+            .filter(kost_id=kost_id)
+            .select_related("room_type")
+            .prefetch_related(
+                "lease_set__tenant__user"
+            )
+        )
+
+        data = RoomProductionSerializer(rooms, many=True).data
+
+        return Response({
+            "count": rooms.count(),
+            "rooms": data
+        })

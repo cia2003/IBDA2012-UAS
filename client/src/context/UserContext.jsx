@@ -5,7 +5,7 @@ import {
   useMemo,
   useState,
 } from "react";
-import api, { unauthenticatedApi } from "../api/api";
+import api, { formDataApi, unauthenticatedApi } from "../api/api";
 import { AppContext } from "./AppContext";
 import toast from "react-hot-toast"; 
 import { useNavigate } from "react-router-dom";
@@ -139,16 +139,68 @@ export const UserContextProvider = ({ children }) => {
   // Mengirimkan data registrasi untuk sewa kos (Bukan resgistrasi awal user)
   const registrationForm = useCallback(async({formData})=>{
     try {
-      const {data} = await api.post('leases/', {
-        user_id: userData.id,
-        name: formData.name,
-        room: formData.room,
-        check_in: formData.date
-      })
-      if(data){
-        toast.success("Pengajuan sewa kost berhasil dikirimkan")
-        navigate('/')
-      }
+      console.log(formData);
+      // const accessToken = localStorage.getItem('accessToken');
+
+      // if (!accessToken) return;
+
+      // const updateUserData = {
+      //   'first_name': formData.firstName, 
+      //   'last_name': formData.lastName
+      // };
+
+      // if (
+      //   userData.first_name !== updateUserData.first_name ||
+      //   userData.last_name !== updateUserData.last_name
+
+      // ) {
+      //   const updateUserResponse = await api.put(
+      //     `users/${userData.id}/`, 
+      //     updateUserData
+      //   );
+
+      //   const newUserData = updateUserResponse.data
+
+      //   if (newUserData) {
+      //     console.log("berhasil update data user");
+      //   }
+      // }
+
+      // const tenantData = {
+      //   user: newUserData.id, 
+      //   gender: formData.gender, 
+      //   phone_Number: formData.phoneNumber, 
+      //   occupation: formData.occupation, 
+      //   institution: formData.institution, 
+      //   identity_type: formData.identityType, 
+      //   identity_card: formData.identityCard, 
+      // };
+
+      // const tenantResponse = await formDataApi.post(
+      //   'tenants/', 
+      //   tenantData
+      // );
+
+      // const resTenant = tenantResponse.data;
+
+      // if (resTenant) {
+      //   console.log("berhasilkan tambahkan tenant");
+      // }
+
+      // const leaseData = {
+      //   tenant: resTenant.id, 
+      //   room: formData.roomid, 
+      //   start_date: formData.checkInDate, 
+      //   end_date: formData.endDate
+      // };
+
+      // const response = await api.post('leases/', leaseData);
+      // const resLease = response.data
+
+      // if(resLease){
+      //   toast.success("Pengajuan sewa kost berhasil dikirimkan")
+      //   navigate('/')
+      // }
     } catch (error) {
       console.error(error.message)
     }

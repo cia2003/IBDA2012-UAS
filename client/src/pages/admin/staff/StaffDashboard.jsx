@@ -21,11 +21,12 @@ export default function StaffDashboard() {
   } = useStaffContext();
   const navigate = useNavigate();
 
-  const currentRooms = managedKost;
-  const totalRooms = currentRooms?.rooms?.length || 0;
+  const kostData = managedKost?.managedKost;
+  const currentRooms = kostData?.rooms;
+  const totalRooms = currentRooms?.length || 0;
 
   const totalOccupants =
-    currentRooms?.rooms?.reduce(
+    currentRooms?.reduce(
       (total, room) =>
         total +
         (room.status === "Occupied" && room.resident
@@ -35,7 +36,7 @@ export default function StaffDashboard() {
     ) || 0;
 
   const roomsLeft =
-    currentRooms?.rooms?.reduce((total, room) => {
+    currentRooms?.reduce((total, room) => {
       return room.status !== "Occupied" ? total + 1 : total;
     }, 0) || 0;
 
@@ -44,14 +45,15 @@ export default function StaffDashboard() {
   const overdueResidents = useMemo(() => {
     if (!currentRooms?.rooms) return [];
 
-    const today = new Date().getDate();
+    const today = new Date();
     const overdueList = [];
 
     currentRooms.rooms.forEach((room) => {
       if (room.status === "Occupied" && room.resident) {
         room.resident.forEach((res) => {
-          // Jika tanggal jatuh tempo < tanggal hari ini, anggap terlambat
-          if (res.paymentDueDate < today) {
+          const due = new Date(res.paymentDueDate);
+
+          if (due < today) {
             overdueList.push({
               ...res,
               roomNumber: room.roomNumber,
@@ -60,6 +62,7 @@ export default function StaffDashboard() {
         });
       }
     });
+
     return overdueList;
   }, [currentRooms]);
 
@@ -101,7 +104,7 @@ export default function StaffDashboard() {
         </h1>
         <p className="text-gray-500 font-medium">
           Monitoring Unit:{" "}
-          <span className="text-blue-600">{currentRooms?.name || staffId}</span>
+          <span className="text-blue-600">{kostData?.name || staffId}</span>
         </p>
       </div>
 

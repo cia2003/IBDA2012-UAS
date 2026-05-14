@@ -5,6 +5,7 @@ import {
   useMemo,
   useCallback,
   useEffect,
+  use,
 } from "react";
 import { useNavigate } from "react-router-dom";
 import {
@@ -88,25 +89,31 @@ export const AppContextProvider = ({ children }) => {
         );
   }, [role, state.staffData]);
 
+  const clearLocalStorage = () => {
+    localStorage.removeItem("accessToken");
+    localStorage.removeItem("refreshToken");
+    localStorage.removeItem("userData");
+  };
+
+  const setLocalStorage = (access, refresh, user) => {
+    localStorage.setItem("accessToken", access);
+    localStorage.setItem("refreshToken", refresh);
+    localStorage.setItem(
+      "userData", 
+      JSON.stringify(user)
+    )
+  }
   // Login admin
   const adminLogin = useCallback(
     async (email, password) => {
       try {
         dispatch({ type: "AUTH_START" });
 
-        // --- MODE DUMMY ---
-        // const user = staffList.find(
-        //   (s) => s.email === email && s.password === password,
-        // );
-
-        // --- MODE BACKEND ---
         const response = await api.post('login/', { email, password });
         const { access, refresh, user } = response.data; // Sesuaikan jika backend mengembalikan { access, refresh, user }
-        // const user = response.data.user; // Sesuaikan jika backend mengembalikan { data: { user: ... } }
-
+ 
         if (user) {
-          localStorage.setItem("accessToken", access);
-          localStorage.setItem("refreshToken", refresh);
+          setLocalStorage(access, refresh, user);
 
           dispatch({ type: "ADMIN_LOGIN_SUCCESS", payload: user });
           toast.success(`Selamat Datang, ${user.first_name}!`);
@@ -126,7 +133,7 @@ export const AppContextProvider = ({ children }) => {
       } catch (error) {
         const errorMsg =
           error.response?.data?.message || error.message || "Terjadi kesalahan";
-        dispatch({ type: "LOGIN_FAILURE", payload: errorMsg });
+        dispatch({ type: "AUTH_FAILURE", payload: errorMsg });
         toast.error(errorMsg);
         console.error(errorMsg);
       }
@@ -141,15 +148,14 @@ export const AppContextProvider = ({ children }) => {
       // await api.post('/admin/logout');
 
       // --- LOGIKA CLIENT SIDE ---
-      localStorage.removeItem("accessToken");
-      localStorage.removeItem("refreshToken");
+      clearLocalStorage();
 
       dispatch({ type: "ADMIN_LOGOUT" });
       toast.success("Logout Berhasil");
       navigate("/");
     } catch (error) {
       console.error(error.message);
-      dispatch({ type: "LOGOUT" });
+      dispatch({ type: "ADMIN_LOGOUT" });
       navigate("/");
     }
   }, [navigate]);
@@ -162,11 +168,7 @@ export const AppContextProvider = ({ children }) => {
         const { access, refresh, user } = response.data; // Sesuaikan jika backend mengembalikan { access, refresh, user }
 
         if (user) {
-          localStorage.setItem("accessToken", access);
-          localStorage.setItem("refreshToken", refresh);
-          localStorage.setItem(
-            "userData", JSON.stringify(user)
-          );
+          setLocalStorage(access, refresh, user);
 
           dispatch({ type: "USER_LOGIN_SUCCESS", payload: user });
           toast.success("Login berhasil");
@@ -182,48 +184,46 @@ export const AppContextProvider = ({ children }) => {
     [navigate],
   );
 
-  const refreshAccessToken = useCallback(async () => {
-    const refreshToken = localStorage.getItem("refreshToken");
+  // const refreshAccessToken = useCallback(async () => {
+  //   const refreshToken = localStorage.getItem("refreshToken");
 
-    if (!refreshToken) return null;
+  //   if (!refreshToken) return null;
 
-    try {
-      const response = await unauthenticatedApi.post(
-        "token/refresh/",
-        {
-          refresh: refreshToken,
-        }
-      );
+  //   try {
+  //     const response = await unauthenticatedApi.post(
+  //       "token/refresh/",
+  //       {
+  //         refresh: refreshToken,
+  //       }
+  //     );
 
-      const newAccess = response.data.access;
+  //     const newAccess = response.data.access;
 
-      localStorage.setItem("accessToken", newAccess);
+  //     localStorage.setItem("accessToken", newAccess);
 
-      return newAccess;
-    } catch (error) {
-      localStorage.removeItem("accessToken");
-      localStorage.removeItem("refreshToken");
+  //     return newAccess;
+  //   } catch (error) {
+  //     localStorage.removeItem("accessToken");
+  //     localStorage.removeItem("refreshToken");
 
-      return null;
-    }
-  }, []);
+  //     return null;
+  //   }
+  // }, []);
 
   const userLogout = useCallback(async () => {
     try {
       // await api.get("/user/logout");
-      localStorage.removeItem("accessToken");
-      localStorage.removeItem("refreshToken");
-      localStorage.removeItem("userData");
+      clearLocalStorage();
 
       dispatch({ type: "USER_LOGOUT" });
       toast.success("Logout Berhasil");
       navigate("/");
     } catch (error) {
       console.error(error.message);
-      dispatch({ type: "LOGOUT" });
+      dispatch({ type: "USER_LOGOUT" });
       navigate("/");
     }
-  }, []);
+  }, [navigate]);
 
   const userRegister = useCallback(async (userData) => {
     dispatch({ type: "AUTH_START" });
@@ -237,11 +237,7 @@ export const AppContextProvider = ({ children }) => {
       const response = await api.post("users/", formData);
       const { access, refresh, user } = response.data
       if (user) {
-        localStorage.setItem("accessToken", access);
-        localStorage.setItem("refreshToken", refresh);
-
-        console.log(access, refresh, user);
-
+        setLocalStorage(access, refresh, user);
         dispatch({ type: "USER_LOGIN_SUCCESS", payload: user });
         toast.success("Register berhasil");
         return user;
@@ -250,7 +246,7 @@ export const AppContextProvider = ({ children }) => {
       toast.error("Register gagal");
       console.error(error.message);
     }
-  }, []);
+  }, [navigate]);
 
   const checkAuthStatus = useCallback(async () => {
     try {
@@ -264,30 +260,41 @@ export const AppContextProvider = ({ children }) => {
       console.log("No active session");
     }
   }, []);
+  useEffect(() => { 
+    const initializeAuth = async () => { 
+      const token = localStorage.getItem("accessToken"); 
+      const unparseData = localStorage.getItem("userData");
 
-  useEffect(() => {
-    const initializeAuth = async () => {
-      const token = localStorage.getItem("accessToken");
-      const storedUser = localStorage.getItem("userData");
+      if (!token || !unparseData) return; 
+      
+      const storedUser = JSON.parse(unparseData); 
 
-      if (!token || !storedUser) return;
+      const groups = storedUser?.groups ?? []; 
+      const isManager = groups.includes("manager"); 
+      const isStaff = groups.includes("staff"); 
 
-      try {
-        dispatch({
-          type: "USER_LOGIN_SUCCESS",
-          payload: JSON.parse(storedUser),
-        });
+      if (isManager || isStaff) { 
+        try { 
+          dispatch({ type: "ADMIN_LOGIN_SUCCESS", payload: storedUser}); 
 
-      } catch (error) {
-        console.error(error);
+        } catch (error) { 
+          console.error(error); 
 
-        userLogout();
-      }
-    };
+          adminLogout(); 
+        } } else { 
+            try { dispatch({ 
+              type: "USER_LOGIN_SUCCESS", 
+              payload: storedUser}); 
 
-    initializeAuth();
+            } catch (error) { 
+              console.error(error); userLogout(); 
+            } 
+          } 
+        }; 
+        
+        initializeAuth(); 
+      }, [userLogout, adminLogout]);
 
-  }, [userLogout]);
 
   const values = useMemo(
     () => ({

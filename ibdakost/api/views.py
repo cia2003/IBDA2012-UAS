@@ -10,6 +10,7 @@ from .models import User, Tenant, Employee
 from .serializers import EmailTokenObtainPairSerializer, TenantSerializer, UserSerializer, EmployeeSerializer, GroupSerializer, EmployeeContactSerializer
 from django.http import Http404
 from rest_framework_simplejwt.views import TokenObtainPairView
+from kosts.serializers import StaffManagedKostSerializer
 
 class EmailLoginView(TokenObtainPairView):
     serializer_class = EmailTokenObtainPairSerializer
@@ -213,6 +214,27 @@ class EmployeeDetailView(APIView):
         employee.delete()
         print(request.user.groups.all())
         return Response(status=status.HTTP_204_NO_CONTENT)
+    
+class StaffKostDashboardView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, staff_id):
+        try:
+            employee = Employee.objects.select_related("kost", "user").get(user_id=staff_id)
+
+            if not employee.kost:
+                return Response({"detail": "No kost assigned"}, status=404)
+
+            data = StaffManagedKostSerializer(employee.kost).data
+
+            return Response({
+                "staffId": str(employee.user.id),
+                "position": employee.position,
+                "managedKost": data
+            })
+
+        except Employee.DoesNotExist:
+            return Response({"detail": "Staff not found"}, status=404)
 
 class GroupListCreateView(APIView):
     authentication_classes = [JWTAuthentication]
