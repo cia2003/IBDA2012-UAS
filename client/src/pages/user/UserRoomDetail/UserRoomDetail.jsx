@@ -203,17 +203,17 @@ function UserRoomDetail() {
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 md:grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                 <button
                   onClick={() => navigate(`/registration/${kostId}/${roomId}`)}
-                  className="flex items-center justify-center bg-blue-600 text-white gap-2 hover:bg-blue-800 hover:text-white px-5 py-2.5 rounded-2xl transition-all duration-300 font-bold text-sm border border-red-100 shadow-sm w-fit"
+                  className="flex items-center justify-center bg-blue-600 text-white gap-2 hover:bg-blue-800 hover:text-white px-5 py-2.5 rounded-2xl transition-all duration-300 font-bold text-sm border border-red-100 shadow-sm w-full md:w-fit"
                 >
                   <BookmarkPlus size={20} />
                   Pesan Kamar
                 </button>
                 <button
                   onClick={handleWishlist}
-                  className="flex items-center justify-center bg-red-50 text-red-600 gap-2 hover:bg-red-600 hover:text-white px-5 py-2.5 rounded-2xl transition-all duration-300 font-bold text-sm border border-red-100 shadow-sm w-fit"
+                  className="flex items-center justify-center bg-red-50 text-red-600 gap-2 hover:bg-red-600 hover:text-white px-5 py-2.5 rounded-2xl transition-all duration-300 font-bold text-sm border border-red-100 shadow-sm w-full md:w-fit"
                 >
                   {!wishlistStatus ? (
                     <>
