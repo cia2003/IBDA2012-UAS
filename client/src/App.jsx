@@ -99,6 +99,12 @@ export default function App() {
         </Route>
         <Route path="/login" element={<UserLogin />} />
 
+        {/* Redirect /admin */}
+        <Route
+          path="/admin"
+          element={<Navigate to={adminDefaultRedirect} replace />}
+        />
+
         {/* ── Staff Routes ── */}
         <Route
           path="/admin/dashboard/:staffId"
