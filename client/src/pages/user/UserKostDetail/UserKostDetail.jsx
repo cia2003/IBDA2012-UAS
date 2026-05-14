@@ -39,10 +39,9 @@ function UserKostDetail() {
       setKostData([]);
     }
   }, [getUnauthenticatedKostDetail, getStaffDataByKostId, getUnauthenticatedRooms, getUnauthenticatedRoomTypes]);
-
-
+  
   useEffect(() => {
-    getUserWishlist()
+    getUserWishlist();
     fetchKostInfo();
   }, [fetchKostInfo]);
 

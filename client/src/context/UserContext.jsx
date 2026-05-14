@@ -15,6 +15,7 @@ export const UserContext = createContext();
 
 export const UserContextProvider = ({ children }) => {
   const [wishlist, setWishlist] = useState([]);
+  const [wishlistKostDetail, setWishlistKostDetail] = useState([])
   const { userData } = useAppContext();
   const navigate = useNavigate()
 
@@ -75,7 +76,24 @@ export const UserContextProvider = ({ children }) => {
 
       if (wishlists) {
         setWishlist(wishlists);
-        console.log(wishlists);
+      }
+    } catch (error) {
+      console.error("Error fetching wishlist:", error.message);
+      return null;
+    }
+  }, [userData?.id]);
+
+  const getUserWishlistKostDetail = useCallback(async () => {
+    const accessToken = localStorage.getItem("accessToken");
+
+    if (!userData?.id || !accessToken) return;
+
+    try {
+      const response = await api.get(`wishlists/kost-details/`);
+      const { wishlists } = response.data;
+
+      if (wishlists) {
+        setWishlistKostDetail(wishlists);
       }
     } catch (error) {
       console.error("Error fetching wishlist:", error.message);
@@ -103,7 +121,9 @@ export const UserContextProvider = ({ children }) => {
 
         // 🔥 penting: refresh dari server
         await getUserWishlist();
+        await getUserWishlistKostDetail();
 
+        console.log(wishlist);
         return response.data;
       }
     } catch (error) {
@@ -112,7 +132,7 @@ export const UserContextProvider = ({ children }) => {
       toast.error(msg);
       return null;
     }
-  }, [navigate, userData, getUserWishlist]);
+  }, [navigate, userData, getUserWishlist, getUserWishlistKostDetail]);
 
   const removeWishlist = useCallback(async (id) => {
     const accessToken = localStorage.getItem("accessToken");
@@ -127,6 +147,7 @@ export const UserContextProvider = ({ children }) => {
 
         // 🔥 penting: refresh dari server
         await getUserWishlist();
+        await getUserWishlistKostDetail();
 
         return true;
       }
@@ -134,7 +155,7 @@ export const UserContextProvider = ({ children }) => {
       console.error(error);
       return false;
     }
-  }, [userData, getUserWishlist]);
+  }, [userData, getUserWishlist, getUserWishlistKostDetail]);
 
   const handleRegistration = useCallback(async (formData) => {
     try {
@@ -212,9 +233,11 @@ export const UserContextProvider = ({ children }) => {
 
   const value = useMemo(() => ({
     wishlist,
+    wishlistKostDetail,
     addToWishlist,
     removeWishlist,
     getUserWishlist,
+    getUserWishlistKostDetail, 
     setWishlist,
     handleRegistration,
     getUnauthenticatedKostData,
@@ -223,9 +246,11 @@ export const UserContextProvider = ({ children }) => {
     getUnauthenticatedRoomTypes,
   }), [
     wishlist,
+    wishlistKostDetail,
     addToWishlist,
     removeWishlist,
     getUserWishlist,
+    getUserWishlistKostDetail,
     handleRegistration,
     getUnauthenticatedKostData,
     getUnauthenticatedKostDetail,

@@ -4,19 +4,17 @@ import { HeartOff, MapPin } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
 const Wishlist = () => {
-  const { wishlist, removeWishlist, getUserWishlist } = useUserContext();
+  const { wishlistKostDetail, removeWishlist, getUserWishlistKostDetail } = useUserContext();
   const navigate = useNavigate();
 
+  if (!wishlistKostDetail) return;
 
   useEffect(() => {
-    getUserWishlist();
+    getUserWishlistKostDetail();
   }, []);
 
-  console.log(wishlist);
 
-  if (!wishlist) return;
-
-  if (wishlist.length === 0) {
+  if (wishlistKostDetail.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh] text-center px-4">
         <div className="bg-zinc-100 p-6 rounded-full mb-4">
@@ -43,13 +41,13 @@ const Wishlist = () => {
           Favorit Saya
         </h1>
         <p className="text-zinc-500 font-medium">
-          {wishlist.length} Kamar pilihan yang sudah kamu simpan.
+          {wishlistKostDetail.length} Kamar pilihan yang sudah kamu simpan.
         </p>
       </header>
 
       {/* Grid diubah menjadi lg:grid-cols-4 */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-        {wishlist.map((item) => (
+        {wishlistKostDetail.map((item) => (
           <div
             key={item.id}
             className="group bg-white rounded-[2rem] border border-zinc-100 shadow-lg shadow-zinc-200/40 overflow-hidden hover:-translate-y-1 transition-all duration-300"

@@ -5,7 +5,7 @@ from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework.permissions import IsAuthenticated
 from api.permissions import IsOwnerOrManagerOrSuperUser, IsManagerOrSuperUser
 from .models import Wishlist
-from .serializers import WishlistSerializer
+from .serializers import WishlistSerializer, WishlistKostDetailSerializer
 from django.http import Http404
 from django.shortcuts import render
 
@@ -71,3 +71,25 @@ class WishlistDetailView(APIView):
         Wishlist = self.get_object(pk)
         Wishlist.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+class WishlistKostDetailView(APIView):
+    authentication_classes = [JWTAuthentication]
+
+    def get_permissions(self):
+        if self.request.method == 'POST':
+            return [IsAuthenticated()]
+        return [IsAuthenticated(), IsOwnerOrManagerOrSuperUser()]
+
+    def get(self, request):
+        user = request.user
+
+        # jika Manager atau superuser
+        is_superuser = user.is_superuser
+        is_Manager = user.groups.filter(name='Manager').exists()
+
+        if is_superuser or is_Manager:
+            Wishlists = Wishlist.objects.all().order_by('created_at')
+        else:
+            Wishlists = Wishlist.objects.filter(user=user).order_by('created_at')
+        serializer = WishlistKostDetailSerializer(Wishlists, many=True)
+        return Response({'wishlists': serializer.data})
