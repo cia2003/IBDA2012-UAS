@@ -6,7 +6,7 @@ urlpatterns = [
   path('users/<uuid:pk>/', views.UserDetailView.as_view(), name='user-detail'),
 
   path('tenants/', views.TenantListCreateView.as_view(), name='tenant-list'),
-  path('tenants/<uuid:id>/', views.TenantDetailView.as_view(), name='tenant-detail'),
+  path('tenants/<uuid:pk>/', views.TenantDetailView.as_view(), name='tenant-detail'),
 
   path('employees/', views.EmployeeListCreateView.as_view(), name='employee-list'),
   path('employees/<uuid:pk>/', views.EmployeeDetailView.as_view(), name='employee-detail'),

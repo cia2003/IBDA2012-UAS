@@ -9,12 +9,13 @@ import api, { formDataApi, unauthenticatedApi } from "../api/api";
 import { AppContext } from "./AppContext";
 import toast from "react-hot-toast"; 
 import { useNavigate } from "react-router-dom";
+import { useAppContext } from "../hook/useContext";
 
 export const UserContext = createContext();
 
 export const UserContextProvider = ({ children }) => {
   const [wishlist, setWishlist] = useState([]);
-  const { userData } = useContext(AppContext);
+  const { userData } = useAppContext();
   const navigate = useNavigate()
 
   // Ini untuk mendapatkan data kost tanpa perlu token, digunakan di halaman Home agar bisa menampilkan data kost meskipun user belum login
@@ -136,75 +137,79 @@ export const UserContextProvider = ({ children }) => {
     }
   }, [userData, getUserWishlist]);
 
-  // Mengirimkan data registrasi untuk sewa kos (Bukan resgistrasi awal user)
-  const registrationForm = useCallback(async({formData})=>{
+  const handleRegistration = useCallback(async (formData) => {
     try {
-      console.log(formData);
-      // const accessToken = localStorage.getItem('accessToken');
+      const accessToken = localStorage.getItem("accessToken");
 
-      // if (!accessToken) return;
+      if (!accessToken || !userData) return false;
 
-      // const updateUserData = {
-      //   'first_name': formData.firstName, 
-      //   'last_name': formData.lastName
-      // };
+      let newUserData = userData;
 
-      // if (
-      //   userData.first_name !== updateUserData.first_name ||
-      //   userData.last_name !== updateUserData.last_name
+      const updateUserData = {
+        first_name: formData.firstName,
+        last_name: formData.lastName,
+      };
 
-      // ) {
-      //   const updateUserResponse = await api.put(
-      //     `users/${userData.id}/`, 
-      //     updateUserData
-      //   );
+      if (
+        userData.first_name !== updateUserData.first_name ||
+        userData.last_name !== updateUserData.last_name
+      ) {
+        const updateUserResponse = await api.put(
+          `users/${userData.id}/`,
+          updateUserData
+        );
 
-      //   const newUserData = updateUserResponse.data
+        newUserData = updateUserResponse.data;
+      };
 
-      //   if (newUserData) {
-      //     console.log("berhasil update data user");
-      //   }
-      // }
+      const tenantData = {
+        user: newUserData.id,
+        gender: formData.gender,
+        phone_number: formData.phoneNumber,
+        occupation: formData.occupation,
+        institution: formData.institution,
+        identity_type: formData.identityType,
+        identity_card: formData.identityCard,
+      };
 
-      // const tenantData = {
-      //   user: newUserData.id, 
-      //   gender: formData.gender, 
-      //   phone_Number: formData.phoneNumber, 
-      //   occupation: formData.occupation, 
-      //   institution: formData.institution, 
-      //   identity_type: formData.identityType, 
-      //   identity_card: formData.identityCard, 
-      // };
+      // 🔥 UPSERT TENANT
+      let resTenant;
 
-      // const tenantResponse = await formDataApi.post(
-      //   'tenants/', 
-      //   tenantData
-      // );
 
-      // const resTenant = tenantResponse.data;
+      const existing = await api.get(`tenants/${newUserData.id}/`);
 
-      // if (resTenant) {
-      //   console.log("berhasilkan tambahkan tenant");
-      // }
+      if (existing?.data) {
+        resTenant = existing.data;
+      } else {
+        const tenantResponse = await formDataApi.post(
+          "tenants/",
+          tenantData
+        );
+        resTenant = tenantResponse.data;
+      };
 
-      // const leaseData = {
-      //   tenant: resTenant.id, 
-      //   room: formData.roomid, 
-      //   start_date: formData.checkInDate, 
-      //   end_date: formData.endDate
-      // };
+      // 🔥 FIX roomId typo
+      const leaseData = {
+        tenant: resTenant.user,
+        room: formData.roomId,
+        start_date: formData.checkInDate,
+        end_date: formData.endDate,
+      };
 
-      // const response = await api.post('leases/', leaseData);
-      // const resLease = response.data
+      const response = await api.post("leases/", leaseData);
 
-      // if(resLease){
-      //   toast.success("Pengajuan sewa kost berhasil dikirimkan")
-      //   navigate('/')
-      // }
+      if (response.data) {
+        toast.success("Pengajuan sewa kost berhasil dikirimkan");
+        navigate("/");
+        return true;
+      }
+
+      return false;
     } catch (error) {
-      console.error(error.message)
+      console.error(error);
+      return false;
     }
-  }, [navigate, userData])
+  }, [navigate, userData]);
 
   const value = useMemo(() => ({
     wishlist,
@@ -212,7 +217,7 @@ export const UserContextProvider = ({ children }) => {
     removeWishlist,
     getUserWishlist,
     setWishlist,
-    registrationForm,
+    handleRegistration,
     getUnauthenticatedKostData,
     getUnauthenticatedKostDetail,
     getUnauthenticatedRooms,
@@ -222,7 +227,7 @@ export const UserContextProvider = ({ children }) => {
     addToWishlist,
     removeWishlist,
     getUserWishlist,
-    registrationForm,
+    handleRegistration,
     getUnauthenticatedKostData,
     getUnauthenticatedKostDetail,
     getUnauthenticatedRooms,

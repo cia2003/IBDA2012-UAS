@@ -7,14 +7,13 @@ from api.models import Tenant
 from rooms.models import Room
 
 class LeaseSerializer(serializers.ModelSerializer):
-    _links = serializers.SerializerMethodField()
     tenant = serializers.PrimaryKeyRelatedField(queryset=Tenant.objects.all())
     room = serializers.PrimaryKeyRelatedField(queryset=Room.objects.all())
     class Meta:
         model = Lease
         fields = [
             'id', 'tenant', 'room', 'status', 'is_validated', 'start_date', 
-            'end_date', 'created_at', 'updated_at', '_links'
+            'end_date', 'created_at', 'updated_at'
             ]
         extra_kwargs = {
             'is_validated': { 'read_only': True }
@@ -31,33 +30,37 @@ class LeaseSerializer(serializers.ModelSerializer):
         instance.save()
         return instance
 
-    def get__links(self, obj):
-        request = self.context.get('request')
-        return [
-            {
-                "rel": "self",
-                "href": reverse('lease-list', request=request),
-                "action": "POST",
-                "types": ["application/json"]
-            },
-            {
-                "rel": "self",
-                "href": reverse('lease-detail', kwargs={'pk': obj.pk}, request=request),
-                "action": "GET",
-                "types": ["application/json"]
-            },
-            {
-                "rel": "self",
-                "href": reverse('lease-detail', kwargs={'pk': obj.pk}, request=request),
-                "action": "PUT",
-                "types": ["application/json"]
-            },
-            {
-                "rel": "self",
-                "href": reverse('lease-detail', kwargs={'pk': obj.pk}, request=request),
-                "action": "DELETE",
-                "types": ["application/json"]
-            }
+class LeaseNestedSerializer(serializers.ModelSerializer):
+    tenant = serializers.SerializerMethodField()
+    room = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Lease
+        fields = [
+            'id',
+            'tenant',
+            'room',
+            'status',
+            'is_validated',
+            'start_date',
+            'end_date',
+            'created_at',
+            'updated_at'
         ]
-        
-    
+
+    def get_tenant(self, obj):
+        return {
+            "id": str(obj.tenant.user.id),
+            "first_name": obj.tenant.user.first_name,
+            "last_name": obj.tenant.user.last_name,
+            "email": obj.tenant.user.email,
+            "gender": obj.tenant.gender,
+            "phone_number": obj.tenant.phone_number,
+        }
+
+    def get_room(self, obj):
+        return {
+            "id": str(obj.room.id),
+            "room_number": obj.room.name,
+            "kost_id": obj.room.kost.id
+        }

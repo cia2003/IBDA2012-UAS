@@ -54,10 +54,6 @@ function UserRoomDetail() {
       getUserWishlist();
     }
 
-    console.log("userEffect:", wishlist);
-    console.log("userEffect:", userData?.id);
-    console.log("userEffect:", userData);
-
     fetchRoomDetails();
   }, [userData?.id, getUserWishlist, fetchRoomDetails]);
 
@@ -82,8 +78,6 @@ function UserRoomDetail() {
 
     try {
       // Tambah wishlist
-
-      console.log(isFavorite);
       if (!isFavorite) {
         const result = await addToWishlist(roomId);
 
@@ -96,7 +90,7 @@ function UserRoomDetail() {
       // Hapus wishlist
       else {
         const success = await removeWishlist(existingWishlist.id);
-        console.log(success)
+
         if (success) {
           toast.success("Wishlist dihapus 🗑️");
         }

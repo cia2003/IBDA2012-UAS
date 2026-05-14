@@ -5,7 +5,7 @@ from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework.permissions import IsAuthenticated
 from api.permissions import  IsManagerOrStaffOrSuperUser
 from .models import Lease
-from .serializers import LeaseSerializer
+from .serializers import LeaseSerializer, LeaseNestedSerializer
 from django.http import Http404
 from django.shortcuts import render
 
@@ -61,3 +61,24 @@ class LeaseDetailView(APIView):
         lease = self.get_object(pk)
         lease.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+class LeaseNestedListView(APIView):
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        leases = (
+            Lease.objects
+            .select_related(
+                'tenant__user',
+                'room'
+            )
+            .all()
+            .order_by('-created_at')
+        )
+
+        serializer = LeaseNestedSerializer(leases, many=True)
+
+        return Response({
+            "leases": serializer.data
+        })

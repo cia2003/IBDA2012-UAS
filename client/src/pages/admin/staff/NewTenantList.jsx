@@ -1,90 +1,86 @@
 import { UserCheck, Check, X, Phone, Search, ChevronDown } from "lucide-react";
 import { useStaffContext } from "../../../hook/useContext";
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import Table from "../../../components/ui/Table";
 import toast from "react-hot-toast";
 
 function NewTenantList() {
   const { staffId } = useParams();
-  const { newTenantList, getKostDataByStaffId, managedKost, getAllRoomsByKostId, getPendingLeases, getTenantById } =
+  const { getNewTenantList, newTenantList, getKostDataByStaffId, managedKost, acceptTenant, rejectTenant } =
     useStaffContext();
   const [searchNewTenant, setSearchNewTenant] = useState("");
   const [selectedFilter, setSelectedFilter] = useState("All"); // Default ke "All"
-  const [rooms, setRooms] = useState([]);
-  const [tenants, setTenants] = useState([]);
-  const [leases, setLeases] = useState([]);
 
-  const roomMap = useMemo(() => {
-    return Object.fromEntries(
-      (rooms || []).map((room) => [room.id, room]),
-    );
-  }, [rooms]);
+  const kostId = managedKost?.managedKost.id;
+  
+  const genderLabel = {
+    male: 'Laki-Laki', 
+    female: 'Perempuan'
+  }
 
-  const allTenants = useMemo(() => {
-    if (!leases?.length || !rooms?.length || !managedKost?.id) return [];
-
-    return leases
-      .filter ((lease) => {
-        const room = roomMap?.[lease?.room?.id];
-
-        return (
-          room &&
-          String(room.kost) === String(managedKost?.id)
-        );
-      })
-      .map((lease) => {
-        const room = roomMap?.[lease?.room?.id];
-        const certainTenant = tenants.find(t => String(t.user) === String(lease.tenant?.user));
-
-        return {
-          id: lease.tenant?.user, 
-          name: certainTenant?.name || lease.tenant?.name || lease.tenant?.user || "Nama tidak tersedia",
-          gender: certainTenant?.gender || lease.tenant?.gender || "Gender tidak tersedia",
-          contact: certainTenant?.contact || lease.tenant?.contact || "Kontak tidak tersedia",
-          checkInDate: lease.checkInDate,
-          roomNumber: room.name,
-        }
-      });
-  }, [leases, rooms, roomMap, managedKost?.id]);
-
-  const filteredTenants = allTenants.filter((person) => {
-    const matchesSearch = person.name
+  const filteredLeases = newTenantList.filter((lease) => {
+    const fullName =  `${lease.tenant?.first_name || ""} ${lease.tenant?.last_name || ""}`;
+    const matchesSearch = fullName
       .toLowerCase()
       .includes(searchNewTenant.toLowerCase());
-    const matchesRoom =
-      selectedFilter === "All" || person.gender === selectedFilter;
-    return matchesSearch && matchesRoom;
+      
+    const matchesGender =
+      selectedFilter === "All" || genderLabel[lease.tenant?.gender] === selectedFilter;
+
+    return matchesSearch && matchesGender;
   });
 
   // Logika Accept Tenant
-  const handleAccept = (tenant) => {
-    const acceptAction = new Promise((resolve, reject) => {
-      // Logika API nanti di sini
-      setTimeout(() => {
-        resolve(tenant.name);
-      }, 1500);
-    });
+  const handleAccept = async (leaseItem) => {
+    try {
+      const acceptAction = acceptTenant(leaseItem.id);
+      
+      toast.promise(acceptAction, {
+        loading: `Memproses pendaftaran ${leaseItem.tenant.first_name}...`,
+        success: () => `Tenan ${leaseItem.tenant.first_name} berhasil diterima!`,
+        error: "Gagal memproses pendaftaran.",
+      });  
+      
+      await acceptAction;
+      await getNewTenantList(kostId);
 
-    toast.promise(acceptAction, {
-      loading: `Memproses pendaftaran ${tenant.name}...`,
-      success: (name) => `Tenan ${name} berhasil diterima!`,
-      error: "Gagal memproses pendaftaran.",
-    });
+    } catch (error) {
+      console.error(error.message);
+    }
   };
 
-  const handleReject = (tenant) => {
+  const handleReject = (leaseItem) => {
+    const rejectAction = async () => {
+      try {
+        const action = rejectTenant(leaseItem.id);
+
+        toast.promise(action, {
+          loading: "Menolak pendaftaran...",
+          success: `${leaseItem.tenant.first_name} ditolak`,
+          error: "Gagal menolak pendaftaran",
+        });
+
+        await action;
+        await getNewTenantList(kostId);
+
+        toast.dismiss()
+      } catch (error) {
+        console.error(error.message);
+      }
+    }
+
     toast(
       (t) => (
         <div className="flex items-center gap-3">
           <p className="text-sm font-medium">
-            Tolak pendaftaran <b>{tenant.name}</b>?
+            Tolak pendaftaran <b>{leaseItem.tenant.first_name}</b>?
           </p>
           <div className="flex gap-2">
             <button
               onClick={() => {
+                rejectAction();
                 toast.dismiss(t.id);
-                toast.error(`Pendaftaran ${tenant.name} ditolak`);
               }}
               className="px-3 py-1 bg-rose-600 text-white text-xs font-bold rounded-lg hover:bg-rose-700 transition-colors"
             >
@@ -99,62 +95,34 @@ function NewTenantList() {
           </div>
         </div>
       ),
-      {
-        duration: 5000,
-        position: "top-center",
-      },
+
     );
   };
 
   useEffect(() => {
-    const fetchTenants = async () => {
-      if (!leases?.length) return;
+    if (kostId) {
+      getNewTenantList(kostId);
 
-      const uniqueIds = [...new Set(
-        leases.map((lease) => lease.tenant?.user).filter(Boolean)
-      )];
-
-      const results = await Promise.all(
-        uniqueIds.map((id) => getTenantById(id))
-      );
-      setTenants(results.filter(Boolean));
-    };
-
-    fetchTenants();
-  }, [leases, getTenantById]);
-
-  useEffect(() => {
-    const fetchData = async () => {
-      if (!managedKost?.id) return;
-
-      const roomsData = await getAllRoomsByKostId(managedKost.id);
-      setRooms(roomsData || []);
-
-      const leasesData = await getPendingLeases(managedKost.id);
-      setLeases(leasesData || []);
-
-      console.log("Leases:", leasesData);
-      console.log("Rooms:", roomsData);
-    };
-    fetchData();
-  }, [managedKost?.id, getAllRoomsByKostId, getPendingLeases]);
+      console.log("useEffect NewTenantList", newTenantList);
+    }
+  }, [kostId]);
 
   const columns = [
     {
       header: "Nama Pendaftar",
-      accessor: "name",
-      cell: (val, item) => (
+      accessor: "tenant_name",
+      cell: (_, item) => (
         <div className="flex flex-col">
-          <span className="font-bold text-gray-900 tracking-tight">{val}</span>
+          <span className="font-bold text-gray-900 tracking-tight"> {item.tenant.first_name} {item.tenant.last_name} </span>
           <span className="text-[10px] text-gray-400 font-medium uppercase tracking-wider">
-            {item.asal}
+            {genderLabel[item.tenant.gender]}
           </span>
         </div>
       ),
     },
     {
       header: "Tanggal Pengajuan",
-      accessor: "entryDate",
+      accessor: "start_date",
       cell: (val) => (
         <span className="text-gray-500 font-medium font-semibold">
           {new Date(val).toLocaleDateString("id-ID", {
@@ -168,10 +136,10 @@ function NewTenantList() {
 
     {
       header: "Kontak",
-      accessor: "phoneNumber",
-      cell: (val) => (
+      accessor: "tenant_phone",
+      cell: (_, item) => (
         <div className="flex items-center gap-2 text-blue-600">
-          <span className="text-gray-600 font-medium">{val}</span>,
+          <span className="text-gray-600 font-medium">{item.tenant.phone_number}</span>
         </div>
       ),
     },
@@ -239,7 +207,7 @@ function NewTenantList() {
               onChange={(e) => setSelectedFilter(e.target.value)}
             >
               <option value="All">Semua Gender</option>
-              <option value="Laki-laki">Laki-laki</option>
+              <option value="Laki-laki">Laki-Laki</option>
               <option value="Perempuan">Perempuan</option>
             </select>
             <ChevronDown
@@ -253,8 +221,8 @@ function NewTenantList() {
       {/* Table Area */}
       <div className="bg-white rounded-[1.5rem] sm:rounded-[2rem] shadow-sm border border-gray-100 overflow-hidden">
         <div className="p-2 sm:p-6 overflow-x-auto">
-          {filteredTenants.length > 0 ? (
-            <Table columns={columns} data={filteredTenants} />
+          {filteredLeases.length > 0 ? (
+            <Table columns={columns} data={filteredLeases} />
           ) : (
             <div className="py-16 sm:py-20 text-center">
               <h3 className="text-gray-900 font-bold">Data tidak ditemukan</h3>
@@ -271,7 +239,7 @@ function NewTenantList() {
             Total Pendaftar
           </p>
           <p className="text-xs text-gray-500 font-bold">
-            <span className="text-blue-600">{filteredTenants.length} </span>
+            <span className="text-blue-600">{filteredLeases.length} </span>
             <span className="text-gray-300 mx-1">/</span> {newTenantList.length}{" "}
             orang
           </p>

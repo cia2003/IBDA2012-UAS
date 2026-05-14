@@ -182,32 +182,32 @@ export const StaffContextProvider = ({ children }) => {
     }
   }, []);
 
-  // --- ACCEPTED LEASE ---
-  const getAcceptedLeases = useCallback(async (kostId) => {
-    try {
-      // -- MODE BACKEND --
-      const response = await api.get(`leases/`); // Asumsikan endpoint ini mengembalikan semua lease
-      const { leases } = response.data; // Asumsikan response mengandung field leases yang merupakan array semua lease
+  // // --- ACCEPTED LEASE ---
+  // const getAcceptedLeases = useCallback(async (kostId) => {
+  //   try {
+  //     // -- MODE BACKEND --
+  //     const response = await api.get(`leases/`); // Asumsikan endpoint ini mengembalikan semua lease
+  //     const { leases } = response.data; // Asumsikan response mengandung field leases yang merupakan array semua lease
 
-      return leases
-        .filter((lease) => lease.status === 'accepted'); // Filter lease berdasarkan kostId dan status accepted
-    } catch (error) {
-      console.error(error.message);
-    }
-  }, []);
+  //     return leases
+  //       .filter((lease) => lease.status === 'accepted'); // Filter lease berdasarkan kostId dan status accepted
+  //   } catch (error) {
+  //     console.error(error.message);
+  //   }
+  // }, []);
 
-  // --- PENDING LEASE ---
-  const getPendingLeases = useCallback(async (kostId) => {
-    try {
-      // -- MODE BACKEND --
-      const response = await api.get(`leases/`); // Asumsikan endpoint ini mengembalikan semua lease
-      const { leases } = response.data; // Asumsikan response mengandung field leases yang merupakan array semua lease
-      const pendingLeases = leases.filter((lease) => String(lease.room.kost) === String(kostId) && lease.status === 'pending');
-      return pendingLeases;
-    } catch (error) {
-      console.error(error.message);
-    }
-  }, []);
+  // // --- PENDING LEASE ---
+  // const getPendingLeases = useCallback(async (kostId) => {
+  //   try {
+  //     // -- MODE BACKEND --
+  //     const response = await api.get(`leases/`); // Asumsikan endpoint ini mengembalikan semua lease
+  //     const { leases } = response.data; // Asumsikan response mengandung field leases yang merupakan array semua lease
+  //     const pendingLeases = leases.filter((lease) => String(lease.room.kost) === String(kostId) && lease.status === 'pending');
+  //     return pendingLeases;
+  //   } catch (error) {
+  //     console.error(error.message);
+  //   }
+  // }, []);
 
   // --- EDIT TENANT ---
   const editTenant = useCallback(async (tenantId, formData) => {
@@ -247,38 +247,18 @@ export const StaffContextProvider = ({ children }) => {
 
   // --- GET NEW TENANT LIST (ANTRIAN) ---
   const getNewTenantList = useCallback(async (kostId) => {
-    if (!kostId) return;
     try {
-    // id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    // tenant = models.ForeignKey(Tenant, on_delete=models.CASCADE)
-    // room = models.ForeignKey(Room, on_delete=models.CASCADE)
-    // status = models.CharField(
-    //     max_length=20, 
-    //     choices=[
-    //         ('pending', 'Pending'),
-    //         ('accepted', 'Accepted'),
-    //         ('rejected', 'Rejected')
-    //     ],
-    //     default='pending'
-    // )
-    // is_validated = models.BooleanField(default=False)
-    // start_date = models.DateField()
-    // end_date = models.DateField()
+      if (!kostId) return;
 
-    // created_at = models.DateTimeField(auto_now_add=True)
-    // updated_at = models.DateTimeField(auto_now=True)
-      // -- MODE BACKEND --
-      const leaseResponse = await api.get('leases/'); // Asumsikan endpoint ini mengembalikan semua lease
+      const leaseResponse = await api.get('leases/nested/'); // Asumsikan endpoint ini mengembalikan semua lease
       const { leases } = leaseResponse.data; // Asumsikan response mengandung field leases yang merupakan array semua lease
 
-      const filteredLeases = leases.filter((lease) => String(lease.room.kost) === String(kostId) && lease.status === 'pending'); // Filter lease berdasarkan kostId dan status pending
+      const filteredLeases = leases.filter((lease) => String(lease.room.kost_id) === String(kostId) && lease.status === 'pending'); // Filter lease berdasarkan kostId dan status pending
       setNewTenantList(filteredLeases);
-      // const response = await api.get(`tenants/${kostId}/`);
-      // setNewTenantList(response.data || []);
 
-      // -- MODE DUMMY --
-      // const data = initialNewTenantDummy.filter((t) => String(t.requestedKostId) === String(kostId));
-      // setNewTenantList(data);
+
+      console.log("getNewTenantlist", leases);
+      console.log("getNewTenantlist", filteredLeases);
       return filteredLeases;
     } catch (error) {
       console.error(error.message);
@@ -286,26 +266,43 @@ export const StaffContextProvider = ({ children }) => {
   }, []);
 
   // --- ACCEPT TENANT ---
-  const acceptTenant = useCallback(async (tenantId) => {
+  const acceptTenant = useCallback(async (leaseId) => {
     try {
       // -- MODE BACKEND --
+      const status = {
+        status:'accepted'
+      };
+
+      const response = await api.put(`leases/${leaseId}/`, status);
+
+      if (response.data) {
+        return response.data;
+      }
       // await api.post(`/accept-tenant/${tenantId}`);
 
-      toast.success("Permintaan diterima");
     } catch (error) {
       console.error(error.message);
+      return null;
     }
   }, []);
 
   // --- REJECT TENANT ---
-  const rejectTenant = useCallback(async (tenantId) => {
+  const rejectTenant = useCallback(async (leaseId) => {
     try {
       // -- MODE BACKEND --
+      const status = {
+        status: 'rejected'
+      };
+
+      const response = await api.put(`leases/${leaseId}/`, status);
       // await api.delete(`/reject-tenant/${tenantId}`);
 
-      toast.success("Permintaan ditolak");
+      if (response.data) {
+        return response.data;
+      }
     } catch (error) {
       console.error(error.message);
+      return null;
     }
   }, []);
 
@@ -366,8 +363,8 @@ export const StaffContextProvider = ({ children }) => {
       getRoomDetails,
       getStaffDataByKostId,
       getAllRoomsByKostId,
-      getAcceptedLeases,
-      getPendingLeases,
+      // getAcceptedLeases,
+      // getPendingLeases,
       getRoomById,
       deleteTenant,
       getKostDataByStaffId,

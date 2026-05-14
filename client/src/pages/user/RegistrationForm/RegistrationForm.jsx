@@ -22,7 +22,7 @@ function RegistrationForm() {
 
   const [form, setForm] = useState({
     firstName: "", 
-    lastName:"", 
+    lastName: "", 
     gender: "", 
     phoneNumber: "", 
     occupation: "", 
@@ -31,7 +31,6 @@ function RegistrationForm() {
     identityCard: "",
     roomId: "",
     checkInDate: dateNow,
-    endDate: null, 
   });
 
   const fullNamePreview = `${form.firstName} ${form.lastName}`.trim();
@@ -39,20 +38,31 @@ function RegistrationForm() {
   const endDate = useMemo(() => {
     if (!form.checkInDate) return "";
     const d = new Date(form.checkInDate);
+
     d.setDate(d.getDate() + 30);
+
     return d.toISOString().split("T")[0];
   }, [form.checkInDate]);
 
+  useEffect(() => {
+    const fetchData = async () => {
+      if (!userData) return;
+
+      setForm((prev) => ({
+        ...prev,
+        firstName: userData.first_name || "", 
+        lastName: userData.last_name || "", 
+        roomId: roomId || "",
+      }));
+    };
+
+    fetchData();
+  }, [userData]);
 
   useEffect(() => {
     const fetchData = async () => {
-      setForm((prev) => ({
-        ...prev,
-        kostId: kostId || "",
-        roomId: roomId || "",
-      }));
 
-      if (kostId && roomId) {
+      if (roomId) {
         const data = await getRoomDetails(roomId);
         if (data) {
           setDisplayInfo({
@@ -62,7 +72,6 @@ function RegistrationForm() {
         }
       }
     };
-
     fetchData();
   }, [roomId, getRoomDetails]);
 
@@ -75,14 +84,19 @@ function RegistrationForm() {
     async (e) => {
       e.preventDefault();
       try {
-        const data = await handleRegistration(form);
-        if (data) {
+        const isSuccess = await handleRegistration({
+          ...form, 
+          endDate: endDate
+        });
+
+        if (isSuccess) {
           toast.success(
             `Berhasil mendaftarkan ${form.firstName} ${form.lastName} di ${displayInfo.kostName}`,
           );
         }
       } catch (error) {
         toast.error("Gagal melakukan registrasi");
+        console.log(error.message);
       }
     },
     [form, displayInfo, handleRegistration],
@@ -159,7 +173,7 @@ function RegistrationForm() {
                 name="firstName"
                 type="text"
                 placeholder="Nama Depan"
-                value={form.firstName || "Dian"}
+                value={form.firstName}
                 onChange={handleChange}
                 className="w-full outline-none py-4 px-6 rounded-2xl border border-zinc-200 focus:border-blue-500 focus:ring-4 focus:ring-blue-50 transition-all font-semibold text-zinc-700"
                 required
@@ -169,7 +183,7 @@ function RegistrationForm() {
                 name="lastName"
                 type="text"
                 placeholder="Nama Belakang"
-                value={form.lastName || "Sastrowidjoyo"}
+                value={form.lastName}
                 onChange={handleChange}
                 className="w-full outline-none py-4 px-6 rounded-2xl border border-zinc-200 focus:border-blue-500 focus:ring-4 focus:ring-blue-50 transition-all font-semibold text-zinc-700"
                 required
