@@ -256,9 +256,6 @@ export const StaffContextProvider = ({ children }) => {
       const filteredLeases = leases.filter((lease) => String(lease.room.kost_id) === String(kostId) && lease.status === 'pending'); // Filter lease berdasarkan kostId dan status pending
       setNewTenantList(filteredLeases);
 
-
-      console.log("getNewTenantlist", leases);
-      console.log("getNewTenantlist", filteredLeases);
       return filteredLeases;
     } catch (error) {
       console.error(error.message);

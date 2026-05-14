@@ -26,7 +26,6 @@ function StaffForm() {
         if (kost) setKostList(kost);
         if (staffId) {
             const data = await getStaffById(staffId);
-            console.log("Data ditemukan:", data); // Debugging
             if (data) {
                 setFormData({
                     firstName: data.firstName || "",

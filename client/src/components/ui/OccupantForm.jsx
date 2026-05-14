@@ -41,9 +41,9 @@ function OccupantForm() {
   const handleSubmit = (e) => {
     e.preventDefault();
     if (occupantId) {
-      console.log("Update:", formData);
+      console.log("Update");
     } else {
-      console.log("Create:", formData);
+      console.log("Create");
     }
   };
 

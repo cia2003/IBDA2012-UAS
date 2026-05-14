@@ -1,4 +1,4 @@
-import { use, useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import Table from "../../../components/ui/Table";
 import { useAppContext, useStaffContext } from "../../../hook/useContext";
 import {
@@ -12,46 +12,29 @@ import {
 } from "lucide-react";
 import toast from "react-hot-toast";
 import { useNavigate, useParams } from "react-router-dom";
+import { staff } from "../../../assets/assets";
 
 function TenantList() {
   const { staffId } = useParams();
-  const { deleteTenant, getKostDataByStaffId, managedKost, getAcceptedLeases, getAllRoomsByKostId } = useStaffContext();
+  const { deleteTenant, getKostDataByStaffId, managedKost } = useStaffContext();
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedRoom, setSelectedRoom] = useState("All");
-  const [rooms, setRooms] = useState([]);
-  const [leases, setLeases] = useState([]);
   const navigate = useNavigate();
 
-  const roomMap = useMemo(() => {
-    return Object.fromEntries(
-      rooms.map((room) => [room.id, room]),
-    );
-  }, [rooms]);
+  const kostData = managedKost?.managedKost || [];
 
-  const allOccupants = useMemo(() => {
-    if (!leases.length || !rooms.length || !managedKost?.id) return [];
-
-    return leases
-      .filter ((lease) => {
-        const room = roomMap[lease.room.id];
-
-        return (
-          room &&
-          String(room.kost) === String(managedKost?.id)
-        );
-      })
-      .map((lease) => {
-        const room = roomMap[lease.room.id];
-
-        return {
-          id: lease.tenant?.user, 
-          name: lease.tenant?.name || lease.tenant?.user || "Nama tidak tersedia",
-          contact: lease.tenant?.contact || "Kontak tidak tersedia",
-          checkInDate: lease.checkInDate,
-          roomNumber: room.name,
-        }
-      });
-  }, [leases, rooms, roomMap, managedKost?.id]);
+  const allOccupants = kostData.rooms
+    ? kostData.rooms
+        .filter(
+          (room) => room.status === "Occupied" && Array.isArray(room.resident),
+        )
+        .flatMap((room) =>
+          room.resident.map((person) => ({
+            ...person,
+            roomNumber: room.roomNumber,
+          })),
+        )
+    : [];
 
   const filteredOccupants = allOccupants.filter((person) => {
     const matchesSearch = person.name
@@ -174,26 +157,13 @@ function TenantList() {
     },
   ];
 
-  // const fetchData = async()=>{
-  //   await getKostDataByStaffId(staffId)
-  // }
 
-  useEffect(() => {
-    const fetchData = async () => {
-      if (!managedKost?.id) return;
-
-      const roomsData = await getAllRoomsByKostId(managedKost.id);
-      setRooms(roomsData);
-
-      const leasesData = await getAcceptedLeases(managedKost.id);
-      setLeases(leasesData);
-
-      console.log("Leases:", leasesData);
-      console.log("Rooms:", roomsData);
-    };
+  useEffect(()=>{
+    const fetchData = async()=>{
+      await getKostDataByStaffId(staffId);
+    }
     fetchData();
-  }, [managedKost?.id, getAllRoomsByKostId, getAcceptedLeases]);
-
+  }, [staffId])
 
   return (
     <div className="space-y-4 sm:space-y-6">

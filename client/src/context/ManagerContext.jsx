@@ -260,14 +260,12 @@ export const ManagerContextProvider = ({ children }) => {
               }))
             : [],
         };
-
-        // console.log("Data tipe kost yang diambil:", roomTypeData);
         
         return roomTypeData;
       }
 
     } catch (error) {
-      console.log(error.message);
+      console.error(error.message);
     }
   }, []);
 

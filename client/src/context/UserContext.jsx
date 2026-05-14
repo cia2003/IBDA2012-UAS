@@ -76,8 +76,6 @@ export const UserContextProvider = ({ children }) => {
       if (wishlists) {
         setWishlist(wishlists);
       }
-
-      console.log(wishlists)
     } catch (error) {
       console.error("Error fetching wishlist:", error.message);
       return null;

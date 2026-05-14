@@ -257,7 +257,7 @@ export const AppContextProvider = ({ children }) => {
       // const userRes = await api.get('/user/is-auth');
       // if(userRes.data.success) dispatch({ type: "USER_LOGIN_SUCCESS", payload: userRes.data.user });
     } catch (e) {
-      console.log("No active session");
+      console.error("No active session");
     }
   }, []);
   useEffect(() => { 

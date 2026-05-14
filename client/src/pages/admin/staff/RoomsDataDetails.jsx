@@ -38,11 +38,8 @@ function RoomsDataDetails() {
   const toggleStatus = async (id, isAvailable) => {
     const newIsAvailable = !isAvailable;
 
-    console.log("toggleStatus: ", id);
     await updateRoomStatus(id, newIsAvailable);
 
-    console.log("toggleStatus:", managedKost);
-    console.log("tonggleStatus", newIsAvailable)
   };
 
   const columns = [

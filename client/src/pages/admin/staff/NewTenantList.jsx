@@ -7,7 +7,7 @@ import toast from "react-hot-toast";
 
 function NewTenantList() {
   const { staffId } = useParams();
-  const { getNewTenantList, newTenantList, getKostDataByStaffId, managedKost, acceptTenant, rejectTenant } =
+  const { getNewTenantList, newTenantList, getKostDataByStaffId, managedKost, acceptTenant, rejectTenant, updateRoomStatus } =
     useStaffContext();
   const [searchNewTenant, setSearchNewTenant] = useState("");
   const [selectedFilter, setSelectedFilter] = useState("All"); // Default ke "All"
@@ -35,14 +35,16 @@ function NewTenantList() {
   const handleAccept = async (leaseItem) => {
     try {
       const acceptAction = acceptTenant(leaseItem.id);
+      const updateRoomAction = updateRoomStatus(leaseItem.room.id, false);
       
       toast.promise(acceptAction, {
         loading: `Memproses pendaftaran ${leaseItem.tenant.first_name}...`,
         success: () => `Tenan ${leaseItem.tenant.first_name} berhasil diterima!`,
         error: "Gagal memproses pendaftaran.",
       });  
-      
+
       await acceptAction;
+      await updateRoomAction;
       await getNewTenantList(kostId);
 
     } catch (error) {
@@ -102,8 +104,7 @@ function NewTenantList() {
   useEffect(() => {
     if (kostId) {
       getNewTenantList(kostId);
-
-      console.log("useEffect NewTenantList", newTenantList);
+      // console.log("newTenantList", newTenantList[0].room.id);
     }
   }, [kostId]);
 
@@ -178,7 +179,7 @@ function NewTenantList() {
               Pendaftaran Masuk
             </h1>
             <p className="text-xs sm:text-sm text-gray-400 mt-1 font-medium italic">
-              {managedKost?.name || "Memuat Lokasi..."}
+              {managedKost?.managedKost.name || "Memuat Lokasi..."}
             </p>
           </div>
         </div>

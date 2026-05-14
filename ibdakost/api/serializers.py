@@ -266,7 +266,7 @@ class StaffRoomSerializer(serializers.ModelSerializer):
                 "id": str(lease.id),
                 "name": f"{lease.tenant.user.first_name} {lease.tenant.user.last_name}",
                 "contact": lease.tenant.phone_number,
-                "paymentDueDate": lease.end_date.day
+                "checkInDate": lease.start_date
             }
             for lease in leases
         ]
