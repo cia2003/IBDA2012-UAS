@@ -25,7 +25,7 @@ const Navbar = () => {
   const navLinks = [
     { name: "Home", path: "/" },
     { name: "Cari Kost", path: "/" },
-    { name: "Tentang Kami", path: "/about" },
+    { name: "Tentang Kami", path: "/tentang-kami" },
     { name: "Blogs", path: "/blogs" },
   ];
 

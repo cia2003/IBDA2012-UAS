@@ -159,7 +159,9 @@ export const UserContextProvider = ({ children }) => {
         });
 
         setWishlist(enriched);
+        return enriched;
       }
+      return wishlist;
     } catch (error) {
       console.error("Error fetching wishlist:", error.message);
     }

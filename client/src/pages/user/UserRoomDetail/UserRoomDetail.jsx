@@ -1,5 +1,9 @@
 import { useParams, useNavigate } from "react-router-dom";
-import { useManagerContext } from "../../../hook/useContext";
+import {
+  useAppContext,
+  useManagerContext,
+  useUserContext,
+} from "../../../hook/useContext";
 import { useCallback, useEffect, useState } from "react";
 import {
   MapPin,
@@ -13,6 +17,7 @@ import {
   Trash2,
   BookmarkPlus,
 } from "lucide-react";
+import toast from "react-hot-toast";
 
 import styles from "./userRoomDetail.module.css";
 
@@ -20,8 +25,11 @@ function UserRoomDetail() {
   const { kostId, roomId } = useParams();
   const navigate = useNavigate();
   const [roomDetails, setRoomDetails] = useState(null);
+  const { userIsLoggedIn } = useAppContext();
   const { getRoomDetails } = useManagerContext();
-  const [wishlistStatus, setWishlistStatus] = useState(false)
+  const { getUserWishlist, addWishlist, deleteWishlist, wishlist } =
+    useUserContext();
+  const [wishlistStatus, setWishlistStatus] = useState(false);
 
   const fetchRoomDetails = useCallback(async () => {
     if (!kostId || !roomId) return;
@@ -36,25 +44,54 @@ function UserRoomDetail() {
     }
   }, [roomId, kostId, getRoomDetails]);
 
-  const handleWishlist = useCallback(async()=>{
-    e.stopPropagation(); 
-    e.preventDefault();
-    
-    if (isDisabled) return;
+  const fetchIsRoomWishlist = useCallback(async () => {
+    if (!roomId) return;
+    try {
+      // Pastikan await jika ini memanggil API
+      const userWishlist = await getUserWishlist();
 
-    const newStatus = !isFavorite;
-    setIsFavorite(newStatus);
-    
-    if (newStatus) {
-      toast.success("Kamar ditambahkan ke wishlist ❤️");
-    } else {
-      toast("Kamar dihapus dari wishlist", { icon: '🗑️' });
+      // Cari apakah ada room yang ID-nya cocok di dalam array wishlist
+      const isBookmarked = wishlist.find(
+        (item) => String(item.roomInfo?.id) === String(roomId),
+      );
+
+      console.log(isBookmarked);
+
+      setWishlistStatus(!!isBookmarked);
+    } catch (error) {
+      console.error("Gagal cek wishlist:", error);
     }
-  }, [kostId, roomId])
+  }, [getUserWishlist, roomId]);
+
+  const handleWishlist = async () => {
+    if (!userIsLoggedIn) {
+      return navigate("/login");
+    }
+
+    try {
+      if (!wishlistStatus) {
+        await addWishlist(kostId, roomId);
+        setWishlistStatus(true);
+      } else {
+        // Perbaikan di sini: tambahkan await dan pastikan userWishlist adalah array
+        const targetWishlist = wishlist.find(
+          (item) => String(item.roomInfo?.id) === String(roomId),
+        );
+
+        if (targetWishlist) {
+          await deleteWishlist(targetWishlist.wishlistId); // Gunakan wishlistId yang benar
+          setWishlistStatus(false);
+        }
+      }
+    } catch (error) {
+      console.error("Error updating wishlist:", error);
+    }
+  };
 
   useEffect(() => {
     fetchRoomDetails();
-  }, [fetchRoomDetails]);
+    fetchIsRoomWishlist();
+  }, [fetchRoomDetails, fetchIsRoomWishlist]);
 
   if (!roomDetails) {
     return (
@@ -168,29 +205,28 @@ function UserRoomDetail() {
 
               <div className="grid grid-cols-2 md:grid-cols-2 gap-3">
                 <button
-                onClick={() => navigate(`/registration/${kostId}/${roomId}`)}
-                className="flex items-center justify-center bg-blue-600 text-white gap-2 hover:bg-blue-800 hover:text-white px-5 py-2.5 rounded-2xl transition-all duration-300 font-bold text-sm border border-red-100 shadow-sm w-fit"
-              >
-                <BookmarkPlus size={20} />
-                Pesan Kamar
-              </button>
-              <button
-                onClick={handleWishlist}
-                className="flex items-center justify-center bg-red-50 text-red-600 gap-2 hover:bg-red-600 hover:text-white px-5 py-2.5 rounded-2xl transition-all duration-300 font-bold text-sm border border-red-100 shadow-sm w-fit"
-              >
-                {!wishlistStatus ? (
+                  onClick={() => navigate(`/registration/${kostId}/${roomId}`)}
+                  className="flex items-center justify-center bg-blue-600 text-white gap-2 hover:bg-blue-800 hover:text-white px-5 py-2.5 rounded-2xl transition-all duration-300 font-bold text-sm border border-red-100 shadow-sm w-fit"
+                >
+                  <BookmarkPlus size={20} />
+                  Pesan Kamar
+                </button>
+                <button
+                  onClick={handleWishlist}
+                  className="flex items-center justify-center bg-red-50 text-red-600 gap-2 hover:bg-red-600 hover:text-white px-5 py-2.5 rounded-2xl transition-all duration-300 font-bold text-sm border border-red-100 shadow-sm w-fit"
+                >
+                  {!wishlistStatus ? (
                     <>
-                    <Heart size={20} />
-                    <span>Favorite</span>    
+                      <Heart size={20} />
+                      <span>Favorite</span>
                     </>
-                ) :(
+                  ) : (
                     <>
-                    <Trash2 size={20} />
-                    <span>Unfavorite</span>
+                      <Trash2 size={20} />
+                      <span>Unfavorite</span>
                     </>
-                )
-                }
-              </button>
+                  )}
+                </button>
               </div>
             </div>
           </div>

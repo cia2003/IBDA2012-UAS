@@ -40,6 +40,8 @@ import RegistrationForm from "./pages/user/RegistrationForm";
 // Other
 import NotFoundPage from "./pages/NotFoundPage";
 import "./style.css";
+import UserKost from "./pages/user/UserKost/UserKost";
+import About from "./pages/user/About";
 
 const AdminProtectedRoute = ({ children, allowedRole }) => {
   const { adminIsLoggedIn, role } = useAppContext();
@@ -69,7 +71,8 @@ export default function App() {
         {/* ── User Routes ── */}
         <Route path="/" element={<User />}>
           <Route index element={<Home />} />
-          <Route path="kost" element={<h1>Semua Kost</h1>} />
+          <Route path="/tentang-kami" element ={<About />} /> 
+          <Route path="kost" element={<UserKost />} />
           <Route path="kost/:kostId" element={<UserKostDetail />} />
           <Route path="kost/:kostId/:roomId" element={<UserRoomDetail />} />
           <Route
