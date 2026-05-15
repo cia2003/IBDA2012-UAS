@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useAppContext, useStaffContext } from "../../hook/useContext";
 import { useParams, useNavigate } from "react-router-dom";
 import {
@@ -10,40 +10,69 @@ import {
   Save,
   ArrowLeft,
 } from "lucide-react";
+import toast from "react-hot-toast";
 
 function OccupantForm() {
-  const { occupantId } = useParams();
+  const { staffId, occupantId } = useParams();
   const navigate = useNavigate();
   const today = new Date().toISOString().split("T")[0];
-  const { getTenantById } = useStaffContext();
+  // const { getTenantById, getKostDataByStaffId } = useStaffContext();
+  const { getAcceptedTenantList, getAllRoomsByKostId, getKostDataByStaffId, editTenant } = useStaffContext();
+
 
   const [formData, setFormData] = useState({
-    id: "",
-    name: "",
-    contact: "",
+    first_name: "",
+    last_name: "",
+    phone_number: "",
     email: "",
     roomNumber: "",
     checkInDate: today,
   });
 
-  const fetchTenant = async () => {
-    const data = await getTenantById(occupantId);
-    if(data){
-      setFormData(data)
-    }
-  };
+  const fetchTenant = useCallback(async () => {
+    const kostData = await getKostDataByStaffId(staffId);
+
+    const kostId = kostData?.managedKost.id;
+    const data = await getAcceptedTenantList(kostId);
+
+
+    const tenantRes = data?.find(
+      (item) => item.tenant.id === occupantId
+    );
+
+    if (!tenantRes) return;
+
+    const [first_name, last_name] = [
+      tenantRes.tenant.first_name,
+      tenantRes.tenant.last_name,
+    ];
+
+    setFormData({
+      first_name: first_name,
+      last_name: last_name,
+      phone_number: tenantRes.tenant.phone_number,
+      email: tenantRes.tenant.email,
+      roomNumber: tenantRes.room.room_number,
+      checkInDate: tenantRes.start_date,
+    });
+  }, [occupantId, getAcceptedTenantList, getKostDataByStaffId]);
+
   useEffect(() => {
     if (occupantId) {
       fetchTenant();
     }
   }, [occupantId, fetchTenant]);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (occupantId) {
-      console.log("Update");
+      const isSuccess = await editTenant(occupantId, formData);
+
+      if (isSuccess) {
+        navigate(-1);
+      }
     } else {
-      console.log("Create");
+      toast.error("Gagal Edit Data Penghuni");
     }
   };
 
@@ -88,9 +117,9 @@ function OccupantForm() {
                 />
                 <input
                   className="w-full outline-none py-3 sm:py-3.5 pl-12 pr-4 rounded-2xl border border-gray-100 bg-gray-50 focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-50 transition-all font-semibold text-gray-700 text-sm sm:text-base"
-                  value={formData.firstName}
+                  value={formData.first_name}
                   onChange={(e) =>
-                    setFormData({ ...formData, firstName: e.target.value })
+                    setFormData({ ...formData, first_name: e.target.value })
                   }
                   required
                 />
@@ -109,9 +138,9 @@ function OccupantForm() {
                 />
                 <input
                   className="w-full outline-none py-3 sm:py-3.5 pl-12 pr-4 rounded-2xl border border-gray-100 bg-gray-50 focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-50 transition-all font-semibold text-gray-700 text-sm sm:text-base"
-                  value={formData.lastName}
+                  value={formData.last_name}
                   onChange={(e) =>
-                    setFormData({ ...formData, lastName: e.target.value })
+                    setFormData({ ...formData, last_name: e.target.value })
                   }
                   required
                 />
@@ -130,9 +159,9 @@ function OccupantForm() {
                 />
                 <input
                   className="w-full outline-none py-3 sm:py-3.5 pl-12 pr-4 rounded-2xl border border-gray-100 bg-gray-50 focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-50 transition-all font-semibold text-gray-700 text-sm sm:text-base"
-                  value={formData.contact}
+                  value={formData.phone_number}
                   onChange={(e) =>
-                    setFormData({ ...formData, contact: e.target.value })
+                    setFormData({ ...formData, phone_number: e.target.value })
                   }
                   required
                 />
@@ -163,7 +192,7 @@ function OccupantForm() {
             {/* Nomor Kamar */}
             <div className="space-y-2">
               <label className="text-[10px] font-bold text-gray-400 uppercase tracking-[0.15em] ml-1">
-                Alokasi Nomor Kamar
+                Alokasi Nomor Kamar (Preview)
               </label>
               <div className="relative group">
                 <DoorOpen
@@ -171,8 +200,9 @@ function OccupantForm() {
                   size={20}
                 />
                 <input
-                  type="number"
-                  className="w-full outline-none py-3 sm:py-3.5 pl-12 pr-4 rounded-2xl border border-gray-100 bg-gray-50 focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-50 transition-all font-bold text-blue-600 text-sm sm:text-base"
+                  type="text"
+                  disabled
+                  className="w-full outline-none py-3 sm:py-3.5 pl-12 pr-4 rounded-2xl border border-gray-100 bg-gray-100 focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-50 transition-all font-bold text-blue-600 text-sm sm:text-base"
                   value={formData.roomNumber}
                   onChange={(e) =>
                     setFormData({ ...formData, roomNumber: e.target.value })
@@ -185,7 +215,7 @@ function OccupantForm() {
             {/* Tanggal Check-in */}
             <div className="space-y-2">
               <label className="text-[10px] font-bold text-gray-400 uppercase tracking-[0.15em] ml-1">
-                Tanggal Masuk
+                Tanggal Masuk (PREVIEW)
               </label>
               <div className="relative group">
                 <Calendar
@@ -194,6 +224,7 @@ function OccupantForm() {
                 />
                 <input
                   type="date"
+                  disabled
                   className="w-full outline-none py-3 sm:py-3.5 pl-12 pr-4 rounded-2xl border border-gray-100 bg-gray-50 focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-50 transition-all font-semibold text-gray-700 cursor-pointer text-sm sm:text-base"
                   value={formData.checkInDate}
                   onChange={(e) =>

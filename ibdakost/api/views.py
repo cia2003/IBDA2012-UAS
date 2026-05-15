@@ -5,12 +5,14 @@ from django.shortcuts import get_object_or_404
 from django.contrib.auth.models import Group
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework.permissions import IsAuthenticated, AllowAny
-from api.permissions import IsManagerOrSuperUser, IsOwnerOrManagerOrSuperUser
+from api.permissions import IsManagerOrSuperUser, IsOwnerOrManagerOrSuperUser, isOwnerOrStaffOrManagerOrSuperUser, IsManagerOrStaffOrSuperUser
 from .models import User, Tenant, Employee
 from .serializers import EmailTokenObtainPairSerializer, TenantSerializer, UserSerializer, EmployeeSerializer, GroupSerializer, EmployeeContactSerializer
 from django.http import Http404
 from rest_framework_simplejwt.views import TokenObtainPairView
 from kosts.serializers import StaffManagedKostSerializer
+from kosts.models import Kost
+from rooms.models import Room
 
 class EmailLoginView(TokenObtainPairView):
     serializer_class = EmailTokenObtainPairSerializer
@@ -21,7 +23,7 @@ class UserListCreateView(APIView):
     def get_permissions(self):
         if self.request.method == 'GET':
             return [IsAuthenticated(), IsManagerOrSuperUser()]
-        return []
+        return [AllowAny()]
     
 
     def get(self, request):
@@ -42,7 +44,7 @@ class UserDetailView(APIView):
     def get_permissions(self):
         if self.request.method == 'DELETE':
             return [IsAuthenticated(), IsManagerOrSuperUser()]
-        return [IsAuthenticated(), IsOwnerOrManagerOrSuperUser()]
+        return [IsAuthenticated(), isOwnerOrStaffOrManagerOrSuperUser()]
 
     def get_object(self, pk):
         try:
@@ -77,8 +79,8 @@ class TenantListCreateView(APIView):
 
     def get_permissions(self):
         if self.request.method == 'GET':
-            return [IsAuthenticated(), IsManagerOrSuperUser()]
-        return []
+            return [IsAuthenticated(), IsManagerOrStaffOrSuperUser()]
+        return [AllowAny()]
 
     def get(self, request):
         tenants = Tenant.objects.all().order_by('created_at')
@@ -98,8 +100,8 @@ class TenantDetailView(APIView):
 
     def get_permissions(self):
         if self.request.method == 'DELETE':
-            return [IsAuthenticated(), IsManagerOrSuperUser()]
-        return [IsAuthenticated(), IsOwnerOrManagerOrSuperUser()]
+            return [IsAuthenticated(), IsManagerOrStaffOrSuperUser()]
+        return [IsAuthenticated(), isOwnerOrStaffOrManagerOrSuperUser()]
 
     def get_object(self, pk):
         try:
@@ -107,6 +109,7 @@ class TenantDetailView(APIView):
             self.check_object_permissions(self.request, tenant)
             return tenant
         except Tenant.DoesNotExist:
+            # return Response(status=status.HTTP_404_NOT_FOUND)
             raise Http404
 
     def get(self, request, pk):
@@ -216,7 +219,7 @@ class EmployeeDetailView(APIView):
         return Response(status=status.HTTP_204_NO_CONTENT)
     
 class StaffKostDashboardView(APIView):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, IsManagerOrStaffOrSuperUser]
 
     def get(self, request, staff_id):
         try:
@@ -235,6 +238,37 @@ class StaffKostDashboardView(APIView):
 
         except Employee.DoesNotExist:
             return Response({"detail": "Staff not found"}, status=404)
+        
+class ManagerKostDashboardView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        try:
+            kosts = Kost.objects.all()
+
+            data = []
+
+            for kost in kosts:
+                rooms = kost.room_set.all()  # atau kost.rooms.all() jika related_name
+
+                data.append({
+                    "id": str(kost.id),
+                    "name": kost.name,
+                    "address": kost.address,
+                    "rooms": [
+                        {
+                            "id": str(room.id),
+                            "name": room.name,
+                            "status": "Available" if room.is_available else "Occupied"
+                        }
+                        for room in rooms
+                    ]
+                })
+
+            return Response(data)
+
+        except Exception as e:
+            return Response({"detail": str(e)}, status=500)
 
 class GroupListCreateView(APIView):
     authentication_classes = [JWTAuthentication]

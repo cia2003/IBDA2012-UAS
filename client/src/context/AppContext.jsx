@@ -113,21 +113,25 @@ export const AppContextProvider = ({ children }) => {
         const { access, refresh, user } = response.data; // Sesuaikan jika backend mengembalikan { access, refresh, user }
  
         if (user) {
-          setLocalStorage(access, refresh, user);
-
-          dispatch({ type: "ADMIN_LOGIN_SUCCESS", payload: user });
-          toast.success(`Selamat Datang, ${user.first_name}!`);
-
           const isManager = user?.groups?.includes("manager");
           const isStaff = user?.groups?.includes("staff");
           const role = isManager ? "manager" : isStaff ? "staff" : null;
 
           if (isManager) {
+            setLocalStorage(access, refresh, user);
+
+            dispatch({ type: "ADMIN_LOGIN_SUCCESS", payload: user });
+            toast.success(`Selamat Datang, ${user.first_name}!`);
             navigate("/admin/dashboard/manager");
           } else if (isStaff) {
+            setLocalStorage(access, refresh, user);
+
+            dispatch({ type: "ADMIN_LOGIN_SUCCESS", payload: user });
+            toast.success(`Selamat Datang, ${user.first_name}!`);
             navigate(`/admin/dashboard/${user.id}`);
           }
         } else {
+          toast.error("Email atau Password Salah!");
           throw new Error("Email atau Password salah!");
         }
       } catch (error) {

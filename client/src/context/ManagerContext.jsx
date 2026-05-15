@@ -73,19 +73,37 @@ export const ManagerContextProvider = ({ children }) => {
   }, []);
 
   // --- FETCHING DATA KOST ---
+  // const getKostData = useCallback(async () => {
+  //   try {
+  //     // -- MODE BACKEND --
+  //     const response = await formDataApi.get('kosts/');
+  //     const { kosts } = response.data;
+
+  //     if(kosts) {
+  //       setInitialKostData(kosts);
+  //       return kosts;
+  //     }
+
+  //     // -- MODE DUMMY --
+  //     // return initialKostDataDummy;
+  //   } catch (error) {
+  //     // toast.error("Data kost gagal dimuat");
+  //     // console.error(error.message);
+  //   }
+  // }, []);
+
   const getKostData = useCallback(async () => {
     try {
       // -- MODE BACKEND --
-      const response = await formDataApi.get('kosts/');
-      const { kosts } = response.data;
+      const response = await formDataApi.get('manager/kosts/');
 
-      if(kosts) {
-        setInitialKostData(kosts);
-        return kosts;
+      const data = response.data;
+
+      if(data) {
+        setInitialKostData(data);
+        return data;
       }
 
-      // -- MODE DUMMY --
-      // return initialKostDataDummy;
     } catch (error) {
       // toast.error("Data kost gagal dimuat");
       // console.error(error.message);

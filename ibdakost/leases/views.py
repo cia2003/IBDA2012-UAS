@@ -8,6 +8,7 @@ from .models import Lease
 from .serializers import LeaseSerializer, LeaseNestedSerializer
 from django.http import Http404
 from django.shortcuts import render
+from django.db import transaction
 
 # Create your views here.
 class LeaseListCreateView(APIView):
@@ -59,7 +60,14 @@ class LeaseDetailView(APIView):
 
     def delete(self, request, pk):
         lease = self.get_object(pk)
-        lease.delete()
+
+        with transaction.atomic():
+            room = lease.room
+
+            room.is_available = True
+            room.save()
+
+            lease.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 class LeaseNestedListView(APIView):

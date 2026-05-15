@@ -15,6 +15,8 @@ urlpatterns = [
   path('kosts/<uuid:kost_id>/contact/', views.KostContactView.as_view(), name='kost-contact-detail'),
   path("staff/<uuid:staff_id>/kost/", views.StaffKostDashboardView.as_view(), name='staff-dashboard'),
 
+  path("manager/kosts/", views.ManagerKostDashboardView.as_view(), name='manager-dashboard'),
+
   path('groups/', views.GroupListCreateView.as_view(), name='group-list'),
   path('groups/<int:pk>/', views.GroupDetailView.as_view(), name='group-detail'),
 

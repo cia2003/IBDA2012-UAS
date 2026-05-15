@@ -53,11 +53,25 @@ class IsOwnerOrManagerOrSuperUser(BasePermission):
     Allows access to the owner of the object, Manager, and superusers.
     """
     def has_object_permission(self, request, view, obj):
+        owner = getattr(obj, "user", None)
         return (
             request.user and request.user.is_authenticated and (
                 request.user.is_superuser or
                 request.user.groups.filter(name='manager').exists() or
-                obj.user == request.user or
-                obj == request.user
+                obj == request.user or
+                owner == request.user 
+            )
+        )
+    
+class isOwnerOrStaffOrManagerOrSuperUser(BasePermission):
+    def has_object_permission(self, request, view, obj):
+        owner = getattr(obj, "user", None)
+        return (
+            request.user and request.user.is_authenticated and (
+                request.user.is_superuser or
+                request.user.groups.filter(name='manager').exists() or
+                request.user.groups.filter(name='staff').exists() or
+                obj == request.user or
+                owner == request.user 
             )
         )

@@ -15,8 +15,8 @@ import { useNavigate, useParams } from "react-router-dom";
 import { staff } from "../../../assets/assets";
 
 function TenantList() {
-  const { staffId } = useParams();
-  const { deleteTenant, getKostDataByStaffId, managedKost } = useStaffContext();
+  const { staffId, occupantId } = useParams();
+  const { deleteTenant, deleteLease, getKostDataByStaffId, managedKost } = useStaffContext();
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedRoom, setSelectedRoom] = useState("All");
   const navigate = useNavigate();
@@ -50,23 +50,31 @@ function TenantList() {
   ].sort();
 
   const handleEdit = (item) => {
-    navigate(`/admin/dashboard/${staffId}/edit-penghuni/${item.id}`);
+    navigate(`/admin/dashboard/${staffId}/edit-penghuni/${item.user_id}`);
   };
 
   const handleDelete = useCallback(
     async (tenant) => {
-      const deletePromise = deleteTenant(tenant.id);
+      const deletePromise = (async () => {
+        // 1. delete lease dulu (kalau ada API-nya)
+        if (tenant.lease_id) {
+          await deleteLease(tenant.lease_id);
+          
+        }
+
+        // 2. delete tenant
+        await deleteTenant(tenant.user_id);
+
+        // 3. Re-render ulang
+        await getKostDataByStaffId(staffId);
+      })();
 
       toast.promise(
         deletePromise,
         {
           loading: `Sedang menghapus ${tenant.name}...`,
-          success: (data) => {
-            return `${tenant.name} berhasil dihapus!`;
-          },
-          error: (err) => {
-            return err?.message || `Gagal menghapus ${tenant.name}`;
-          },
+          success: () => `${tenant.name} berhasil dihapus!`,
+          error: (err) => err?.message || `Gagal menghapus ${tenant.name}`,
         },
         {
           style: {
@@ -77,10 +85,10 @@ function TenantList() {
           success: {
             duration: 3000,
           },
-        },
+        }
       );
     },
-    [deleteTenant],
+    [deleteTenant, deleteLease]
   );
 
   const columns = [

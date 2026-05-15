@@ -195,22 +195,25 @@ export const UserContextProvider = ({ children }) => {
       // 🔥 UPSERT TENANT
       let resTenant;
 
-
-      const existing = await api.get(`tenants/${newUserData.id}/`);
-
-      if (existing?.data) {
-        resTenant = existing.data;
-      } else {
+      try {
         const tenantResponse = await formDataApi.post(
           "tenants/",
           tenantData
         );
-        resTenant = tenantResponse.data;
-      };
+        resTenant = tenantResponse.data;        
+      } catch (error) {
+        if (error.response?.status === 500) {
+          const existing = await formDataApi.get(`tenants/${newUserData.id}/`);
+          console.log(existing);
+          resTenant = existing.data;
+        }
+      }
+
+      console.log(resTenant);
 
       // 🔥 FIX roomId typo
       const leaseData = {
-        tenant: resTenant.user,
+        tenant: resTenant.user_id,
         room: formData.roomId,
         start_date: formData.checkInDate,
         end_date: formData.endDate,

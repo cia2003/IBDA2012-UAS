@@ -119,12 +119,34 @@ class UserSerializer(serializers.ModelSerializer):
 
 class TenantSerializer(serializers.ModelSerializer):
     _links = serializers.SerializerMethodField()
-    user = serializers.PrimaryKeyRelatedField(queryset=User.objects.all())
+
+    # write field
+    user = serializers.PrimaryKeyRelatedField(
+        queryset=User.objects.all(),
+        write_only=True
+    )
+
+    # read field (object)
+    user_detail = serializers.SerializerMethodField(read_only=True)
+
+    # optional: expose user_id explicitly
+    user_id = serializers.UUIDField(source="user.id", read_only=True)
 
     class Meta:
         model = Tenant
         fields = [
-            'user', 'gender', 'phone_number', 'occupation', 'institution', 'identity_type', 'identity_card', 'created_at', 'updated_at', '_links'
+            "user",
+            "user_id",
+            "user_detail",
+            "gender",
+            "phone_number",
+            "occupation",
+            "institution",
+            "identity_type",
+            "identity_card",
+            "created_at",
+            "updated_at",
+            "_links",
         ]
 
     def create(self, validated_data):
@@ -135,6 +157,26 @@ class TenantSerializer(serializers.ModelSerializer):
 
         tenant = Tenant.objects.create(user=user, **validated_data)
         return tenant
+    
+    def update(self, instance, validated_data):
+        user = validated_data.pop('user', None)
+
+        if user:
+            instance.user = user
+
+        for attr, value in validated_data.items():
+            setattr(instance, attr, value)
+
+        instance.save()
+        return instance
+    
+    def get_user_detail(self, obj):
+        return {
+            "id": obj.user.id,
+            "first_name": obj.user.first_name,
+            "last_name": obj.user.last_name,
+            "email": obj.user.email,
+        }
 
     def get__links(self, obj):
         request = self.context.get('request')
@@ -263,7 +305,8 @@ class StaffRoomSerializer(serializers.ModelSerializer):
 
         return [
             {
-                "id": str(lease.id),
+                "lease_id": str(lease.id),
+                "user_id": lease.tenant.user.id,
                 "name": f"{lease.tenant.user.first_name} {lease.tenant.user.last_name}",
                 "contact": lease.tenant.phone_number,
                 "checkInDate": lease.start_date

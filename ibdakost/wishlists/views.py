@@ -3,7 +3,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework.permissions import IsAuthenticated
-from api.permissions import IsOwnerOrManagerOrSuperUser, IsManagerOrSuperUser
+from api.permissions import isOwnerOrStaffOrManagerOrSuperUser, IsManagerOrSuperUser, IsOwnerOrManagerOrSuperUser
 from .models import Wishlist
 from .serializers import WishlistSerializer, WishlistKostDetailSerializer
 from django.http import Http404
@@ -16,7 +16,7 @@ class WishlistListCreateView(APIView):
     def get_permissions(self):
         if self.request.method == 'POST':
             return [IsAuthenticated()]
-        return [IsAuthenticated(), IsOwnerOrManagerOrSuperUser()]
+        return [IsAuthenticated(), isOwnerOrStaffOrManagerOrSuperUser()]
 
     def get(self, request):
         user = request.user
@@ -46,7 +46,7 @@ class WishlistDetailView(APIView):
     def get_permissions(self):
         if self.request.method == 'PUT':
             return [IsAuthenticated(), IsManagerOrSuperUser()]
-        return [IsAuthenticated(), IsOwnerOrManagerOrSuperUser()]
+        return [IsAuthenticated(), isOwnerOrStaffOrManagerOrSuperUser]
 
     def get_object(self, pk):
         try:
