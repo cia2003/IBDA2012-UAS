@@ -45,74 +45,106 @@ const Wishlist = () => {
         </p>
       </header>
 
-      {/* Grid diubah menjadi lg:grid-cols-4 */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-        {wishlistKostDetail.map((item) => (
-          <div
-            key={item.id}
-            className="group bg-white rounded-[2rem] border border-zinc-100 shadow-lg shadow-zinc-200/40 overflow-hidden hover:-translate-y-1 transition-all duration-300"
-          >
-            {/* Image Section */}
-            <div className="relative h-48">
-              <img
-                src={item.room.image}
-                className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-                alt={item.room.name || item.room.kost_name}
-              />
-              
-              {/* Room Number Badge */}
-              <div className="absolute top-3 left-3 px-3 py-1 bg-indigo-600/90 backdrop-blur-md text-white rounded-xl text-xs font-black shadow-lg">
-                No. {item.room.room_number || ""}
+        {wishlistKostDetail.map((item) => {
+          const isAvailable = item.room.is_available;
+
+          return (
+            <div
+              key={item.id}
+              className={`group bg-white rounded-[2rem] border shadow-lg overflow-hidden transition-all duration-300
+                ${isAvailable
+                  ? "border-zinc-100 shadow-zinc-200/40 hover:-translate-y-1"
+                  : "border-zinc-200 opacity-70 grayscale"
+                }`}
+            >
+              {/* IMAGE */}
+              <div className="relative h-48">
+                <img
+                  src={item.room.image}
+                  className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                  alt={item.room.name || item.room.kost_name}
+                />
+
+                {/* ROOM BADGE */}
+                <div className="absolute top-3 left-3 px-3 py-1 bg-indigo-600/90 backdrop-blur-md text-white rounded-xl text-xs font-black shadow-lg">
+                  No. {item.room.room_number || ""}
+                </div>
+
+                {/* STATUS BADGE */}
+                {!isAvailable && (
+                  <div className="absolute bottom-3 left-3 px-3 py-1 bg-zinc-900/80 text-white text-[10px] font-black rounded-xl">
+                    OCCUPIED
+                  </div>
+                )}
+
+                {/* DELETE */}
+                <button
+                  onClick={() => removeWishlist(item.id)}
+                  className="absolute top-3 right-3 p-2.5 bg-white/90 backdrop-blur rounded-xl text-red-500 hover:bg-red-500 hover:text-white transition-all shadow-md"
+                >
+                  <HeartOff size={18} />
+                </button>
               </div>
 
-              {/* Delete Button */}
-              <button
-                onClick={() => removeWishlist(item.id)}
-                className="absolute top-3 right-3 p-2.5 bg-white/90 backdrop-blur rounded-xl text-red-500 hover:bg-red-500 hover:text-white transition-all shadow-md"
-              >
-                <HeartOff size={18} />
-              </button>
-            </div>
+              {/* CONTENT */}
+              <div className="p-5">
+                <div className="mb-4">
+                  <h3 className="text-lg font-black text-zinc-800 truncate">
+                    {item.room.name || item.room.kost_name}
+                  </h3>
 
-            {/* Information Section */}
-            <div className="p-5">
-              <div className="mb-4">
-                <h3 className="text-lg font-black text-zinc-800 truncate leading-tight">
-                  {item.room.name || item.room.kost_name}
-                </h3>
-                <div className="flex items-center gap-1.5 text-zinc-400 font-bold text-[11px] mt-1">
-                  <MapPin size={12} className="shrink-0" />
-                  <span className="truncate">{item.room.location}</span>
+                  <div className="flex items-center gap-1.5 text-zinc-400 font-bold text-[11px] mt-1">
+                    <MapPin size={12} className="shrink-0" />
+                    <span className="truncate">{item.room.location}</span>
+                  </div>
+                </div>
+
+                <div className="flex items-baseline gap-1 mb-6">
+                  <span className="text-xl font-black text-indigo-600">
+                    Rp {item.room.price.toLocaleString("id-ID")}
+                  </span>
+                  <span className="text-[10px] font-black text-zinc-300 uppercase tracking-tighter">
+                    / Bln
+                  </span>
+                </div>
+
+                {/* ACTION */}
+                <div className="grid grid-cols-2 gap-2">
+                  <button
+                    disabled={!isAvailable}
+                    onClick={() =>
+                      navigate(`/kost/${item.room.kost_id}/${item.room.id}`)
+                    }
+                    className={`py-3 font-black rounded-xl transition-all text-[10px] uppercase tracking-widest border
+                      ${
+                        isAvailable
+                          ? "bg-zinc-50 text-zinc-600 hover:bg-zinc-200 border-zinc-100"
+                          : "bg-zinc-100 text-zinc-400 cursor-not-allowed border-zinc-200"
+                      }`}
+                  >
+                    Detail
+                  </button>
+
+                  <button
+                    disabled={!isAvailable}
+                    onClick={() =>
+                      navigate(`/registration/${item.room.kost_id}/${item.room.id}`)
+                    }
+                    className={`py-3 font-black rounded-xl transition-all text-[10px] uppercase tracking-widest shadow-md
+                      ${
+                        isAvailable
+                          ? "bg-indigo-600 text-white hover:bg-indigo-700 shadow-indigo-100"
+                          : "bg-zinc-300 text-zinc-500 cursor-not-allowed shadow-none"
+                      }`}
+                  >
+                    Sewa
+                  </button>
                 </div>
               </div>
-
-              <div className="flex items-baseline gap-1 mb-6">
-                <span className="text-xl font-black text-indigo-600">
-                  Rp {item.room.price.toLocaleString("id-ID") || 0}
-                </span>
-                <span className="text-[10px] font-black text-zinc-300 uppercase tracking-tighter">
-                  / Bln
-                </span>
-              </div>
-
-              {/* Action Buttons */}
-              <div className="grid grid-cols-2 gap-2">
-                <button
-                  onClick={() => navigate(`/kost/${item.room.kost_id}/${item.room.id}`)}
-                  className="py-3 bg-zinc-50 text-zinc-600 font-black rounded-xl hover:bg-zinc-200 transition-all text-[10px] uppercase tracking-widest border border-zinc-100"
-                >
-                  Detail
-                </button>
-                <button
-                  onClick={() => navigate(`/registration/${item.room.kost_id}/${item.room.id}`)}
-                  className="py-3 bg-indigo-600 text-white font-black rounded-xl shadow-md shadow-indigo-100 hover:bg-indigo-700 transition-all text-[10px] uppercase tracking-widest"
-                >
-                  Sewa
-                </button>
-              </div>
             </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
     </div>
   );
