@@ -1,110 +1,266 @@
+import kost1 from './kost1.jpg'
+import kost2 from './kost2.jpg'
+import kost3 from './kost3.jpg'
+
 // Definisi Role
 export const ROLES = {
-    MANAGER: 'MANAGER',
-    STAFF: 'STAFF'
+  MANAGER: "manager",
+  STAFF: "staff",
 };
 
 // Master Data Tipe Kamar (Sesuai Deskripsi Bisnis)
 export const ROOM_TYPES = {
-    TIPE_1: {
-        name: 'Tipe 1',
-        size: '2,5 m × 2,5 m',
-        facilities: ['Kipas Angin', 'Kamar Mandi Luar'],
-        price: 750000
-    },
-    TIPE_2: {
-        name: 'Tipe 2',
-        size: '3 m × 3 m',
-        facilities: ['Kamar Mandi Dalam'],
-        price: 1250000
-    },
-    TIPE_3: {
-        name: 'Tipe 3',
-        size: '4 m × 4 m',
-        facilities: ['AC', 'Kamar Mandi Dalam', 'TV', 'Dispenser'],
-        price: 2250000
-    },
-    TIPE_4: {
-        name: 'Tipe 4',
-        size: '5 m × 5 m',
-        facilities: ['AC', 'TV', 'Mini Pantry', 'Dispenser', 'Kulkas', 'Kamar Mandi Dalam', 'Parkir Mobil'],
-        price: 3750000
-    }
+  TIPE_1: {
+    id: '1',
+    name: "Tipe 1",
+    size: "2,5 m × 2,5 m",
+    facilities: ["Kipas Angin", "Kamar Mandi Luar"],
+    price: 750000,
+  },
+  TIPE_2: {
+    id: '2',
+    name: "Tipe 2",
+    size: "3 m × 3 m",
+    facilities: ["Kamar Mandi Dalam"],
+    price: 1250000,
+  },
+  TIPE_3: {
+    id: '3',
+    name: "Tipe 3",
+    size: "4 m × 4 m",
+    facilities: ["AC", "Kamar Mandi Dalam", "TV", "Dispenser"],
+    price: 2250000,
+  },
+  TIPE_4: {
+    id: '4',
+    name: "Tipe 4",
+    size: "5 m × 5 m",
+    facilities: [
+      "AC",
+      "TV",
+      "Mini Pantry",
+      "Dispenser",
+      "Kulkas",
+      "Kamar Mandi Dalam",
+      "Parkir Mobil",
+    ],
+    price: 4000000,
+  },
 };
 
 export const staff = [
-    { 
-        id: 1, 
-        name: 'Joshua', 
-        role: ROLES.MANAGER, 
-        assignedKost: null, 
-        email: 'manager@email.com',
-        password: 'manager123' 
-    },
-    { 
-        id: 2, 
-        name: 'Emily', 
-        role: ROLES.STAFF, 
-        assignedKost: 'K01',
-        email: 'staff1@email.com',
-        password: 'stafkos1' 
-    },
-    { 
-        id: 3, 
-        name: 'Michael', 
-        role: ROLES.STAFF, 
-        assignedKost: 'K02', 
-        email: 'michael@email.com',
-        password: 'stafkos2' 
-    },
-    { 
-        id: 4, 
-        name: 'Sarah', 
-        role: ROLES.STAFF, 
-        assignedKost: 'K03', 
-        email: 'sarah@email.com',
-        password: 'stafkost3' 
-    },
+  {
+    id: 1,
+    name: "Joshua",
+    role: ROLES.MANAGER,
+    assignedKost: null,
+    telephone: "089617548012",
+    email: "manager@email.com",
+    password: "calvinJoshua",
+  },
+  {
+    id: 2,
+    name: "Emily",
+    role: ROLES.STAFF,
+    assignedKost: "K01",
+    telephone: "081234567890",
+    email: "staff1@email.com",
+    password: "stafkos1",
+  },
+  {
+    id: 3,
+    name: "Michael",
+    role: ROLES.STAFF,
+    telephone: "081234567890",
+    assignedKost: "K02",
+    email: "michael@email.com",
+    password: "stafkos2",
+  },
+  {
+    id: 4,
+    name: "Sarah",
+    role: ROLES.STAFF,
+    telephone: "081234567890",
+    assignedKost: "K03",
+    email: "sarah@email.com",
+    password: "stafkost3",
+  },
 ];
 
 export const kostData = [
-    { 
-        id: 'K01', 
-        name: 'IBDA Kost A', 
-        address: 'Jl. Merdeka No. 1', 
-        rooms: [
-            { id: 'A01', roomNumber: '101', ...ROOM_TYPES.TIPE_1, status: 'Available', resident: null },
-            { id: 'A02', roomNumber: '102', ...ROOM_TYPES.TIPE_2, status: 'Available', resident: null },
+  {
+    id: "K01",
+    img: kost1,
+    name: "IBDA Kost A",
+    address: "Jl. Merdeka No. 1",
+    rooms: [
+      {
+        ...ROOM_TYPES.TIPE_1,
+        id: "A01",
+        roomNumber: "101",
+        status: "Occupied",
+        resident: [
+          {
+            id: "P506",
+            name: "Joshua",
+            contact: "089617548012",
+            checkInDate: "2026-04-04",
+            paymentDue: 4
+          },
         ],
-        staffId: 2 
-    },
-    { 
-        id: 'K02', 
-        name: 'IBDA Kost B', 
-        address: 'Jl. Sudirman No. 12', 
-        rooms: [
-            { id: 'B01', roomNumber: '201', ...ROOM_TYPES.TIPE_1, status: 'Available', resident: null },
-            { id: 'B02', roomNumber: '202', ...ROOM_TYPES.TIPE_2, status: 'Occupied', 
-              resident: [
-                { id: 'P02', name: 'Andi', contact: '081222333444', checkInDate: '2026-02-01' }
-            ] 
-            },
+      },
+      {
+        ...ROOM_TYPES.TIPE_2,
+        id: "A02",
+        roomNumber: "102",
+        status: "Available",
+        resident: null,
+      },
+    ],
+    staffId: 2,
+  },
+  {
+    id: "K02",
+    name: "IBDA Kost B",
+    img: kost2,
+    address: "Jl. Sudirman No. 12",
+    rooms: [
+      {
+        ...ROOM_TYPES.TIPE_1,
+        id: "B01",
+        roomNumber: "201",
+        status: "Available",
+        resident: null,
+      },
+      {
+        ...ROOM_TYPES.TIPE_2,
+        id: "B02",
+        roomNumber: "202",
+        status: "Occupied",
+        resident: [
+          {
+            id: "P02",
+            name: "Andi",
+            contact: "081222333444",
+            checkInDate: "2026-02-01",
+            paymentDue: 2
+          },
         ],
-        staffId: 3 
-    },
-    { 
-        id: 'K03', 
-        name: 'IBDA Kost C', 
-        address: 'Jl. Thamrin No. 5', 
-        rooms: [
-            { id: 'C01', roomNumber: '301', ...ROOM_TYPES.TIPE_3, status: 'Occupied', 
-              resident: [
-                { id: 'P01', name: 'Budi', contact: '081234567891', email: 'budi@email.com', checkInDate: '2026-01-01' },
-                { id: 'P03', name: 'Ujang', contact: '081234567891', email: 'ujang@email.com', checkInDate: '2026-01-01' }
-            ]
-            },
-            { id: 'C02', roomNumber: '302', ...ROOM_TYPES.TIPE_4, status: 'Available', resident: null },
+      },
+      {
+        ...ROOM_TYPES.TIPE_2,
+        id: "B03",
+        roomNumber: "203",
+        status: "Available",
+        resident: null,
+      },
+      {
+        ...ROOM_TYPES.TIPE_2,
+        id: "B04",
+        roomNumber: "203",
+        status: "Available",
+        resident: null,
+      },
+    ],
+    staffId: 3,
+  },
+  {
+    id: "K03",
+    img: kost3,
+    name: "IBDA Kost C",
+    address: "Jl. Thamrin No. 5",
+    rooms: [
+      {
+        ...ROOM_TYPES.TIPE_3,
+        id: "C01",
+        roomNumber: "301",
+        status: "Occupied",
+        resident: [
+          {
+            id: "P01",
+            name: "Budi",
+            contact: "081234567891",
+            email: "budi@email.com",
+            checkInDate: "2026-01-01",
+            paymentDue: 1
+          },
+          {
+            id: "P03",
+            name: "Ujang",
+            contact: "081234567891",
+            email: "ujang@email.com",
+            checkInDate: "2026-01-01",
+            paymentDue: 1
+          },
         ],
-        staffId: 4
-    },
+      },
+      {
+        ...ROOM_TYPES.TIPE_4,
+        id: "C02",
+        roomNumber: "302",
+        status: "Available",
+        resident: null,
+      },
+    ],
+    staffId: 4,
+  },
+];
+
+export const newTenant = [
+  {
+    id: "reg-001",
+    name: "Abu jahar",
+    gender: "Laki-laki",
+    asal: "Madiun",
+    entryDate: "2026-05-05",
+    requestedKostId: "K03",
+    requestedRoomId: "C02",
+    phoneNumber: "08123456789",
+    notes: "Mahasiswa semester 2",
+  },
+  {
+    id: "reg-002",
+    name: "Sulaiman",
+    gender: "Laki-laki",
+    asal: "Madiun",
+    entryDate: "2026-05-05",
+    requestedKostId: "K01",
+    requestedRoomId: "A02",
+    phoneNumber: "08129999888",
+    notes: "Karyawan swasta",
+  },
+  {
+    id: "reg-003",
+    name: "Bilqis",
+    gender: "Perempuan",
+    asal: "Depok",
+    entryDate: "2026-05-06",
+    requestedKostId: "K02",
+    requestedRoomId: "B02",
+    phoneNumber: "08131111222",
+    notes: "-",
+  },
+];
+export const User = [
+  {
+    id: "U01",
+    name: "Joshua",
+    email: "calvinjoshua37@gmail.com",
+    password: "user123",
+    wishlist: [
+      { id: "WL01", kostId: "K01", roomId: "A02" }, // IBDA Kost A - Kamar 102 (Available)
+      { id: "WL02", kostId: "K03", roomId: "C02" }, // IBDA Kost C - Kamar 302 (Available)
+    ],
+  },
+  {
+    id: "U02",
+    name: "Siti",
+    email: "siti@email.com",
+    password: "siti123",
+    wishlist: [
+      { id: "WL03", kostId: "K02", roomId: "B01" }, // IBDA Kost B - Kamar 201 (Available)
+      { id: "WL04", kostId: "K02", roomId: "B03" }, // IBDA Kost B - Kamar 203 (Available)
+      { id: "WL05", kostId: "K01", roomId: "A02" }, // IBDA Kost A - Kamar 102 (Available)
+    ],
+  },
 ];

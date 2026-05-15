@@ -1,45 +1,143 @@
+// App.jsx
 import { Navigate, Route, Routes } from "react-router-dom";
-import { useAppContext } from "./hook/useAppContext";
-import Login from "./pages/Login";
-import StaffLayout from "./pages/admin/StaffLayout"; 
-import StaffDashboard from "./pages/admin/StaffDashboard";
+import { useAppContext } from "./hook/useContext";
+import { Toaster } from "react-hot-toast";
 
+// UI Components
+import RoomForm from "./components/ui/RoomForm";
+import OccupantForm from "./components/ui/OccupantForm";
+import KostForm from "./components/ui/KostForm";
 
+// Admin Pages
+import Login from "./pages/admin/Login";
+import Layout from "./pages/admin/Layout";
+
+// Staff Pages
+import StaffDashboard from "./pages/admin/staff/StaffDashboard";
+import RoomsDataDetails from "./pages/admin/staff/RoomsDataDetails";
+import TenantList from "./pages/admin/staff/TenantList";
+import NewTenantList from "./pages/admin/staff/NewTenantList";
+
+// Manager Pages
+import OwnerDashboard from "./pages/admin/manager/OwnerDashboard";
+import Kost from "./pages/admin/manager/Kost";
+import Staff from "./pages/admin/manager/Staff";
+import StaffForm from "./pages/admin/manager/StaffForm";
+import KostDetail from "./pages/admin/manager/KostDetail";
+import KostTipeForm from "./pages/admin/manager/KostTipeForm";
+import TipeKost from "./pages/admin/manager/TipeKost";
+import TipeDetail from "./pages/admin/manager/TipeDetail";
+
+// User Pages
+import Home from "./pages/user/Home/Home";
+import User from "./pages/user/User";
+import WishList from "./pages/user/WishList";
+import UserLogin from "./pages/user/UserLogin/UserLogin";
+import UserKostDetail from "./pages/user/UserKostDetail";
+import UserRoomDetail from "./pages/user/UserRoomDetail/UserRoomDetail";
+import RegistrationForm from "./pages/user/RegistrationForm";
+
+// Other
+import NotFoundPage from "./pages/NotFoundPage";
 import "./style.css";
-import RoomsDataDetails from "./pages/admin/RoomsDataDetails";
-import OccupantDataDetails from "./pages/admin/OccupantDataDetails";
+import UserKost from "./pages/user/UserKost/UserKost";
+import About from "./pages/user/About";
+
+const AdminProtectedRoute = ({ children, allowedRole }) => {
+  const { adminIsLoggedIn, role } = useAppContext();
+
+  if (!adminIsLoggedIn) return <Navigate to="/admin/login" replace />;
+  if (allowedRole && role !== allowedRole)
+    return <Navigate to="/admin/login" replace />;
+
+  return children;
+};
+
+const UserProtectedRoute = ({ children }) => {
+  const { userIsLoggedIn } = useAppContext();
+
+  if (!userIsLoggedIn) return <Navigate to="/login" replace />;
+
+  return children;
+};
 
 export default function App() {
-  // Ganti dataLoggedIn menjadi staffData sesuai yang ada di Provider
-  const { isLoggedIn, staffData } = useAppContext(); 
+  const { adminIsLoggedIn, role, staffData } = useAppContext();
 
   return (
-    <Routes>
-      <Route path="/login" element={<Login />} />
-      
-      {isLoggedIn && (
-        <>
-          {/* Manager Routes */}
-          {staffData?.role === "MANAGER" && (
-            <Route path="/dashboard/manager" element={<StaffLayout />}>
-              <Route index element={<h1>Manager Overview</h1>} />
-              <Route path="laporan" element={<h1>Laporan Keuangan</h1>} />
-              <Route path="tambah-kost" element={<h1>Tambah Kost</h1>} />
-            </Route>
-          )}
+    <>
+      <Toaster />
+      <Routes>
+        {/* ── User Routes ── */}
+        <Route path="/" element={<User />}>
+          <Route index element={<Home />} />
+          <Route path="/tentang-kami" element ={<About />} /> 
+          <Route path="kost" element={<UserKost />} />
+          <Route path="kost/:kostId" element={<UserKostDetail />} />
+          <Route path="kost/:kostId/:roomId" element={<UserRoomDetail />} />
+          <Route
+            path="wishlist"
+            element={
+              <UserProtectedRoute>
+                <WishList />
+              </UserProtectedRoute>
+            }
+          />
+          <Route
+            path="/registration/:kostId/:roomId"
+            element={
+              <UserProtectedRoute>
+                <RegistrationForm />
+              </UserProtectedRoute>
+            }
+          />
+        </Route>
+        <Route path="/login" element={<UserLogin />} />
 
-          {/* Staff Routes */}
-          {staffData?.role === 'STAFF' && (
-            <Route path="/dashboard/staff/:staffId" element={<StaffLayout />}>
-              <Route index element={<StaffDashboard />} />
-              <Route path="kamar" element={<RoomsDataDetails />} />
-              <Route path="penghuni" element={<OccupantDataDetails />} />
-            </Route>
-          )}
-        </>
-      )}
+        {/* ── Staff Routes ── */}
+        <Route
+          path="/admin/dashboard/:staffId"
+          element={
+            <AdminProtectedRoute allowedRole="staff">
+              <Layout />
+            </AdminProtectedRoute>
+          }
+        >
+          <Route index element={<StaffDashboard />} />
+          <Route path="kamar" element={<RoomsDataDetails />} />
+          <Route path="penghuni" element={<TenantList />} />
+          <Route path="penghuni-baru" element={<NewTenantList />} />
+          <Route path="edit-penghuni/:occupantId" element={<OccupantForm />} />
+          <Route path="tambah-kamar" element={<RoomForm />} />
+        </Route>
 
-      <Route path="*" element={<Navigate to={isLoggedIn ? (staffData?.role === "MANAGER" ? "/dashboard/manager" : `/dashboard/staff/${staffData?.id}`) : "/login"} />} />
-    </Routes>
+        {/* ── Manager Routes ── */}
+        <Route
+          path="/admin/dashboard/manager"
+          element={
+            <AdminProtectedRoute allowedRole="manager">
+              <Layout />
+            </AdminProtectedRoute>
+          }
+        >
+          <Route index element={<OwnerDashboard />} />
+          <Route path="kost" element={<Kost />} />
+          <Route path="kost-form" element={<KostForm />} />
+          <Route path="add-tipe" element={<KostTipeForm />} />
+          <Route path="edit-tipe/:tipeId" element={<KostTipeForm />} />
+          <Route path="tipe-kost-detail/:tipeId" element={<TipeDetail />} />
+          <Route path="tipe-kost" element={<TipeKost />} />
+          <Route path="edit-kost/:kostId" element={<KostForm />} />
+          <Route path="kost-detail/:kostId" element={<KostDetail />} />
+          <Route path="staff" element={<Staff />} />
+          <Route path="staff-form" element={<StaffForm />} />
+          <Route path="staff-form/:staffId" element={<StaffForm />} />
+        </Route>
+
+        {/* ── Auth & Fallback ── */}
+        <Route path="/admin/login" element={<Login />} />
+        <Route path="*" element={<NotFoundPage />} />
+      </Routes>
+    </>
   );
 }

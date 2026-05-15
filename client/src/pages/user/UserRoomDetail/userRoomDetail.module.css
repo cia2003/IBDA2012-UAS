@@ -1,0 +1,291 @@
+.pageWrapper {
+    background-color: #ffffff;
+    min-height: 100vh;
+    padding-bottom: 80px;
+}
+
+.container {
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 0 20px;
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 40px;
+}
+
+/* Desktop Grid Layout */
+@media (min-width: 1024px) {
+    .container {
+        grid-template-columns: 2fr 1fr;
+    }
+}
+
+/* Kolom Kiri */
+.leftColumn {
+    display: flex;
+    flex-direction: column;
+    gap: 32px;
+}
+
+.galleryWrapper {
+    height: 300px;
+    width: 100%;
+}
+
+@media (min-width: 768px) {
+    .galleryWrapper {
+        height: 450px;
+    }
+}
+
+.imageCard {
+    border-radius: 24px;
+    overflow: hidden;
+    height: 100%;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+}
+
+.mainImg {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.7s ease;
+}
+
+.mainImg:hover {
+    transform: scale(1.05);
+}
+
+/* Title Section */
+.titleSection {
+    margin-top: 20px;
+}
+
+.roomBadge {
+    padding: 6px 16px;
+    background-color: #f5f3ff;
+    color: #4f46e5;
+    font-size: 12px;
+    font-weight: 700;
+    border-radius: 999px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.mainTitle {
+    font-size: 2.25rem;
+    font-weight: 900;
+    color: #18181b;
+    letter-spacing: -0.02em;
+    margin-top: 12px;
+    line-height: 1.2;
+}
+
+.locationText {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: #71717a;
+    margin-top: 12px;
+}
+
+.iconPrimary {
+    color: #4f46e5;
+}
+
+.divider {
+    border: none;
+    border-top: 1px solid #f4f4f5;
+}
+
+/* Specs */
+.specsGrid {
+    display: flex;
+    gap: 32px;
+}
+
+.specItem {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.iconBox {
+    padding: 12px;
+    background-color: #f8fafc;
+    border-radius: 16px;
+    color: #475569;
+}
+
+.specLabel {
+    font-size: 11px;
+    color: #94a3b8;
+    font-weight: 700;
+    text-transform: uppercase;
+}
+
+.specValue {
+    font-weight: 700;
+    color: #1e293b;
+}
+
+/* Facilities */
+.sectionTitle {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #18181b;
+    margin-bottom: 16px;
+}
+
+.facilityGrid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+}
+
+@media (min-width: 768px) {
+    .facilityGrid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
+.facilityItem {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 16px;
+    border: 1px solid #f4f4f5;
+    border-radius: 16px;
+    transition: all 0.3s ease;
+}
+
+.facilityItem:hover {
+    border-color: #e0e7ff;
+    background-color: rgba(245, 243, 255, 0.5);
+}
+
+.iconCheck {
+    color: #10b981;
+    flex-shrink: 0;
+}
+
+/* Kolom Kanan (Sticky) */
+.stickySidebar {
+    position: sticky;
+    top: 40px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.priceCard {
+    background: #ffffff;
+    padding: 32px;
+    border-radius: 32px;
+    border: 1px solid #f4f4f5;
+    box-shadow: 0 20px 50px rgba(79, 70, 229, 0.08);
+}
+
+.priceLabel {
+    color: #a1a1aa;
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-bottom: 4px;
+}
+
+.priceValue {
+    font-size: 2.5rem;
+    font-weight: 900;
+    color: #4f46e5;
+}
+
+.perMonth {
+    font-size: 1rem;
+    color: #a1a1aa;
+    font-weight: 500;
+}
+
+.trustSignals {
+    margin: 24px 0;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.signalItem {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 14px;
+    color: #52525b;
+}
+
+.ctaButton {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+}
+
+.callButton,
+.wishListButton {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 10px 20px;
+    border-radius: 16px;
+    font-weight: 700;
+    font-size: 0.875rem;
+    width: fit-content;
+    transition: all 0.3s ease-in-out;
+    border: 1px solid #fee2e2; 
+    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+    cursor: pointer;
+}
+.callButton {
+    background-color: #2563eb;
+    color: #ffffff;
+}
+
+.callButton:hover {
+    background-color: #1e40af;
+    color: #ffffff;
+}
+
+.wishListButton {
+    background-color: #fef2f2;
+    color: #dc2626; 
+}
+
+.wishListButton:hover {
+    background-color: #dc2626;
+    color: #ffffff;
+}
+
+.disclaimer {
+    font-size: 10px;
+    text-align: center;
+    color: #a1a1aa;
+    margin-top: 16px;
+    font-weight: 700;
+    text-transform: uppercase;
+}
+
+.surveyCard {
+    background-color: #18181b;
+    padding: 24px;
+    border-radius: 24px;
+    color: #ffffff;
+}
+
+.surveyTitle {
+    font-weight: 700;
+    margin-bottom: 4px;
+}
+
+.surveyDesc {
+    color: #a1a1aa;
+    font-size: 12px;
+}
