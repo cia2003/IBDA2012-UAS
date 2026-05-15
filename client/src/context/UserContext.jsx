@@ -204,12 +204,10 @@ export const UserContextProvider = ({ children }) => {
       } catch (error) {
         if (error.response?.status === 500) {
           const existing = await formDataApi.get(`tenants/${newUserData.id}/`);
-          console.log(existing);
+
           resTenant = existing.data;
         }
       }
-
-      console.log(resTenant);
 
       // 🔥 FIX roomId typo
       const leaseData = {
