@@ -116,16 +116,14 @@ export const StaffContextProvider = ({ children }) => {
       // -- MODE BACKEND --
 
       const formData = new FormData();
-      formData.append('kost', managedKost.id); // Asumsikan managedKost sudah memiliki ID kost yang dikelola
+      formData.append('kost', managedKost?.managedKost?.id); // Asumsikan managedKost sudah memiliki ID kost yang dikelola
       formData.append('room_type', roomForm.category);
       formData.append('name', roomForm.roomNumber);
       formData.append('image', roomForm.image);
       formData.append('is_available', true); // Set default status kamar menjadi tersedia
       
-      console.log("addRoom", formData);
       const response = await formDataApi.post("rooms/", formData);
 
-      console.log("addRoom", response);
       if(response.data) {
         toast.success("Kamar berhasil ditambahkan");
       };

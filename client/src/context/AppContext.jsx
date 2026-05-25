@@ -136,9 +136,9 @@ export const AppContextProvider = ({ children }) => {
         }
       } catch (error) {
         const errorMsg =
-          error.response?.data?.message || error.message || "Terjadi kesalahan";
+          error.response?.data?.message || error.message;
         dispatch({ type: "AUTH_FAILURE", payload: errorMsg });
-        toast.error(errorMsg);
+        toast.error("Terjadi kesalahan");
         console.error(errorMsg);
       }
     },

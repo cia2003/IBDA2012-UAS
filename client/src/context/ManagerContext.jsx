@@ -133,7 +133,8 @@ export const ManagerContextProvider = ({ children }) => {
     } catch (error) {
       const errors = error.response?.data || {};
       const errorMessages = Object.values(errors).flat();
-      toast.error(errorMessages.join("\n") || "Kost gagal ditambahkan");
+      toast.error("Kost gagal ditambahkan");
+      console.error(errorMessages.join("\n"))
     }
   }, []);
 
