@@ -14,12 +14,6 @@ const RoomForm = () => {
   const { getTipeKost } = useManagerContext();
   const navigate = useNavigate();
 
-  // const categories = [
-  //   { name: "Tipe 1" },
-  //   { name: "Tipe 2" },
-  //   { name: "Tipe 3" },
-  // ];
-
   // Handler untuk input teks dan select
   const handleChange = (e) => {
     const { id, value } = e.target;

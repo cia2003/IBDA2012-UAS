@@ -6,14 +6,23 @@ import { useEffect, useState, useCallback } from "react";
 
 function TipeKost() {
   const [tipeData, setTipeData] = useState([]);
+  const [loading, setLoading] = useState(true);
+
   const navigate = useNavigate();
+
   const { getTipeKost } = useManagerContext();
 
   const fetchTipeData = useCallback(async () => {
-    const data = await getTipeKost();
-    if (data) {
-      setTipeData(data);
-      return data;
+    try {
+      const data = await getTipeKost();
+      if (data) {
+        setTipeData(data);
+        return data;
+      }      
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setLoading(false);
     }
   }, [getTipeKost]);
 
@@ -96,7 +105,13 @@ function TipeKost() {
       {/* Table Section */}
       <div className="bg-white rounded-[1.5rem] sm:rounded-[2rem] shadow-sm border border-gray-100 overflow-hidden">
         <div className="p-2 sm:p-6 overflow-x-auto">
-          <Table columns={columns} data={tipeData} />
+          {loading ? (
+            <div className="flex justify-center items-center py-10 text-gray-500 font-medium">
+              Memuat ulang...
+            </div>
+          ) : (
+            <Table columns={columns} data={tipeData} />
+          )}
         </div>
       </div>
     </div>

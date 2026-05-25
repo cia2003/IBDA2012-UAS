@@ -122,7 +122,10 @@ export const StaffContextProvider = ({ children }) => {
       formData.append('image', roomForm.image);
       formData.append('is_available', true); // Set default status kamar menjadi tersedia
       
+      console.log("addRoom", formData);
       const response = await formDataApi.post("rooms/", formData);
+
+      console.log("addRoom", response);
       if(response.data) {
         toast.success("Kamar berhasil ditambahkan");
       };

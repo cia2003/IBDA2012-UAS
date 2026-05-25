@@ -12,6 +12,7 @@ import {
 import { kostData } from "../../../assets/assets";
 
 function Home() {
+  const [loading, setLoading] = useState(true);
   const [kost, setKost] = useState([]);
   const [originalKost, setOriginalKost] = useState([]);
 
@@ -27,6 +28,7 @@ function Home() {
 
   const fetchKost = useCallback(async () => {
     try {
+      setLoading(true);
       // Ambil semua data
       const kostData = await getUnauthenticatedKostData();
 
@@ -72,6 +74,8 @@ function Home() {
 
       setKost([]);
       setOriginalKost([]);
+    } finally {
+      setLoading(false);
     }
   }, [
     getUnauthenticatedKostData,
@@ -273,7 +277,11 @@ function Home() {
 
         <section className={style.contentSection}>
           <div className={style.cardGrid}>
-            {kost.length > 0 ? (
+            {loading ? (
+              <div className={style.emptyState}>
+                <p>Memuat data kost...</p>
+              </div>
+            ) : kost.length > 0 ? (
               kost.map((item) => (
                 <KostCard
                   key={item.id}

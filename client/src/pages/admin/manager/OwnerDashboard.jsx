@@ -54,17 +54,17 @@ function OwnerDashboard() {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         <KPICard
           title="Total Kost"
-          value={totalKost}
+          value={totalKost || "memuat data..."}
           icon={<House className="text-blue-500" />}
         />
         <KPICard
           title="Total Kamar"
-          value={totalRooms}
+          value={totalRooms || "memuat data..."}
           icon={<Bed className="text-purple-500" />}
         />
         <KPICard
           title="Kamar Terisi"
-          value={occupiedRooms}
+          value={occupiedRooms || "memuat data..."}
           icon={<HouseHeart className="text-green-500" />}
         />
       </div>
@@ -90,7 +90,7 @@ function OwnerDashboard() {
             Tambah Kost Baru
           </button>
           <button
-            className="flex items-center gap-2 bg-gray-400 hover:bg-gray-700 hover:text-white font-semibold py-2 px-4 rounded-lg transition-all shadow-md group text-sm"
+            className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg transition-all shadow-md group text-sm"
             onClick={() => navigate("/admin/dashboard/manager/staff-form")}
           >
             <UserPlus2
@@ -101,7 +101,7 @@ function OwnerDashboard() {
           </button>
           <button
             onClick={() => navigate("/admin/dashboard/manager/add-tipe")}
-            className="flex items-center gap-2 bg-gray-400 hover:bg-gray-700 hover:text-white font-semibold py-2 px-4 rounded-lg transition-all shadow-md group text-sm"
+            className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg transition-all shadow-md group text-sm"
           >
             <VectorSquare
               size={18}

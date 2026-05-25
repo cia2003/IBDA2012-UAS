@@ -304,7 +304,6 @@ export const ManagerContextProvider = ({ children }) => {
   const addStaff = useCallback(
     async (staffForm) => {
       try {
-        console.log("staffForm", staffForm);
         // -- MODE BACKEND --
         const userData = {
           "first_name": staffForm.firstName,
@@ -318,8 +317,6 @@ export const ManagerContextProvider = ({ children }) => {
 
         if (user) {
           toast.success("User untuk staff berhasil dibuat");
-
-          console.log(user);
 
           const userId = user?.id;
           let staffData;
@@ -347,14 +344,9 @@ export const ManagerContextProvider = ({ children }) => {
           }
         }
 
-        // -- MODE DUMMY --
-        // toast.success("Staff Berhasil Ditambahkan (Dummy)");
-        // navigate("/admin/dashboard/manager");
       } catch (error) {
-        const errors = error.response?.data || {};
-        const errorMessages = Object.values(errors).flat();
-        toast.error(errorMessages.join("\n") || "Staff gagal ditambahkan");
-        // toast.error(error.response?.data?.message || "Staff gagal ditambahkan");
+        console.error(error);
+        toast.error("Staff gagal ditambahkan");
       }
     },
     [navigate],
@@ -439,9 +431,8 @@ export const ManagerContextProvider = ({ children }) => {
 
           const staffResponse = await api.put(`employees/${staffId}/`, staffData);
           toast.success("Staff Berhasil Diperbaharui");
+
         }
-      // -- MODE DUMMY --
-      // toast.success("Staff Berhasil Diperbaharui (Dummy)");
     } catch (error) {
       toast.error("Staff gagal diperbaharui");
     }

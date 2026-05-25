@@ -104,7 +104,7 @@ export default function StaffDashboard() {
         </h1>
         <p className="text-gray-500 font-medium">
           Monitoring Unit:{" "}
-          <span className="text-blue-600">{kostData?.name || staffId}</span>
+          <span className="text-blue-600">{kostData?.name || "memuat data..."}</span>
         </p>
       </div>
 

@@ -123,7 +123,6 @@ export const UserContextProvider = ({ children }) => {
         await getUserWishlist();
         await getUserWishlistKostDetail();
 
-        console.log(wishlist);
         return response.data;
       }
     } catch (error) {

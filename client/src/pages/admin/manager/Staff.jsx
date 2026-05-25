@@ -4,24 +4,36 @@ import { useManagerContext } from "../../../hook/useContext";
 import Table from "../../../components/ui/Table";
 import { useNavigate } from "react-router-dom";
 import api from "../../../api/api";
+import toast from "react-hot-toast";
 
 
 function Staff() {
   const navigate = useNavigate();
+
   const [staff, setStaff] = useState([]);
+  const [loading, setLoading] = useState(true);
+
   const { getStaffData, editStaff, deleteStaff } = useManagerContext();
 
   useEffect(() => {
     const fetchStaff = async () => {
-      const data = await getStaffData();
-  
-      if (data) {
-        setStaff(data);
+      try {
+        setLoading(true);
 
-      } else {
-        console.error("Gagal mengambil data staff");
+        const data = await getStaffData();
+
+        if (data) {
+          setStaff(data);
+        } else {
+          toast.error("Gagal mengambil data staff")
+        }
+      } catch (error) {
+        console.error("Terjadi error:", error);
+      } finally {
+        setLoading(false);
       }
     };
+
     fetchStaff();
   }, [getStaffData]);
 
@@ -114,7 +126,13 @@ function Staff() {
       {/* Table Section */}
       <div className="bg-white rounded-[1.5rem] sm:rounded-[2rem] shadow-sm border border-gray-100 overflow-hidden">
         <div className="p-2 sm:p-6 overflow-x-auto">
-          <Table columns={columns} data={staff} />
+          {loading ? (
+            <div className="flex justify-center items-center py-10 text-gray-500 font-medium">
+              Memuat ulang...
+            </div>
+          ) : (
+            <Table columns={columns} data={staff} />
+          )}
         </div>
       </div>
     </div>

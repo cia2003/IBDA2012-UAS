@@ -53,3 +53,4 @@ function Table({ columns = [], data = [] }) {
     );
 }
 export default Table;
+

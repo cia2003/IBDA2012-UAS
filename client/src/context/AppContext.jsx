@@ -232,16 +232,9 @@ export const AppContextProvider = ({ children }) => {
   const userRegister = useCallback(async (userData) => {
     dispatch({ type: "AUTH_START" });
     try {
-      // const formData = new FormData();
-      // formData.append("first_name", userData.firstName);
-      // formData.append("last_name", userData.lastName);
-      // formData.append("email", userData.email);
-      // formData.append("password", userData.password);
-
       const response = await api.post("users/", userData);
-      const { access, refresh, user } = response.data
+      const user = response.data;
       if (user) {
-        setLocalStorage(access, refresh, user);
         dispatch({ type: "USER_LOGIN_SUCCESS", payload: user });
         toast.success("Register berhasil");
         return user;
