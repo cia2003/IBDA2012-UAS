@@ -304,6 +304,7 @@ export const ManagerContextProvider = ({ children }) => {
   const addStaff = useCallback(
     async (staffForm) => {
       try {
+        console.log("staffForm", staffForm);
         // -- MODE BACKEND --
         const userData = {
           "first_name": staffForm.firstName,
@@ -317,6 +318,8 @@ export const ManagerContextProvider = ({ children }) => {
 
         if (user) {
           toast.success("User untuk staff berhasil dibuat");
+
+          console.log(user);
 
           const userId = user?.id;
           let staffData;
