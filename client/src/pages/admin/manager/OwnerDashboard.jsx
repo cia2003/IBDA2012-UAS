@@ -54,17 +54,17 @@ function OwnerDashboard() {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         <KPICard
           title="Total Kost"
-          value={totalKost || "memuat data..."}
+          value={totalKost || 0}
           icon={<House className="text-blue-500" />}
         />
         <KPICard
           title="Total Kamar"
-          value={totalRooms || "memuat data..."}
+          value={totalRooms || 0}
           icon={<Bed className="text-purple-500" />}
         />
         <KPICard
           title="Kamar Terisi"
-          value={occupiedRooms || "memuat data..."}
+          value={occupiedRooms || 0}
           icon={<HouseHeart className="text-green-500" />}
         />
       </div>

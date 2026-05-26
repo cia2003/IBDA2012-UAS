@@ -232,7 +232,14 @@ export const AppContextProvider = ({ children }) => {
   const userRegister = useCallback(async (userData) => {
     dispatch({ type: "AUTH_START" });
     try {
-      const response = await api.post("users/", userData);
+      const userFormData = {
+        'email': userData.email, 
+        'first_name': userData.firstName, 
+        'last_name': userData.lastName, 
+        'password': userData.password
+      };
+
+      const response = await api.post("users/", userFormData);
       const user = response.data;
       if (user) {
         dispatch({ type: "USER_LOGIN_SUCCESS", payload: user });

@@ -307,8 +307,8 @@ export const ManagerContextProvider = ({ children }) => {
       try {
         // -- MODE BACKEND --
         const userData = {
-          "first_name": staffForm.firstName,
-          "last_name": staffForm.lastName,
+          "firstName": staffForm.firstName,
+          "lastName": staffForm.lastName,
           "email": staffForm.email,
           "password": staffForm.password,
           "is_staff": true

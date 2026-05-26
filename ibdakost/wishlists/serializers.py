@@ -64,7 +64,8 @@ class WishlistKostDetailSerializer(serializers.ModelSerializer):
             "kost_id": obj.room.kost_id,
             "room_number": obj.room.name, 
             "price": obj.room.room_type.price, 
-            "location": obj.room.kost.address
+            "location": obj.room.kost.address, 
+            "is_available": obj.room.is_available
         }
     
     def get_user(self, obj):

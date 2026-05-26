@@ -13,6 +13,7 @@ from rest_framework_simplejwt.views import TokenObtainPairView
 from kosts.serializers import StaffManagedKostSerializer
 from kosts.models import Kost
 from rooms.models import Room
+from api.models import Role
 
 class EmailLoginView(TokenObtainPairView):
     serializer_class = EmailTokenObtainPairSerializer
@@ -134,10 +135,20 @@ class KostContactView(APIView):
     permission_classes = [AllowAny]
 
     def get(self, request, kost_id):
+        # employee = Employee.objects.filter(
+        #     kost_id=kost_id,
+        #     position=Role.STAFF
+        # ).select_related('user').first()
         employee = Employee.objects.filter(
-            kost_id=kost_id,
-            position="staff"
-        ).select_related('user').first()
+            kost=kost_id
+        ).first()
+
+
+        print(employee)
+        print(type(kost_id))
+        print(Kost.objects.filter(id=kost_id).exists())
+        # print(employee.position)
+        print(Role.STAFF)
 
         if not employee:
             return Response(
