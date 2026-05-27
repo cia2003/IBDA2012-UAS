@@ -7,7 +7,7 @@ import { Mail, Phone } from "lucide-react"; // Tambahan ikon biar manis
 function UserKostDetail() {
   const { kostId } = useParams();
   // const { getKostById } = useManagerContext();
-  const { getUnauthenticatedKostDetail, getUnauthenticatedRooms, getUnauthenticatedRoomTypes, getUserWishlist } = useUserContext();
+  const { wishlist, getUnauthenticatedKostDetail, getUnauthenticatedRooms, getUnauthenticatedRoomTypes, getUserWishlist } = useUserContext();
   const { getKostData } = useManagerContext();
   const { getStaffDataByKostId } = useStaffContext();
   const [kostData, setKostData] = useState(null);
@@ -41,8 +41,14 @@ function UserKostDetail() {
   }, [getUnauthenticatedKostDetail, getStaffDataByKostId, getUnauthenticatedRooms, getUnauthenticatedRoomTypes]);
   
   useEffect(() => {
-    getUserWishlist();
-    fetchKostInfo();
+    const initialize = async () => {
+      await getUserWishlist();
+      await fetchKostInfo();
+
+      console.log("UserKostDetail", wishlist);
+    };
+
+    initialize();
   }, [fetchKostInfo]);
 
   if (!kostData)
