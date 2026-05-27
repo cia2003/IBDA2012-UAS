@@ -65,12 +65,9 @@ export const StaffContextProvider = ({ children }) => {
   const getStaffDataByKostId = useCallback(async (kostId) => {
     try {
       // -- MODE BACKEND --
-      console.log("getStaffDataByKost", kostId);
       const response = await api.get(`kosts/${kostId}/contact/`); // Asumsikan endpoint ini mengembalikan daftar kontak staff berdasarkan ID kost
       const employee = response.data; // Asumsikan response mengandung field employees yang merupakan array staff
 
-      console.log("getStaffDataByKost", response);
-      console.log("getStaffDataByKost", employee);
       return employee
       
     } catch (error) {

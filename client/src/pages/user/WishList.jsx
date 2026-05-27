@@ -1,6 +1,6 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useUserContext } from "../../hook/useContext";
-import { HeartOff, MapPin } from "lucide-react";
+import { HeartOff, MapPin, Loader2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
 const Wishlist = () => {
@@ -11,10 +11,35 @@ const Wishlist = () => {
   } = useUserContext();
 
   const navigate = useNavigate();
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    getUserWishlistKostDetail();
+    const fetchWishlist = async () => {
+      try {
+        await getUserWishlistKostDetail();
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchWishlist();
   }, []);
+
+  if (loading) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[60vh]">
+        <Loader2 size={48} className="animate-spin text-indigo-600 mb-4" />
+
+        <h2 className="text-xl font-black text-zinc-800">
+          Memuat wishlist...
+        </h2>
+
+        <p className="text-zinc-500 mt-2">
+          Tunggu sebentar ya.
+        </p>
+      </div>
+    );
+  }
 
   if (!wishlistKostDetail) return null;
 

@@ -46,7 +46,7 @@ class WishlistDetailView(APIView):
     def get_permissions(self):
         if self.request.method == 'PUT':
             return [IsAuthenticated(), IsManagerOrSuperUser()]
-        return [IsAuthenticated(), isOwnerOrStaffOrManagerOrSuperUser]
+        return [IsAuthenticated(), isOwnerOrStaffOrManagerOrSuperUser()]
 
     def get_object(self, pk):
         try:

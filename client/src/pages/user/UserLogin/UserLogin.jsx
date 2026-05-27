@@ -30,8 +30,13 @@ function UserLogin() {
             navigate("/");
           }
         } else if (state === "register") {
-          const data = await userRegister(formData);
-          navigate("/login");
+          const registerData = await userRegister(formData);
+          const loginData = await userLogin(formData.email, formData.password);
+
+          if (loginData) {
+            navigate("/");
+          }
+          
         }
       } catch (error) {}
     },

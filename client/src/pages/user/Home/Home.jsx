@@ -177,12 +177,16 @@ function Home() {
         <div className="flex flex-col md:flex-row items-center gap-2">
           {/* SEARCH NAMA */}
           <div className="flex-1 flex items-center gap-3 px-6 py-3 border-r-0 md:border-r border-zinc-100">
-            <Search className="text-indigo-500" size={20} />
+            {/* <Search className="text-indigo-500" size={20} /> */}
 
             <div className="w-full">
-              <p className="text-[10px] font-black uppercase text-zinc-400 tracking-wider">
-                Nama Kost
-              </p>
+              <div className="flex gap-1">
+                <Search className="text-indigo-500" size={15} />
+                <p className="text-[10px] font-black uppercase text-zinc-400 tracking-wider">
+                  Nama Kost
+                </p>
+                <br />
+              </div>
 
               <input
                 type="text"
@@ -196,12 +200,17 @@ function Home() {
 
           {/* SEARCH LOKASI */}
           <div className="flex-1 flex items-center gap-3 px-6 py-3 border-r-0 md:border-r border-zinc-100">
-            <MapPin className="text-rose-500" size={20} />
+            
 
             <div className="w-full">
-              <p className="text-[10px] font-black uppercase text-zinc-400 tracking-wider">
-                Lokasi
-              </p>
+              <div className="flex gap-1">
+                <MapPin className="text-rose-500" size={15} />
+                <p className="text-[10px] font-black uppercase text-zinc-400 tracking-wider">
+                  Lokasi
+                </p>    
+                <br></br>            
+              </div>
+
 
               <input
                 type="text"
@@ -214,40 +223,81 @@ function Home() {
           </div>
 
           {/* FILTER HARGA */}
-          <div className="flex-1 flex items-center gap-3 px-6 py-3">
-            <CircleDollarSign
-              className="text-emerald-500"
-              size={20}
-            />
+          <div className="flex-1 flex items-center gap-3 px-6 py-3 border-r-0 md:border-r border-zinc-100">
 
             <div className="w-full">
-              <p className="text-[10px] font-black uppercase text-zinc-400 tracking-wider">
-                Harga Maksimal
-              </p>
+              <div className="flex items-center justify-between mb-1">
+                <div className="flex gap-1">
+                  <CircleDollarSign className="text-emerald-500" size={15} />
+                  <p className="text-[10px] font-black uppercase text-zinc-400 tracking-wider">
+                    Harga Maksimal
+                  </p>                  
+                </div>
+                <br></br>
+              </div>
 
-              <select
-                value={maxPrice}
-                onChange={(e) =>
-                  setMaxPrice(Number(e.target.value))
-                }
-                className="w-full bg-transparent outline-none text-sm font-bold text-zinc-800 appearance-none cursor-pointer"
-              >
-                <option value={1400000}>
-                  Di bawah 1.4 Juta
-                </option>
+              <div className="relative w-full">
+                <select
+                  value={maxPrice}
+                  onChange={(e) =>
+                    setMaxPrice(Number(e.target.value))
+                  }
+                  className="
+                    w-full
+                    bg-zinc-50
+                    border
+                    border-zinc-200
+                    font-black
+                    text-sm
+                    rounded-2xl
+                    px-4
+                    py-3
+                    pr-10
+                    outline-none
+                    cursor-pointer
+                    transition-all
+                    hover:bg-white-100
+                    hover:border-white-300
+                    focus:ring-2
+                    focus:ring-zinc-300
+                    appearance-none
+                    shadow-sm
+                  "
+                >
+                  <option value={1400000}>
+                    Di bawah 1.4 Juta
+                  </option>
 
-                <option value={2000000}>
-                  Di bawah 2 Juta
-                </option>
+                  <option value={2000000}>
+                    Di bawah 2 Juta
+                  </option>
 
-                <option value={3000000}>
-                  Di bawah 3 Juta
-                </option>
+                  <option value={3000000}>
+                    Di bawah 3 Juta
+                  </option>
 
-                <option value={99999999}>
-                  Semua Harga
-                </option>
-              </select>
+                  <option value={99999999}>
+                    Semua Harga
+                  </option>
+                </select>
+
+                {/* ICON DROPDOWN */}
+                <div className="absolute inset-y-0 right-4 flex items-center pointer-events-none">
+                  <svg
+                    className="w-4 h-4 text-emerald-600"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={3}
+                      d="M19 9l-7 7-7-7"
+                    />
+                  </svg>
+                </div>
+              </div>
             </div>
           </div>
 
@@ -256,7 +306,7 @@ function Home() {
             onClick={handleSearch}
             className="bg-indigo-600 hover:bg-indigo-700 text-white p-5 rounded-3xl transition-all active:scale-95 shadow-lg shadow-indigo-100"
           >
-            <SlidersHorizontal size={24} />
+            <Search size={24} />
           </button>
         </div>
       </div>
