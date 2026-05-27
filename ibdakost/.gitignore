@@ -7,3 +7,6 @@ media/
 # ignore db.sqlite3 which is the default database for Django projects
 db.sqlite3
 
+
+__pycache__/
+*.pyc
