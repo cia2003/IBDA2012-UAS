@@ -11,7 +11,8 @@ from api.permissions import IsManagerOrSuperUser
 from .serializers import KostSerializer
 from .models import Kost
 from django.http import Http404
-from ibdakost.supabase_client import StorageService
+# from ibdakost.supabase_client import StorageService
+from ibdakost.storages.storage import StorageService
 
 # Create your views here.
 class KostListCreateView(APIView):

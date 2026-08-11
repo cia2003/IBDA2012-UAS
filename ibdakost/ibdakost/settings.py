@@ -71,41 +71,50 @@ INSTALLED_APPS = [
     # Aplikasi pihak ketiga
     'rest_framework',
     'corsheaders',
-    'storages',
+    # 'storages',
 ]
 
 STORAGES = {
     "default": {
-        "BACKEND": "storages.backends.s3boto3.S3Boto3Storage",
-        "OPTIONS": {
-            "endpoint_url": os.getenv("AWS_S3_ENDPOINT_URL"),
-            "access_key": os.getenv("AWS_ACCESS_KEY_ID"),
-            "secret_key": os.getenv("AWS_SECRET_ACCESS_KEY"),
-            "bucket_name": os.getenv("AWS_STORAGE_BUCKET_NAME"),
-            "region_name": os.getenv("AWS_S3_REGION_NAME"),
-            "object_parameters": {
-                "CacheControl": "max-age=86400",
-            },
-            "querystring_auth": True,
-            "location": "media",
-        },
+        "BACKEND": "django.core.files.storage.FileSystemStorage",
     },
     "staticfiles": {
-        "BACKEND": "storages.backends.s3boto3.S3Boto3Storage",
-        "OPTIONS": {
-            "endpoint_url": os.getenv("AWS_S3_ENDPOINT_URL"),
-            "access_key": os.getenv("AWS_ACCESS_KEY_ID"),
-            "secret_key": os.getenv("AWS_SECRET_ACCESS_KEY"),  # 00
-            "bucket_name": os.getenv("AWS_STORAGE_BUCKET_NAME"),
-            "region_name": os.getenv("AWS_S3_REGION_NAME"),
-            "object_parameters": {
-                "CacheControl": "max-age=86400",
-            },
-            "querystring_auth": True,
-            "location": "static",
-        },
+        "BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage",
     },
 }
+
+# STORAGES = {
+#     "default": {
+#         "BACKEND": "storages.backends.s3boto3.S3Boto3Storage",
+#         "OPTIONS": {
+#             "endpoint_url": os.getenv("AWS_S3_ENDPOINT_URL"),
+#             "access_key": os.getenv("AWS_ACCESS_KEY_ID"),
+#             "secret_key": os.getenv("AWS_SECRET_ACCESS_KEY"),
+#             "bucket_name": os.getenv("AWS_STORAGE_BUCKET_NAME"),
+#             "region_name": os.getenv("AWS_S3_REGION_NAME"),
+#             "object_parameters": {
+#                 "CacheControl": "max-age=86400",
+#             },
+#             "querystring_auth": True,
+#             "location": "media",
+#         },
+#     },
+#     "staticfiles": {
+#         "BACKEND": "storages.backends.s3boto3.S3Boto3Storage",
+#         "OPTIONS": {
+#             "endpoint_url": os.getenv("AWS_S3_ENDPOINT_URL"),
+#             "access_key": os.getenv("AWS_ACCESS_KEY_ID"),
+#             "secret_key": os.getenv("AWS_SECRET_ACCESS_KEY"),  # 00
+#             "bucket_name": os.getenv("AWS_STORAGE_BUCKET_NAME"),
+#             "region_name": os.getenv("AWS_S3_REGION_NAME"),
+#             "object_parameters": {
+#                 "CacheControl": "max-age=86400",
+#             },
+#             "querystring_auth": True,
+#             "location": "static",
+#         },
+#     },
+# }
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -193,6 +202,10 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
 
 STATIC_URL = 'static/'
+STATIC_ROOT = BASE_DIR / 'staticfiles'
+
+MEDIA_URL = '/media/'
+MEDIA_ROOT = BASE_DIR / 'media'
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
@@ -206,12 +219,14 @@ CORS_ALLOWED_ORIGINS = [
 ]
 CORS_ALLOW_CREDENTIALS = True
 
-DEFAULT_FILE_STORAGE = "storages.supabase_storage.SupabaseStorage"
+# DEFAULT_FILE_STORAGE = "storages.supabase_storage.SupabaseStorage"
 
-SUPABASE_PROJECT_URL = os.getenv('SUPABASE_PROJECT_URL')
-SUPABASE_SERVICE_ROLE_KEY = os.getenv('SUPABASE_SERVICE_ROLE_KEY')
-SUPABASE_BUCKET = os.getenv("SUPABASE_BUCKET", "media")
+# SUPABASE_PROJECT_URL = os.getenv('SUPABASE_PROJECT_URL')
+# SUPABASE_SERVICE_ROLE_KEY = os.getenv('SUPABASE_SERVICE_ROLE_KEY')
+# SUPABASE_BUCKET = os.getenv("SUPABASE_BUCKET", "media")
 
 if 'test' in sys.argv:
     MEDIA_URL = '/media/'
-    MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+    MEDIA_ROOT = BASE_DIR / 'media'
+    # MEDIA_URL = '/media/'
+    # MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
